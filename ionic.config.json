@@ -1,0 +1,8 @@
+{
+  "name": "kt_smart",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "vue",
+  "id": "0464e2ab"
+}
