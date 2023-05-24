@@ -1,4 +1,5 @@
 import {defineStore} from "pinia";
+import {useStorage} from "@/hooks/useStorage";
 
 export interface CharacteristicModule {
   service: string;
@@ -8,7 +9,7 @@ export interface CharacteristicModule {
 export interface PeripheralModule {
   name: string;
   id: string;
-  advertising: {};
+  advertising: object;
   rssi: string;
   isPairing: boolean;
   isPaired: boolean;
@@ -18,39 +19,42 @@ export interface PeripheralModule {
 export const useBleStore = defineStore('ble', {
   state: () => ({
     connectedDevice: {},
-    availableDevices: [
-      // {
-      //   id: '0D:CD:45:F1:D9:BF',
-      //   name: 'aaaa',
-      //   advertising: {},
-      //   rssi: '-86',
-      //   isPairing: false,
-      //   isPaired: false,
-      //   services: [],
-      //   characteristics: []
-      // },
-      // {
-      //   id: '0D:CD:45:F9:D9:BF',
-      //   name: 'bbbb',
-      //   advertising: {},
-      //   rssi: '-86',
-      //   isPairing: false,
-      //   isPaired: false,
-      //   services: [],
-      //   characteristics: []
-      // }
-    ]
+    availableDevices: []
   }),
   getters: {
-    gerConnectedDevice: (state) => state.connectedDevice,
+    getConnectedDevice: (state) => state.connectedDevice,
     getAvailableDevices: (state) => state.availableDevices
   },
   actions: {
     setConnectedDevice(payload: PeripheralModule) {
-      this.connectedDevice = payload
+      return new Promise((resolve, reject) => {
+        try {
+          this.connectedDevice = payload
+          resolve(payload)
+        } catch (e) {
+          reject(e)
+        }
+      })
     },
     removeConnectedDevice() {
-      this.connectedDevice = {}
+      return new Promise((resolve, reject) => {
+        try {
+          this.connectedDevice = {}
+          resolve(true)
+        } catch (e) {
+          reject(e)
+        }
+      })
+    },
+    setAvailableDevice(payload: any) {
+      return new Promise((resolve, reject) => {
+        try {
+          // this.availableDevices.push(payload)
+          resolve(payload)
+        } catch (e) {
+          reject(e)
+        }
+      })
     }
   }
 })

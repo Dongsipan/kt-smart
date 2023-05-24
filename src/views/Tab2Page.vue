@@ -22,9 +22,12 @@ import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent } from '@ionic/vue
 import ExploreContainer from '@/components/ExploreContainer.vue';
 import {onMounted, ref} from "vue";
 import {useStorage} from "@/hooks/useStorage";
+import {useBleStore} from "@/store/useBleStore";
 const {get} = useStorage()
-const test = ref(null)
+const {getConnectedDevice} = useBleStore()
+const test = ref('')
 onMounted(async()=> {
-  test.value = await get('test')
+  // test.value = await get('test')
+  test.value = JSON.stringify(getConnectedDevice)
 })
 </script>
