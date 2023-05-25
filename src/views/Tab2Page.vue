@@ -28,6 +28,7 @@ const {getConnectedDevice} = useBleStore()
 const test = ref('')
 onMounted(async()=> {
   // test.value = await get('test')
+  console.log(get('connectedDevice'))
   test.value = JSON.stringify(getConnectedDevice)
 })
 </script>

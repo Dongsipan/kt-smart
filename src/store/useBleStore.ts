@@ -16,10 +16,11 @@ export interface PeripheralModule {
   services: string[];
   characteristics: CharacteristicModule[];
 }
+const { set } = useStorage();
 export const useBleStore = defineStore('ble', {
   state: () => ({
     connectedDevice: {},
-    availableDevices: []
+    availableDevices: [] as any[]
   }),
   getters: {
     getConnectedDevice: (state) => state.connectedDevice,
@@ -30,6 +31,7 @@ export const useBleStore = defineStore('ble', {
       return new Promise((resolve, reject) => {
         try {
           this.connectedDevice = payload
+          set('connectedDevice', payload)
           resolve(payload)
         } catch (e) {
           reject(e)
@@ -49,12 +51,12 @@ export const useBleStore = defineStore('ble', {
     setAvailableDevice(payload: any) {
       return new Promise((resolve, reject) => {
         try {
-          // this.availableDevices.push(payload)
+          this.availableDevices.push(payload)
           resolve(payload)
         } catch (e) {
           reject(e)
         }
       })
-    }
+    },
   }
 })
