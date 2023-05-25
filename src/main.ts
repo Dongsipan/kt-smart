@@ -1,10 +1,9 @@
 import {createApp} from 'vue'
 import App from './App.vue'
 import router from './router';
-import store from './store'
+import pinia from './store'
 
 import {IonicVue} from '@ionic/vue';
-import {Storage} from '@ionic/storage';
 
 /* Core CSS required for Ionic components to work properly */
 import '@ionic/vue/css/core.css';
@@ -27,18 +26,11 @@ import './theme/variables.css';
 
 
 const app = createApp(App)
-const initStorage = async (app: any) => {
-  /*初始化持久化storage*/
-  const store = new Storage()
-  app.config.globalProperties.$storage = await store.create()
-}
-initStorage(app).then(() => {
-  app.use(IonicVue)
-  app.use(router)
-  app.use(store);
+app.use(IonicVue)
+app.use(router)
+app.use(pinia);
 
-  router.isReady().then(async () => {
-    app.mount('#app');
-  });
-})
+router.isReady().then(async () => {
+  app.mount('#app');
+});
 

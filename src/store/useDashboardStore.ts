@@ -31,5 +31,6 @@ export const useDashboardStore = defineStore('dashboard', {
     setDisplayType(payload: string) {
       this.displayType = payload
     }
-  }
+  },
+  persist: true
 })

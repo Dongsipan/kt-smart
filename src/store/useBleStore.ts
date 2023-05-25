@@ -1,5 +1,4 @@
 import {defineStore} from "pinia";
-import {useStorage} from "@/hooks/useStorage";
 
 export interface CharacteristicModule {
   service: string;
@@ -16,7 +15,6 @@ export interface PeripheralModule {
   services: string[];
   characteristics: CharacteristicModule[];
 }
-const { set } = useStorage();
 export const useBleStore = defineStore('ble', {
   state: () => ({
     connectedDevice: {},
@@ -31,7 +29,6 @@ export const useBleStore = defineStore('ble', {
       return new Promise((resolve, reject) => {
         try {
           this.connectedDevice = payload
-          set('connectedDevice', payload)
           resolve(payload)
         } catch (e) {
           reject(e)
@@ -58,5 +55,6 @@ export const useBleStore = defineStore('ble', {
         }
       })
     },
-  }
+  },
+  persist: true
 })

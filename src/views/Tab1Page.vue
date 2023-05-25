@@ -21,14 +21,14 @@
 import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent } from '@ionic/vue';
 import ExploreContainer from '@/components/ExploreContainer.vue';
 import {onMounted} from "vue";
-import {useStorage} from "@/hooks/useStorage";
+// import {useStorage} from "@/hooks/useStorage";
 import {useBleStore} from "@/store/useBleStore";
 
-const {set} = useStorage()
+// const {set} = useStorage()
 const {setConnectedDevice} = useBleStore()
 
 onMounted(()=> {
-  set('test', 112233445566)
+  // set('test', 112233445566)
   setConnectedDevice({
     id: '0D:CD:45:F1:D9:BF',
     name: 'aaaa',
