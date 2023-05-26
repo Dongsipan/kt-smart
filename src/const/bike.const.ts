@@ -1,4 +1,4 @@
-export const enum GearDirection {
+export enum GearDirection {
   positionZero = 0x00,
   positionOne = 0x01,
   positionTwo = 0x02,
