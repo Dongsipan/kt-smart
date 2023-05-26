@@ -69,7 +69,7 @@ export function useBluetoothLe() {
     await BleClient.write(deviceId, serviceUUID, characteristicUUID, value);
   }
 
-  const startNotification = async (deviceId: string, serviceUUID: string, characteristicUUID: string, callback: any) => {
+  const startNotification = async (deviceId: string, serviceUUID: string, characteristicUUID: string, callback: (value: DataView) => void) => {
     await BleClient.startNotifications(
         deviceId,
         serviceUUID,
