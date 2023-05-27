@@ -11,7 +11,7 @@ export function useMessage() {
   const {
     setElectricQuantity,
     setSingleTime,
-    isKmUint,
+    isKmUnit,
     setSpeed,
     speed,
     singleMileage,
@@ -70,7 +70,7 @@ export function useMessage() {
     const defaultSpeed = (round / timeSpan) * 1000 * 3600;
     const speed = Math.floor(defaultSpeed) === 1 ? 0 : Math.floor(defaultSpeed);
     console.log('speed', speed);
-    const displaySpeed = isKmUint ? speed : Math.floor(speed * 0.6213712);
+    const displaySpeed = isKmUnit ? speed : Math.floor(speed * 0.6213712);
     setSpeed(displaySpeed)
     if (displaySpeed > 0) {
       getSingleTime();

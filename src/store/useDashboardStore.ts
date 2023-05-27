@@ -11,7 +11,7 @@ export const useDashboardStore = defineStore('dashboard', {
     totalMileage: 0,
     lightStatus: false,
     assistanceStatus: false,
-    isKmUint: false,
+    isKmUnit: false,
     assistance: 0
   }),
   getters: {
@@ -24,7 +24,7 @@ export const useDashboardStore = defineStore('dashboard', {
     getTotalMileage: (state) => state.totalMileage,
     getLightStatus: (state) => state.lightStatus,
     getAssistanceStatus: (state) => state.assistanceStatus,
-    getIsKmUint: (state) => state.isKmUint,
+    getIsKmUnit: (state) => state.isKmUnit,
     getAssistance: (state) => state.assistance
   },
   actions: {
@@ -55,8 +55,8 @@ export const useDashboardStore = defineStore('dashboard', {
     setAssistanceStatus(payload: boolean) {
       this.assistanceStatus = payload;
     },
-    setIsKmUint(payload: boolean) {
-      this.isKmUint = payload
+    setIsKmUnit(payload: boolean) {
+      this.isKmUnit = payload
     },
     setAssistance(payload: number) {
       this.assistance = payload;
