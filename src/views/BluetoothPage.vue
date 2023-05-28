@@ -24,13 +24,13 @@
           <ion-item-sliding v-for="(item, index) in pairedDevices" :key="index">
             <ion-item detail>
               <ion-icon v-if="item.isPaired" color="primary" :icon="bluetooth" slot="start"></ion-icon>
-              <ion-icon v-else name="bluetooth" slot="start"></ion-icon>
-              <ion-label>{{item.name||item.id}}</ion-label>
+              <ion-icon v-else :icon="bluetooth" slot="start"></ion-icon>
+              <ion-label>{{item.device.name}}</ion-label>
               <ion-note slot="end" v-if="item.isPairing">Pairing...</ion-note>
             </ion-item>
             <ion-item-options side="end">
               <ion-item-option color="danger">
-                <ion-icon slot="icon-only" name="trash"></ion-icon>
+                <ion-icon slot="icon-only" :icon="trash"></ion-icon>
               </ion-item-option>
             </ion-item-options>
           </ion-item-sliding>
@@ -42,7 +42,7 @@
               AVAILABLE DEVICES
             </ion-label>
           </ion-item-divider>
-          <ion-item v-for="(item, index) in availableDevices" :key="index" @click="selectDevice">
+          <ion-item v-for="(item, index) in availableDevices" :key="index" @click="selectDevice(item)">
             <ion-icon :icon="bluetooth" slot="start"></ion-icon>
             <ion-label>{{item.device.name}}</ion-label>
           </ion-item>
@@ -54,7 +54,7 @@
 
 <script setup lang="ts">
 import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonBackButton, IonButtons, IonButton, IonIcon, IonList, IonItemGroup, IonItemDivider, IonItemSliding, IonItemOptions, IonItemOption, IonItem, IonLabel, IonNote } from '@ionic/vue';
-import {bluetooth, refresh} from 'ionicons/icons';
+import {bluetooth, refresh, trash} from 'ionicons/icons';
 import {useBleStore} from "@/store/useBleStore";
 import {useBluetoothLe} from "@/hooks/useBluetooth-le";
 import {onMounted} from "vue";
@@ -69,7 +69,8 @@ onMounted(() => {
 
 const selectDevice = async (device: any) => {
   try {
-    await connectBle(device.device.deviceId)
+    debugger
+    // await connectBle(device.device.deviceId)
     setConnectedDevice(device)
   } catch (e) {
     console.log(e)
