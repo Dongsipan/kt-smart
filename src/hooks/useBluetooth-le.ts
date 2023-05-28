@@ -20,15 +20,9 @@ export interface CharacteristicModule {
 }
 
 export function useBluetoothLe() {
-  const {getAvailableDevices} = useBleStore()
-
+  const {availableDevices, setAvailableDevice, pairedDevices} = useBleStore()
   const HEART_RATE_SERVICE = numberToUUID(0x180d);
-  const peripherals = ref<PeripheralModule[]>([])
-  const availableDevices = ref<PeripheralModule[]>([])
-  const connectedDevice = ref<PeripheralModule>()
   const scanning = ref(false)
-
-  availableDevices.value = getAvailableDevices
 
   async function scan() {
     try {
@@ -37,10 +31,10 @@ export function useBluetoothLe() {
 
       await BleClient.requestLEScan(
           {
-            services: [HEART_RATE_SERVICE],
+            // services: [HEART_RATE_SERVICE],
           },
           (result) => {
-            deviceDetected(result)
+             deviceDetected(result)
             console.log('received new scan result', result);
           }
       );
@@ -55,12 +49,12 @@ export function useBluetoothLe() {
     }
   }
 
-  const connectBle = async (device: any) => {
-    await BleClient.connect(device.id, (deviceId) => onDisconnect(deviceId));
+  const connectBle = async (deviceId: string) => {
+    await BleClient.connect(deviceId, (deviceId) => onDisconnect(deviceId));
   }
 
-  const disConnectBle = async (device: any) => {
-    await BleClient.disconnect(device.deviceId);
+  const disConnectBle = async (deviceId: string) => {
+    await BleClient.disconnect(deviceId);
   }
   const onDisconnect = (deviceId: string) => {
     console.log(`device ${deviceId} disconnected`);
@@ -93,34 +87,27 @@ export function useBluetoothLe() {
   const deviceDetected = (device: any) => {
     device.isPaired = false;
     device.isPairing = false;
-    if (availableDevices.value.findIndex(d => d.id === device.id) > -1) {
-      return
-    }
-    if (deviceAlreadyInPeripheralsArray(device)) {
-      updateExistingDevice(device);
-    } else {
-      addNewDevice(device);
-    }
+    // if (pairedDevices.findIndex(d => d.id === device.id) > -1) {
+    //   return
+    // }
+    // if (deviceAlreadyInPeripheralsArray(device)) {
+    //   updateExistingDevice(device);
+    // } else {
+    //   setAvailableDevice(device);
+    // }
+    setAvailableDevice(device);
   }
-  const deviceAlreadyInPeripheralsArray = (device: any) => {
-    const d = peripherals.value.find(item => item.id === device.id);
-    return d !== undefined;
-  }
+  // const deviceAlreadyInPeripheralsArray = (device: any) => {
+  //   const d = availableDevices.find(item => item.id === device.id);
+  //   return d !== undefined;
+  // }
 
-  const updateExistingDevice = (newDevice: any) => {
-    const deviceIndex = peripherals.value.findIndex(d => d.id === newDevice.id);
-    peripherals.value[deviceIndex] = newDevice;
-  }
-
-  const addNewDevice = (device: any) => {
-    peripherals.value.push(device);
-  }
+  // const updateExistingDevice = (newDevice: any) => {
+  //   const deviceIndex = availableDevices.findIndex(d => d.id === newDevice.id);
+  //   peripherals.value[deviceIndex] = newDevice;
+  // }
 
   return {
-    peripherals,
-    availableDevices,
-    connectedDevice,
-    scanning,
     scan,
     connectBle,
     disConnectBle,

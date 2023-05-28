@@ -17,8 +17,12 @@ export interface PeripheralModule {
 }
 export const useBleStore = defineStore('ble', {
   state: () => ({
-    connectedDevice: {},
-    availableDevices: [] as any[],
+    connectedDevice: {} as PeripheralModule,
+    availableDevices: [
+      {"device":{"deviceId":"509D3B9C-FE9A-BF1F-2519-6250EFCE9E07","name":"董思盼的MacBook Pro"},"rssi":-56,"txPower":9,"uuids":[],"isPaired":false,"isPairing":false},
+      {"txPower":8,"uuids":[],"rssi":-98,"device":{"name":"董思盼的Apple Watch","deviceId":"51FD931A-0A66-D005-99B3-C29AE796B21F"},"isPaired":false,"isPairing":false},
+      {"device":{"name":"yeelink.light.light3","deviceId":"5576AE7E-C57F-F894-367F-2CEB9B39F1A6"},"serviceData":{"0000fe95-0000-1000-8000-00805f9b34fb":{}},"rssi":-101,"txPower":127,"uuids":[],"localName":"yeelink.light.light3","isPaired":false,"isPairing":false}
+    ] as any [],
     pairedDevices: [] as any[]
   }),
   getters: {
@@ -27,19 +31,13 @@ export const useBleStore = defineStore('ble', {
   },
   actions: {
     setConnectedDevice(payload: PeripheralModule) {
-      return new Promise((resolve, reject) => {
-        try {
-          this.connectedDevice = payload
-          resolve(payload)
-        } catch (e) {
-          reject(e)
-        }
-      })
+      this.connectedDevice = payload
+      this.pairedDevices = [payload]
     },
     removeConnectedDevice() {
       return new Promise((resolve, reject) => {
         try {
-          this.connectedDevice = {}
+          this.connectedDevice = {} as PeripheralModule
           resolve(true)
         } catch (e) {
           reject(e)
@@ -47,18 +45,11 @@ export const useBleStore = defineStore('ble', {
       })
     },
     setAvailableDevice(payload: any) {
-      return new Promise((resolve, reject) => {
-        try {
-          this.availableDevices.push(payload)
-          resolve(payload)
-        } catch (e) {
-          reject(e)
-        }
-      })
+      this.availableDevices.push(payload)
     },
     setPairedDevices(payload: any) {
       this.pairedDevices.push(payload)
     }
   },
-  persist: true
+  persist: false
 })

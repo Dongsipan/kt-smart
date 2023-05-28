@@ -5,6 +5,7 @@ import {useDashboardStore} from "@/store/useDashboardStore";
 import {useSettingStore} from "@/store/useSettingStore";
 import {useError} from "@/hooks/useError";
 import {LightDirection} from "@/const/bike.const";
+import {useBleStore} from "@/store/useBleStore";
 
 export function useMessage() {
   const {writeData} = useSetting()
@@ -21,19 +22,20 @@ export function useMessage() {
     setTotalMileage,
     setAssistance
   } = useDashboardStore()
-  const {connectedDevice, write, startNotification, stopNotification} = useBluetoothLe()
+  const { connectedDevice } = useBleStore()
+  const { write, startNotification, stopNotification} = useBluetoothLe()
   const { setError } = useError()
   let writeInterval: NodeJS.Timer
   let singleTimeInterval: NodeJS.Timer
   let singleTimeSecond = 0
   const sendMessage = () => {
     writeInterval = setInterval(async () => {
-      if (!connectedDevice.value) {
+      if (!connectedDevice) {
         return
       }
       try {
-        await write(connectedDevice.value.id, ServiceUUID, CharacteristicUUID, new DataView(writeData.buffer))
-        await startNotification(connectedDevice.value.id, ServiceUUID, CharacteristicUUID, onNotification)
+        await write(connectedDevice.id, ServiceUUID, CharacteristicUUID, new DataView(writeData.buffer))
+        await startNotification(connectedDevice.id, ServiceUUID, CharacteristicUUID, onNotification)
       } catch (error) {
         await stopSendMessage()
       }
@@ -41,8 +43,8 @@ export function useMessage() {
     }, 105)
   }
   const stopSendMessage = async () => {
-    if (!connectedDevice.value) return
-    await stopNotification(connectedDevice.value.id, ServiceUUID, CharacteristicUUID)
+    if (!connectedDevice) return
+    await stopNotification(connectedDevice.id, ServiceUUID, CharacteristicUUID)
     clearInterval(writeInterval)
   }
   const onNotification = (value: DataView) => {

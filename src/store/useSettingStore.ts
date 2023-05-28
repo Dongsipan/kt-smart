@@ -108,5 +108,5 @@ export const useSettingStore = defineStore('setting', {
       this.displayType = payload;
     }
   },
-  persist: true
+  persist: false
 })

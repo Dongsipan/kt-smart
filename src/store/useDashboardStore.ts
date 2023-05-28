@@ -77,5 +77,5 @@ export const useDashboardStore = defineStore('dashboard', {
       this.assistance = payload;
     }
   },
-  persist: true
+  persist: false
 })
