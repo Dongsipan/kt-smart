@@ -45,7 +45,7 @@
 
 <script setup lang="ts">
 import { IonGrid, IonRow, IonCol } from '@ionic/vue';
-import {onMounted, defineProps, ref, watch} from "vue";
+import {onMounted, defineProps, ref, watch, onUnmounted} from "vue";
 
 const props = defineProps({
   speed: {
@@ -73,7 +73,6 @@ let chartSize = 0
 
 const unit = ref('KM/h')
 const initChart = () => {
-  debugger
   return new Promise((resolve, reject) => {
     try {
       const chartEl = document.getElementById('chartEl')
@@ -123,11 +122,9 @@ const initChart = () => {
       reject(e)
     }
   })
-
 }
 
 const renderChart = (value: number) => {
-  debugger
   const canvasEl = document.getElementById('canvasEl') as any
   if (!canvasEl) return
   const context = canvasEl.getContext('2d');
@@ -165,9 +162,19 @@ const renderChart = (value: number) => {
   }
 }
 
+const resizeEvent = () => {
+  initChart()
+  renderChart(props.speed)
+}
+
 onMounted(async()=> {
   await initChart()
   renderChart(props.speed)
+  window.addEventListener('resize', resizeEvent)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('resize', resizeEvent)
 })
 
 watch(() => props.speed, async(value) => {
@@ -272,8 +279,5 @@ watch(() => props.isKmUnit, async (value) => {
 }
 .no-padding {
   padding: 0;
-}
-.bg-black {
-  --background: black !important;
 }
 </style>

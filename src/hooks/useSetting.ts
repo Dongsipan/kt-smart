@@ -1,6 +1,6 @@
 import {useSettingStore} from "@/store/useSettingStore";
 import {useDashboardStore} from "@/store/useDashboardStore";
-import {GearDirection} from "@/const/bike.const";
+import {GearDirection, LightDirection} from "@/const/bike.const";
 import {WriteData} from "@/const/ble.const";
 
 export function useSetting() {
@@ -26,7 +26,12 @@ export function useSetting() {
     percent,
     handlebarMaxSpeed
   } = useSettingStore()
-  const {gearPosition} = useDashboardStore()
+  const {
+    gearPosition,
+    setGearPosition,
+    lightStatus,
+    setLightStatus
+    } = useDashboardStore()
 
   /*设置最大速度*/
   const setMaxSpeed = () => {
@@ -74,31 +79,72 @@ export function useSetting() {
       }
     }
   }
-  const setGearPosition = () => {
+  // const setGearPosition = () => {
+  //   switch (gearPosition) {
+  //     case 0:
+  //       writeData[1] = GearDirection.positionZero;
+  //       break;
+  //     case 1:
+  //       writeData[1] = GearDirection.positionOne;
+  //       break;
+  //     case 2:
+  //       writeData[1] = GearDirection.positionTwo;
+  //       break;
+  //     case 3:
+  //       writeData[1] = GearDirection.positionThree;
+  //       break;
+  //     case 4:
+  //       writeData[1] = GearDirection.positionFour;
+  //       break;
+  //     case 5:
+  //       writeData[1] = GearDirection.positionFive;
+  //       break;
+  //     default:
+  //       writeData[1] = GearDirection.positionFive;
+  //       break;
+  //   }
+  // }
+
+  const changeGearPosition = (position: number) => {
+    setGearPosition(position)
+    updateFirstIndexOfData()
+  }
+  const changeLightStatus = (status: boolean) => {
+    setLightStatus(status)
+    updateFirstIndexOfData()
+  }
+  const updateFirstIndexOfData = () => {
+    const lightValue = lightStatus ? LightDirection.on : LightDirection.off;
     switch (gearPosition) {
       case 0:
-        writeData[1] = GearDirection.positionZero;
+        writeData[1] = GearDirection.positionZero + lightValue;
         break;
       case 1:
-        writeData[1] = GearDirection.positionOne;
+        writeData[1] = GearDirection.positionOne + lightValue;
         break;
       case 2:
-        writeData[1] = GearDirection.positionTwo;
+        writeData[1] = GearDirection.positionTwo + lightValue;
         break;
       case 3:
-        writeData[1] = GearDirection.positionThree;
+        writeData[1] = GearDirection.positionThree + lightValue;
         break;
       case 4:
-        writeData[1] = GearDirection.positionFour;
+        writeData[1] = GearDirection.positionFour + lightValue;
         break;
       case 5:
-        writeData[1] = GearDirection.positionFive;
+        writeData[1] = GearDirection.positionFive + lightValue;
         break;
       default:
-        writeData[1] = GearDirection.positionFive;
+        writeData[1] = GearDirection.positionFive + lightValue;
         break;
     }
+    updateFiveIndexOfData();
   }
+
+  const updateFiveIndexOfData = () => {
+    writeData[5] = writeData[1] ^ writeData[2] ^ writeData[3] ^ writeData[4] ^ writeData[6] ^ writeData[7] ^ writeData[8] ^ writeData[9] ^ writeData[10] ^ writeData[11];
+  }
+
   const setP1 = () => {
     writeData[3] = Int2Bytes(p1);
   }
@@ -160,7 +206,8 @@ export function useSetting() {
     return arrBytes;
   }
   return {
-    setGearPosition,
+    changeGearPosition,
+    changeLightStatus,
     setMaxSpeed,
     setP1,
     setP5,

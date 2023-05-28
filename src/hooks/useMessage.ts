@@ -4,6 +4,7 @@ import {CharacteristicUUID, ServiceUUID} from "@/const/ble.const";
 import {useDashboardStore} from "@/store/useDashboardStore";
 import {useSettingStore} from "@/store/useSettingStore";
 import {useError} from "@/hooks/useError";
+import {LightDirection} from "@/const/bike.const";
 
 export function useMessage() {
   const {writeData} = useSetting()

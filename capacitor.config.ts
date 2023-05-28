@@ -1,7 +1,7 @@
 import { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'io.ionic.starter',
+  appId: 'dongsipan.kt.smart',
   appName: 'kt_smart',
   webDir: 'dist',
   server: {

@@ -30,3 +30,8 @@
 import { IonTabBar, IonTabButton, IonTabs, IonLabel, IonIcon, IonPage, IonRouterOutlet } from '@ionic/vue';
 import { settings, bicycle, speedometer, infinite } from 'ionicons/icons';
 </script>
+<style scoped>
+ion-tab-bar {
+  --background: #000;
+}
+</style>

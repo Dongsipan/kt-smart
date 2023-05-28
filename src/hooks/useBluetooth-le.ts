@@ -5,7 +5,7 @@ import {useBleStore} from "@/store/useBleStore";
 export interface PeripheralModule {
   name: string;
   id: string;
-  advertising: {};
+  advertising: object;
   rssi: string;
   isPairing: boolean;
   isPaired: boolean;

@@ -18,7 +18,8 @@ export interface PeripheralModule {
 export const useBleStore = defineStore('ble', {
   state: () => ({
     connectedDevice: {},
-    availableDevices: [] as any[]
+    availableDevices: [] as any[],
+    pairedDevices: [] as any[]
   }),
   getters: {
     getConnectedDevice: (state) => state.connectedDevice,
@@ -55,6 +56,9 @@ export const useBleStore = defineStore('ble', {
         }
       })
     },
+    setPairedDevices(payload: any) {
+      this.pairedDevices.push(payload)
+    }
   },
   persist: true
 })

@@ -7,7 +7,7 @@ export const useDashboardStore = defineStore('dashboard', {
     gearPosition: 0,
     displayType: 'mile',
     singleMileage: 0,
-    singleTime: '',
+    singleTime: '00:00:00',
     totalMileage: 0,
     lightStatus: false,
     assistanceStatus: false,
@@ -19,13 +19,28 @@ export const useDashboardStore = defineStore('dashboard', {
     getSpeed: (state) => state.speed,
     getGearPosition: (state) => state.gearPosition,
     getDisplayType: (state) => state.displayType,
-    getSingleMileage: (state) => state.singleMileage,
+    getSingleMileage: (state) => {
+      return state.singleMileage.toFixed(1)
+    },
+    getSingleKM: (state) => {
+      const value = state.singleMileage * 0.6213712
+      return value.toFixed(1)
+    },
     getSingleTime: (state) => state.singleTime,
-    getTotalMileage: (state) => state.totalMileage,
+    getTotalMileage: (state) => {
+      return state.totalMileage.toFixed(1)
+    },
+    getTotalKM: (state) => {
+      const value = state.totalMileage * 0.6213712
+      return value.toFixed(1)
+    },
     getLightStatus: (state) => state.lightStatus,
     getAssistanceStatus: (state) => state.assistanceStatus,
-    getIsKmUnit: (state) => state.isKmUnit,
-    getAssistance: (state) => state.assistance
+    getUnit: (state) => {
+      return state.isKmUnit ? 'KM/h' : 'Mil/h'
+    },
+    getAssistance: (state) => state.assistance,
+
   },
   actions: {
     setGearPosition(payload: number) {
