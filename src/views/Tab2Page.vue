@@ -11,7 +11,7 @@
           <ion-title size="large">Tab 2</ion-title>
         </ion-toolbar>
       </ion-header>
-
+      {{test}}
       <ExploreContainer name="Tab 2 page" />
     </ion-content>
   </ion-page>
@@ -20,4 +20,11 @@
 <script setup lang="ts">
 import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent } from '@ionic/vue';
 import ExploreContainer from '@/components/ExploreContainer.vue';
+import {onMounted, ref} from "vue";
+import {useBleStore} from "@/store/useBleStore";
+const {getConnectedDevice} = useBleStore()
+const test = ref('')
+onMounted(async()=> {
+  test.value = JSON.stringify(getConnectedDevice)
+})
 </script>

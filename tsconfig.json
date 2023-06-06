@@ -12,6 +12,9 @@
     "lib": ["ESNext", "DOM"],
     "skipLibCheck": true,
     "noEmit": true,
+    "types": [
+      "node"
+    ],
     "paths": {
       "@/*": ["./src/*"]
     }
