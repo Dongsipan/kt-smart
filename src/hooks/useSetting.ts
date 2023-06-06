@@ -138,6 +138,7 @@ const {setGearPosition,setLightStatus } = useDashboardStore()
   }
 
   const setP1 = () => {
+    debugger
     writeData.value[3] = Int2Bytes(p1);
     updateFiveIndexOfData();
   }
@@ -158,7 +159,6 @@ const {setGearPosition,setLightStatus } = useDashboardStore()
     updateFiveIndexOfData();
   }
   const setC1C2 = () => {
-    debugger
     const c1Hex = Int2Bytes(c1);
 
     const c2Hex = Int2Bytes(c2);
@@ -223,23 +223,32 @@ const {setGearPosition,setLightStatus } = useDashboardStore()
   }
   const updateSetting = () => {
     setMaxSpeed()
+    setP1()
+    setP2()
+    setP5()
+    setC1C2()
+    setC5C14()
+    setC4C7C12()
+    setC13()
+    setPercent()
+    setHandlebar()
    // setP3() setP4() => 引用 setMaxSpeed
   }
   return {
     changeGearPosition,
     changeLightStatus,
     setMaxSpeed,
-    setP1,
-    setP2,
-    setP3,
-    setP4,
-    setP5,
-    setC1C2,
-    setC5C14,
-    setC4C7C12,
-    setC13,
-    setPercent,
-    setHandlebar,
+    // setP1,
+    // setP2,
+    // setP3,
+    // setP4,
+    // setP5,
+    // setC1C2,
+    // setC5C14,
+    // setC4C7C12,
+    // setC13,
+    // setPercent,
+    // setHandlebar,
     writeData,
     updateSetting
   }
