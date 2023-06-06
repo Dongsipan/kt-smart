@@ -103,6 +103,7 @@ export function useMessage() {
         console.log('timeSpan', timeSpan);
         if (timeSpan === 6922) {
             setSpeed(0)
+            clearInterval(singleTimeInterval);
             return;
         }
         console.log(chalk.yellow('dimension', dimension.value))
@@ -113,11 +114,7 @@ export function useMessage() {
         console.log('speed', speed);
         const displaySpeed = getDisplayType.value === 'kilometer' ? speed : Math.floor(speed * 0.6213712);
         setSpeed(displaySpeed)
-        if (displaySpeed > 0) {
-            getSingleTime();
-        } else {
-            clearInterval(singleTimeInterval);
-        }
+        getSingleTime();
     }
     // 获取单次计时
     const getSingleTime = () => {
