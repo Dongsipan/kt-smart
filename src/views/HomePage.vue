@@ -80,7 +80,8 @@
             </ion-button>
           </ion-col>
           <ion-col class="text-align-center">
-            <ion-button class="icon-only-button" shape="round" :color="lightStatus ? 'primary' : 'light'" @click="changeLight">
+            <ion-button class="icon-only-button" shape="round" :color="lightStatus ? 'primary' : 'light'"
+                        @click="changeLight">
               <ion-icon slot="icon-only" src="/assets/icon/light-white.svg">
               </ion-icon>
               <ion-ripple-effect></ion-ripple-effect>
@@ -119,7 +120,7 @@ import {
   onIonViewDidEnter, IonAlert
 } from '@ionic/vue';
 import {bluetooth} from 'ionicons/icons';
-import {ComponentPublicInstance, computed, ref} from "vue";
+import {ComponentPublicInstance, computed, onMounted, ref} from "vue";
 import DashboardComponent from "@/components/DashboardComponent.vue";
 import {useDashboardStore} from "@/store/useDashboardStore";
 import {useSetting} from "@/hooks/useSetting";
@@ -129,6 +130,7 @@ import {storeToRefs} from "pinia";
 import {useMessage} from "@/hooks/useMessage";
 import {useBluetoothLe} from "@/hooks/useBluetooth-le";
 import {useSettingStore} from "@/store/useSettingStore";
+// import {dataViewToNumbers, hexStringToDataView} from "@capacitor-community/bluetooth-le";
 
 const dashboardStore = useDashboardStore()
 const bleStore = useBleStore()
@@ -151,11 +153,24 @@ const {connectedDevice} = storeToRefs(bleStore)
 const {initialBle, disConnectBle} = useBluetoothLe()
 const {changeGearPosition, changeLightStatus} = useSetting()
 
-const {sendMessage, stopSendMessage} = useMessage()
+const {sendMessage, stopSendMessage, getAssistance} = useMessage()
 
 const router = useRouter()
 
 const dashboard = ref<ComponentPublicInstance | null>(null)
+
+// onMounted(() => {
+//   const data = "41 90 10 11 50 00 5f 02 01 00 80 39" // ['41', '70', '80', '00', 'f1', '00', 'ba', '02', '00', '00', '80', '39']
+//   const dv = dataViewToNumbers(hexStringToDataView(data))
+//   debugger
+//   setInterval(() => {
+//     getSpeed(dv)
+//     getBattery(dv)
+//     getSingleDistance()
+//     getAssistance(dv)
+//   }, 1000)
+//
+// })
 
 onIonViewDidEnter(async () => {
   if (connectedDevice.value.isPaired) {

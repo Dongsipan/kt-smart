@@ -83,7 +83,7 @@ export function useMessage() {
         console.log(chalk.green('onNotification', message))
         getBattery(message)
         getSpeed(message)
-        getSingleMileage()
+        getSingleDistance()
         getAssistance(message)
         checkError(message)
     }
@@ -113,7 +113,7 @@ export function useMessage() {
         console.log('speed', speed);
         const displaySpeed = getDisplayType.value === 'kilometer' ? speed : Math.floor(speed * 0.6213712);
         setSpeed(displaySpeed)
-        if (displaySpeed > 0 && !singleTimeInterval) {
+        if (displaySpeed > 0) {
             getSingleTime();
         } else {
             clearInterval(singleTimeInterval);
@@ -121,6 +121,7 @@ export function useMessage() {
     }
     // 获取单次计时
     const getSingleTime = () => {
+        if (singleTimeInterval) return
         singleTimeInterval = setInterval(() => {
             singleTimeSecond++;
             const singleTime = formatSeconds(singleTimeSecond);
@@ -136,7 +137,7 @@ export function useMessage() {
         return val > 9 ? val : '0' + val;
     }
     // 计算单次里程
-    const getSingleMileage = () => {
+    const getSingleDistance = () => {
         const timeDelay = 1/3600 // 0.0000294; // 106ms 转成 hour
         const distance = speed.value * timeDelay;
         const storageMileage = singleMileage || 0;
@@ -145,7 +146,6 @@ export function useMessage() {
         const total = storageTotal.value + distance;
         setSingleMileage(currentMileage);
         setTotalMileage(total);
-
     }
     // 计算助力
     const getAssistance = (message: number[]) => {
@@ -175,6 +175,7 @@ export function useMessage() {
         getSpeed,
         getBattery,
         checkError,
-        getAssistance
+        getAssistance,
+        getSingleDistance
     }
 }
