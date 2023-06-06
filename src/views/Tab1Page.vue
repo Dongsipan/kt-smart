@@ -45,6 +45,7 @@ const {
   sendMessage,
   // getSpeed,
   // getBattery,
+  getAssistance,
   checkError
 } = useMessage()
 const router = useRouter()
@@ -69,7 +70,7 @@ onMounted(() => {
   const data = "41 90 80 1b 0a 24 9e 02 00 00 80 39 " // ['41', '70', '80', '00', 'f1', '00', 'ba', '02', '00', '00', '80', '39']
   const dv = dataViewToNumbers(hexStringToDataView(data))
   debugger
-  checkError(dv)
+  getAssistance(dv)
   // getBattery(dv)
   // getSpeed(dv)
 })

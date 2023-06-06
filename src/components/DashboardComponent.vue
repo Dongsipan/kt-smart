@@ -26,7 +26,7 @@
             </ion-row>
           </ion-grid>
           <ion-grid class="info-container">
-            <ion-row :v-if="isAssistance">
+            <ion-row v-if="isAssistance">
               <ion-col size="12">
                 ASSIST
               </ion-col>

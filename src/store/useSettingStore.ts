@@ -37,7 +37,9 @@ export const useSettingStore = defineStore('setting', {
     getP5: (state) => state.p5,
     getC1: (state) => state.c1,
     getC2: (state) => state.c2,
-    getC3: (state) => state.c3,
+    getPosition: (state) => {
+      return state.c3
+    },
     getC4: (state) => state.c4,
     getC5: (state) => state.c5,
     getC7: (state) => state.c7,
@@ -47,7 +49,8 @@ export const useSettingStore = defineStore('setting', {
     getPercent: (state) => state.percent,
     getHandlebarMaxSpeed: (state) => state.handlebarMaxSpeed,
     getCandidateParam: (state) => state.candidateParam,
-    getDisplayType: (state) => state.displayType
+    getDisplayType: (state) => state.displayType,
+    getDisplayUnit: state => state.displayType === 'kilometer' ? 'KM/h' : 'Mil/h'
   },
   actions: {
     setMaxSpeed(payload: number) {

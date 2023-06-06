@@ -15,21 +15,21 @@
       </ion-toolbar>
     </ion-header>
     <ion-content :fullscreen="true" :force-overscroll="true" :scrollY="false">
-      <dashboard-component ref="dashboard" :speed="speed" :gear-position="gearPosition"
-                           :is-assistance="assistanceStatus" :is-km-unit="true"/>
+      <dashboard-component ref="dashboard" :speed="speed" :gear-position="getGearPosition"
+                           :is-assistance="isAssistance" :is-km-unit="isKmUnit"/>
 
       <ion-grid>
         <ion-row>
           <ion-col>
             <ion-label>DST</ion-label>
             <ion-item lines="none">
-              <ion-label class="value" v-if="isKmUnit">
+              <ion-label class="value" v-if="getDisplayType === 'kilometer'">
                 {{ getSingleKM }}
               </ion-label>
               <ion-label class="value" v-else>
                 {{ getSingleMileage }}
               </ion-label>
-              <ion-text slot="end">{{ getUnit }}</ion-text>
+              <ion-text slot="end">{{ getDisplayUnit }}</ion-text>
             </ion-item>
           </ion-col>
           <ion-col>
@@ -47,13 +47,13 @@
           <ion-col>
             <ion-label>ODO</ion-label>
             <ion-item lines="none">
-              <ion-label class="value" v-if="isKmUnit">
+              <ion-label class="value" v-if="getDisplayType === 'kilometer'">
                 {{ getTotalKM }}
               </ion-label>
               <ion-label class="value" v-else>
                 {{ getTotalMileage }}
               </ion-label>
-              <ion-text slot="end">{{ getUnit }}</ion-text>
+              <ion-text slot="end">{{ getDisplayUnit }}</ion-text>
             </ion-item>
           </ion-col>
           <ion-col>
@@ -68,20 +68,20 @@
         </ion-row>
         <ion-row>
           <ion-col class="text-align-center">
-            <ion-button class="icon-only" shape="round" @click="addSpeed">
+            <ion-button class="icon-only-button" shape="round" @click="addSpeed">
               <ion-icon slot="icon-only" src="/assets/icon/caret-up.svg"></ion-icon>
               <ion-ripple-effect></ion-ripple-effect>
             </ion-button>
           </ion-col>
           <ion-col class="text-align-center">
-            <ion-button class="icon-only" shape="round" @click="reduceSpeed">
+            <ion-button class="icon-only-button" shape="round" @click="reduceSpeed">
               <ion-icon slot="icon-only" src="/assets/icon/caret-down.svg"></ion-icon>
               <ion-ripple-effect></ion-ripple-effect>
             </ion-button>
           </ion-col>
           <ion-col class="text-align-center">
-            <ion-button class="icon-only btn-light" shape="round" @click="changeLight">
-              <ion-icon slot="icon-only" src="/assets/icon/light-white.svg" :class="{'light-on': lightStatus}">
+            <ion-button class="icon-only-button" shape="round" :color="lightStatus ? 'primary' : 'light'" @click="changeLight">
+              <ion-icon slot="icon-only" src="/assets/icon/light-white.svg">
               </ion-icon>
               <ion-ripple-effect></ion-ripple-effect>
             </ion-button>
@@ -119,7 +119,7 @@ import {
   onIonViewDidEnter, IonAlert
 } from '@ionic/vue';
 import {bluetooth} from 'ionicons/icons';
-import {ComponentPublicInstance, ref} from "vue";
+import {ComponentPublicInstance, computed, ref} from "vue";
 import DashboardComponent from "@/components/DashboardComponent.vue";
 import {useDashboardStore} from "@/store/useDashboardStore";
 import {useSetting} from "@/hooks/useSetting";
@@ -128,9 +128,12 @@ import {useBleStore} from "@/store/useBleStore";
 import {storeToRefs} from "pinia";
 import {useMessage} from "@/hooks/useMessage";
 import {useBluetoothLe} from "@/hooks/useBluetooth-le";
+import {useSettingStore} from "@/store/useSettingStore";
 
 const dashboardStore = useDashboardStore()
 const bleStore = useBleStore()
+const settingStore = useSettingStore()
+const {getDisplayType, getDisplayUnit} = storeToRefs(settingStore)
 const {
   speed,
   getSingleMileage,
@@ -138,12 +141,9 @@ const {
   getTotalMileage,
   getTotalKM,
   singleTime,
-  isKmUnit,
-  getUnit,
   assistance,
-  assistanceStatus,
   lightStatus,
-  gearPosition,
+  getGearPosition,
   electricQuantity
 } = storeToRefs(dashboardStore)
 const {connectedDevice} = storeToRefs(bleStore)
@@ -190,14 +190,14 @@ const toBluetoothPage = () => {
 }
 
 const addSpeed = () => {
-  if (gearPosition.value >= 5) return
-  const position = gearPosition.value + 1
+  if (getGearPosition.value >= 5) return
+  const position = getGearPosition.value + 1
   changeGearPosition(position)
   sendMessage()
 }
 const reduceSpeed = () => {
-  if (gearPosition.value <= 1) return
-  const position = gearPosition.value - 1
+  if (getGearPosition.value <= 0) return
+  const position = getGearPosition.value - 1
   changeGearPosition(position)
   sendMessage()
 }
@@ -207,11 +207,32 @@ const changeLight = () => {
   changeLightStatus(value)
   sendMessage()
 }
+
+const isKmUnit = computed(() => {
+  return getDisplayType.value === 'kilometer'
+})
+const isAssistance = computed(() => {
+  return assistance.value > 0
+})
 </script>
 <style lang="scss" scoped>
 .home-page {
   .home-page__battery {
     width: 2.5rem;
+  }
+
+  .text-align-center {
+    display: flex;
+    justify-content: center;
+    align-content: center;
+
+    .icon-only-button {
+      height: 4rem;
+      width: 4rem;
+      --border-radius: 50%;
+      --padding-start: 0;
+      --padding-end: 0;
+    }
   }
 
   ion-icon {

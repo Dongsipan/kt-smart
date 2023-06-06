@@ -19,6 +19,7 @@ export function useSetting() {
     p5,
     c1,
     c2,
+    c3,
     c4,
     c5,
     c7,
@@ -27,7 +28,8 @@ export function useSetting() {
     c14,
     percent,
     handlebarMaxSpeed
-  } = useSettingStore()
+  } = storeToRefs(useSettingStore())
+  const {setDisplayType} = useSettingStore()
   const {
     gearPosition,
     lightStatus
@@ -49,24 +51,24 @@ const {setGearPosition,setLightStatus } = useDashboardStore()
     } else {
       expand = 0x0;
     }
-    if (maxSpeed < 32) {
+    if (maxSpeed.value < 32) {
       limitSpeed = 0x0;
-      const speed: number = maxSpeed << 3;
+      const speed: number = maxSpeed.value << 3;
       secondData = Int2Bytes(speed + dimensionMode.dimension);
       writeData.value[2] = secondData;
-      writeData.value[4] = Int2Bytes(p2) + (Int2Bytes(p3) << 3) + (Int2Bytes(p4) << 4) + limitSpeed + expand; // p2+p3+p4+限速+轮径拓展
+      writeData.value[4] = Int2Bytes(p2.value) + (Int2Bytes(p3.value) << 3) + (Int2Bytes(p4.value) << 4) + limitSpeed + expand; // p2+p3+p4+限速+轮径拓展
     }
-    if (maxSpeed >= 32 && maxSpeed < 64) {
+    if (maxSpeed.value >= 32 && maxSpeed.value < 64) {
       limitSpeed = 0x20;
-      const speedDiff = maxSpeed - 32;
+      const speedDiff = maxSpeed.value - 32;
       if (speedDiff === 0) {
         secondData = 0x5;
       } else {
         const speed: number = speedDiff << 3;
-        secondData = Int2Bytes(speed + dimension);
+        secondData = Int2Bytes(speed + dimension.value);
       }
       writeData.value[2] = secondData;
-      writeData.value[4] = Int2Bytes(p2) + (Int2Bytes(p3) << 3) + (Int2Bytes(p4) << 4) + limitSpeed + expand; // p2+p3+p4+限速+轮径拓展
+      writeData.value[4] = Int2Bytes(p2.value) + (Int2Bytes(p3.value) << 3) + (Int2Bytes(p4.value) << 4) + limitSpeed + expand; // p2+p3+p4+限速+轮径拓展
     }
     updateFiveIndexOfData()
     // code = 0 轮径不需要扩展  code = 1 需要扩展
@@ -83,13 +85,13 @@ const {setGearPosition,setLightStatus } = useDashboardStore()
   // }
   /*获取不同尺寸轮径的数据*/
   const getDimension = () => {
-    if (dimension < 10) {
+    if (dimension.value < 10) {
       return {
         code: 0,
-        dimension: Int2Bytes(dimension)
+        dimension: Int2Bytes(dimension.value)
       }
     } else {
-      const diff = dimension - 10;
+      const diff = dimension.value - 10;
       return {
         code: 1,
         dimension: Int2Bytes(diff)
@@ -108,9 +110,9 @@ const {setGearPosition,setLightStatus } = useDashboardStore()
   const updateFirstIndexOfData = () => {
     const lightValue = lightStatus.value ? LightDirection.on : LightDirection.off;
     switch (gearPosition.value) {
-      // case 0:
-      //   writeData.value[1] = GearDirection.positionZero + lightValue;
-      //   break;
+      case 0:
+        writeData.value[1] = GearDirection.positionZero + lightValue;
+        break;
       case 1:
         writeData.value[1] = GearDirection.positionOne + lightValue;
         break;
@@ -138,8 +140,7 @@ const {setGearPosition,setLightStatus } = useDashboardStore()
   }
 
   const setP1 = () => {
-    debugger
-    writeData.value[3] = Int2Bytes(p1);
+    writeData.value[3] = Int2Bytes(p1.value);
     updateFiveIndexOfData();
   }
   const setP2 = () => {
@@ -155,47 +156,57 @@ const {setGearPosition,setLightStatus } = useDashboardStore()
     setMaxSpeed()
   }
   const setP5 = () => {
-    writeData.value[0] = Int2Bytes(p5);
+    writeData.value[0] = Int2Bytes(p5.value);
     updateFiveIndexOfData();
   }
   const setC1C2 = () => {
-    const c1Hex = Int2Bytes(c1);
+    const c1Hex = Int2Bytes(c1.value);
 
-    const c2Hex = Int2Bytes(c2);
+    const c2Hex = Int2Bytes(c2.value);
 
     writeData.value[6] = (c1Hex << 3) + (c2Hex);
     updateFiveIndexOfData();
   }
+  // c3 对应的是档位
+  const setC3 = () => {
+    const position = Number(c3.value)
+    if (position === 8) return
+    gearPosition.value = Number(position)
+    changeGearPosition(position)
+  }
   const setC5C14 = () => {
-    const c5Hex = Int2Bytes(c5);
+    const c5Hex = Int2Bytes(c5.value);
 
-    const c14Hex = Int2Bytes(c14 << 5);
+    const c14Hex = Int2Bytes(c14.value) << 5;
 
     writeData.value[7] = 128 + c14Hex + c5Hex;
     updateFiveIndexOfData();
   }
   const setC4C7C12 = () => {
-    const c4Hex = Int2Bytes(c4 << 5);
+    const c4Hex = Int2Bytes(c4.value) << 5;
 
-    const c7Hex = Int2Bytes(c7 << 3);
+    const c7Hex = Int2Bytes(c7.value) << 3;
 
-    const c12Hex = Int2Bytes(c12);
+    const c12Hex = Int2Bytes(c12.value);
 
     writeData.value[8] = c4Hex + c7Hex + c12Hex;
     updateFiveIndexOfData();
   }
   const setC13 = () => {
-    const c13Hex = Int2Bytes(c13 << 2);
+    const c13Hex = Int2Bytes(c13.value) << 2;
     writeData.value[10] = c13Hex + 1;
     updateFiveIndexOfData();
   }
   const setPercent = () => {
-    writeData.value[11] = Int2Bytes(percent);
+    writeData.value[11] = Int2Bytes(percent.value);
     updateFiveIndexOfData();
   }
   const setHandlebar = () => {
-    writeData.value[9] = Int2Bytes(handlebarMaxSpeed);
+    writeData.value[9] = Int2Bytes(handlebarMaxSpeed.value);
     updateFiveIndexOfData();
+  }
+  const setUnitDisplayType = () => {
+
   }
   const Int2Bytes = (value: number | string) => {
     if (typeof value === 'string') {
@@ -222,16 +233,17 @@ const {setGearPosition,setLightStatus } = useDashboardStore()
     return arrBytes;
   }
   const updateSetting = () => {
-    setMaxSpeed()
     setP1()
     setP2()
     setP5()
     setC1C2()
+    setC3()
     setC5C14()
     setC4C7C12()
     setC13()
     setPercent()
     setHandlebar()
+    setMaxSpeed()
    // setP3() setP4() => 引用 setMaxSpeed
   }
   return {

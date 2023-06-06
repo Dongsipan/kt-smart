@@ -1,24 +1,25 @@
-import {defineStore} from "pinia";
+import {defineStore, storeToRefs} from "pinia";
+import {useSettingStore} from "@/store/useSettingStore";
+
+const { getPosition, getDisplayType } = storeToRefs(useSettingStore())
 
 export const useDashboardStore = defineStore('dashboard', {
   state: () => ({
     electricQuantity: 0,
     speed: 0,
-    gearPosition: 5,
-    displayType: 'mile',
+    gearPosition: -1,
     singleMileage: 0,
     singleTime: '00:00:00',
     totalMileage: 0,
     lightStatus: false,
-    assistanceStatus: false,
-    isKmUnit: false,
     assistance: 0
   }),
   getters: {
     getElectricQuantity: (state) => state.electricQuantity,
     getSpeed: (state) => state.speed,
-    getGearPosition: (state) => state.gearPosition,
-    getDisplayType: (state) => state.displayType,
+    getGearPosition: (state) => {
+      return getPosition.value === 8 ? state.gearPosition === -1 ? 5 : state.gearPosition : state.gearPosition
+    },
     getSingleMileage: (state) => {
       return state.singleMileage.toFixed(1)
     },
@@ -35,10 +36,6 @@ export const useDashboardStore = defineStore('dashboard', {
       return value.toFixed(1)
     },
     getLightStatus: (state) => state.lightStatus,
-    getAssistanceStatus: (state) => state.assistanceStatus,
-    getUnit: (state) => {
-      return state.isKmUnit ? 'KM/h' : 'Mil/h'
-    },
     getAssistance: (state) => state.assistance,
 
   },
@@ -55,9 +52,6 @@ export const useDashboardStore = defineStore('dashboard', {
     setTotalMileage(payload: number) {
       this.totalMileage = payload;
     },
-    setDisplayType(payload: string) {
-      this.displayType = payload
-    },
     setElectricQuantity(payload: number) {
       this.electricQuantity = payload;
     },
@@ -70,15 +64,11 @@ export const useDashboardStore = defineStore('dashboard', {
     setLightStatus(payload: boolean) {
       this.lightStatus = payload;
     },
-    setAssistanceStatus(payload: boolean) {
-      this.assistanceStatus = payload;
-    },
-    setIsKmUnit(payload: boolean) {
-      this.isKmUnit = payload
-    },
     setAssistance(payload: number) {
       this.assistance = payload;
     }
   },
-  persist: false
+  persist: {
+    paths: ['gearPosition', 'displayType', 'totalMileage']
+  }
 })

@@ -5,74 +5,74 @@
         <ion-title>Error Information</ion-title>
       </ion-toolbar>
     </ion-header>
-    <ion-content :fullscreen="true">
+    <ion-content :fullscreen="true" class="ion-padding-horizontal">
       <ion-grid>
-        <ion-row align-items-center>
-          <ion-col align-self-center class="info-page__bicycle">
+        <ion-row>
+          <ion-col class="info-page__bicycle">
             <ion-icon :icon="bicycle"></ion-icon>
           </ion-col>
         </ion-row>
-        <ion-row align-items-center>
-          <ion-col align-self-center size="6">
+        <ion-row>
+          <ion-col size="6">
             <ion-row align-items-center>
-              <ion-col size="4">
+              <ion-col size="3">
                 <ion-icon :icon="warningOutline" :color="current ? 'primary' : ''"></ion-icon>
               </ion-col>
-              <ion-col align-self-center size="8">
+              <ion-col class="ion-align-self-center" size="9">
                 <ion-text>Current</ion-text>
               </ion-col>
             </ion-row>
           </ion-col>
           <ion-col size="6">
-            <ion-row align-items-center>
-              <ion-col align-self-center size="4">
+            <ion-row>
+              <ion-col class="ion-align-self-center" size="3">
                 <ion-icon :icon="warningOutline" :color="throttle ? 'danger' : ''"></ion-icon>
               </ion-col>
-              <ion-col align-self-center size="8">
+              <ion-col class="ion-align-self-center" size="9">
                 <ion-text>Throttle</ion-text>
               </ion-col>
             </ion-row>
           </ion-col>
         </ion-row>
-        <ion-row align-items-center>
-          <ion-col align-self-center size="6">
-            <ion-row align-items-center>
-              <ion-col size="4">
+        <ion-row>
+          <ion-col size="6">
+            <ion-row>
+              <ion-col size="3">
                 <ion-icon :icon="warningOutline" :color="motorPhase ? 'danger' : ''"></ion-icon>
               </ion-col>
-              <ion-col align-self-center size="8">
+              <ion-col class="ion-align-self-center" size="9">
                 <ion-text>MotorPhase</ion-text>
               </ion-col>
             </ion-row>
           </ion-col>
           <ion-col size="6">
-            <ion-row align-items-center>
-              <ion-col align-self-center size="4">
+            <ion-row>
+              <ion-col size="3">
                 <ion-icon :icon="warningOutline" :color="motorHall ? 'danger' : ''"></ion-icon>
               </ion-col>
-              <ion-col align-self-center size="8">
+              <ion-col class="ion-align-self-center" size="9">
                 <ion-text>MotorHall</ion-text>
               </ion-col>
             </ion-row>
           </ion-col>
         </ion-row>
-        <ion-row align-items-center>
-          <ion-col align-self-center size="6">
-            <ion-row align-items-center>
-              <ion-col size="4">
+        <ion-row>
+          <ion-col size="6">
+            <ion-row>
+              <ion-col size="3">
                 <ion-icon :icon="warningOutline" :color="torqueSensor ? 'danger' : ''"></ion-icon>
               </ion-col>
-              <ion-col align-self-center size="8">
+              <ion-col class="ion-align-self-center" size="9">
                 <ion-text>TorqueSensor</ion-text>
               </ion-col>
             </ion-row>
           </ion-col>
           <ion-col size="6">
-            <ion-row align-items-center>
-              <ion-col align-self-center size="4">
+            <ion-row>
+              <ion-col size="3">
                 <ion-icon :icon="warningOutline" :color="speedSensor ? 'danger' : ''"></ion-icon>
               </ion-col>
-              <ion-col align-self-center size="8">
+              <ion-col class="ion-align-self-center" size="9">
                 <ion-text>SpeedSensor</ion-text>
               </ion-col>
             </ion-row>
@@ -100,6 +100,9 @@ const { current, throttle, motorPhase, motorHall, torqueSensor, speedSensor } = 
     ion-icon {
       font-size: 15rem;
     }
+  }
+  ion-icon {
+    font-size: 2rem;
   }
 }
 </style>
