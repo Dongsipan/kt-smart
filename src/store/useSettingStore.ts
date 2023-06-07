@@ -1,8 +1,8 @@
-import {defineStore} from "pinia";
-import {DefaultSetting} from "@/const/setting.const";
-import {DimensionList, LevelList} from "@/const/bike.const";
+import { defineStore } from "pinia";
+import { DefaultSetting } from "@/const/setting.const";
+import { DimensionList, LevelList } from "@/const/bike.const";
 
-export const useSettingStore = defineStore('setting', {
+export const useSettingStore = defineStore("setting", {
   state: () => ({
     maxSpeed: DefaultSetting.maxSpeed,
     dimension: DefaultSetting.dimension,
@@ -25,9 +25,9 @@ export const useSettingStore = defineStore('setting', {
     candidateParam: DefaultSetting.candidateParam,
     displayType: DefaultSetting.displayType,
     dimensionList: DimensionList,
-    levelList: LevelList
+    levelList: LevelList,
   }),
-  getters:{
+  getters: {
     getMaxSpeed: (state) => state.maxSpeed,
     getDimension: (state) => state.dimension,
     getP1: (state) => state.p1,
@@ -38,81 +38,82 @@ export const useSettingStore = defineStore('setting', {
     getC1: (state) => state.c1,
     getC2: (state) => state.c2,
     getPosition: (state) => {
-      return state.c3
+      return state.c3;
     },
     getC4: (state) => state.c4,
     getC5: (state) => state.c5,
     getC7: (state) => state.c7,
-    getC12:(state) => state.c12,
-    getC13:(state) => state.c13,
+    getC12: (state) => state.c12,
+    getC13: (state) => state.c13,
     getC14: (state) => state.c14,
     getPercent: (state) => state.percent,
     getHandlebarMaxSpeed: (state) => state.handlebarMaxSpeed,
     getCandidateParam: (state) => state.candidateParam,
     getDisplayType: (state) => state.displayType,
-    getDisplayUnit: state => state.displayType === 'kilometer' ? 'KM/h' : 'Mil/h'
+    getDisplayUnit: (state) =>
+      state.displayType === "kilometer" ? "KM/h" : "Mil/h",
   },
   actions: {
     setMaxSpeed(payload: number) {
       this.maxSpeed = payload;
     },
-    setDimension (payload: number) {
+    setDimension(payload: number) {
       this.dimension = payload;
     },
-    setP1 (payload: number) {
+    setP1(payload: number) {
       this.p1 = payload;
     },
-    setP2 (payload:number) {
+    setP2(payload: number) {
       this.p2 = payload;
     },
-    setP3 (payload:number) {
+    setP3(payload: number) {
       this.p3 = payload;
     },
-    setP4 (payload:number) {
+    setP4(payload: number) {
       this.p4 = payload;
     },
-    setP5 (payload:number) {
+    setP5(payload: number) {
       this.p5 = payload;
     },
-    setC1 (payload: number) {
+    setC1(payload: number) {
       this.c1 = payload;
     },
-    setC2 (payload:number) {
-      this.c2 = payload
+    setC2(payload: number) {
+      this.c2 = payload;
     },
-    setC3 (payload:number) {
+    setC3(payload: number) {
       this.c3 = payload;
     },
-    setC4 (payload:number) {
+    setC4(payload: number) {
       this.c4 = payload;
     },
-    setC5 (payload:number) {
+    setC5(payload: number) {
       this.c5 = payload;
     },
-    setC7 (payload:number) {
+    setC7(payload: number) {
       this.c7 = payload;
     },
-    setC12 (payload:number) {
+    setC12(payload: number) {
       this.c12 = payload;
     },
-    setC13 (payload:number) {
+    setC13(payload: number) {
       this.c13 = payload;
     },
-    setC14 (payload:number) {
+    setC14(payload: number) {
       this.c14 = payload;
     },
-    setPercent (payload:number) {
+    setPercent(payload: number) {
       this.percent = payload;
     },
-    setHandlebarMaxSpeed (payload:number) {
+    setHandlebarMaxSpeed(payload: number) {
       this.handlebarMaxSpeed = payload;
     },
-    setCandidateParam (payload:number) {
+    setCandidateParam(payload: number) {
       this.candidateParam = payload;
     },
-    setDisplayType (payload: string) {
+    setDisplayType(payload: string) {
       this.displayType = payload;
-    }
+    },
   },
-  persist: true
-})
+  persist: true,
+});

@@ -1,11 +1,12 @@
-import {defineStore} from "pinia";
-import {BleDevice} from "@capacitor-community/bluetooth-le";
+import { defineStore } from "pinia";
+import { BleDevice } from "@capacitor-community/bluetooth-le";
 
 export interface CharacteristicModule {
   service: string;
   characteristic: string;
   properties: string[];
 }
+
 export interface PeripheralModule {
   name: string;
   id: string;
@@ -17,58 +18,65 @@ export interface PeripheralModule {
   characteristics: CharacteristicModule[];
 }
 
-export interface Device extends BleDevice{
+export interface Device extends BleDevice {
   isPaired: boolean;
   isPairing: boolean;
+
   [propName: string]: any;
 }
 
-export const useBleStore = defineStore('ble', {
+export const useBleStore = defineStore("ble", {
   state: () => ({
     connectedDevice: {} as Device,
-    availableDevices: [] as Device [],
-    pairedDevices: [] as Device[]
+    availableDevices: [] as Device[],
+    pairedDevices: [] as Device[],
   }),
   getters: {
     getConnectedDevice: (state) => state.connectedDevice,
-    getAvailableDevices: (state) => state.availableDevices
+    getAvailableDevices: (state) => state.availableDevices,
   },
   actions: {
     setConnectedDevice(payload: Device) {
-      this.connectedDevice = payload
-      this.setPairedDevices(payload)
-      this.removePairedDeviceFromAvailableDevices(payload)
+      this.connectedDevice = payload;
+      this.setPairedDevices(payload);
+      this.removePairedDeviceFromAvailableDevices(payload);
     },
-    updateConnectedDevicePairedStatus (payload: boolean) {
-      this.connectedDevice.isPaired = payload
-      const index= this.pairedDevices.findIndex(item => item.deviceId === this.connectedDevice.deviceId)
+    updateConnectedDevicePairedStatus(payload: boolean) {
+      this.connectedDevice.isPaired = payload;
+      const index = this.pairedDevices.findIndex(
+        (item) => item.deviceId === this.connectedDevice.deviceId
+      );
       if (index > -1) {
-        this.pairedDevices[index].isPaired = payload
+        this.pairedDevices[index].isPaired = payload;
       }
     },
     removeConnectedDevice(payload: Device) {
-      this.connectedDevice = {} as Device
-      this.removePairedDevice(payload)
+      this.connectedDevice = {} as Device;
+      this.removePairedDevice(payload);
     },
     setAvailableDevice(payload: Device) {
-      this.availableDevices.push(payload)
+      this.availableDevices.push(payload);
     },
     clearAvailableDevices() {
-      this.availableDevices.length = 0
+      this.availableDevices.length = 0;
     },
-    removePairedDeviceFromAvailableDevices (payload: Device) {
-      this.$patch(state => {
-        state.availableDevices = this.availableDevices.filter(item => payload.deviceId !== item.deviceId)
-      })
+    removePairedDeviceFromAvailableDevices(payload: Device) {
+      this.$patch((state) => {
+        state.availableDevices = this.availableDevices.filter(
+          (item) => payload.deviceId !== item.deviceId
+        );
+      });
     },
     setPairedDevices(payload: Device) {
-      this.pairedDevices.push(payload)
+      this.pairedDevices.push(payload);
     }, // 暂时只存储一个配对的设备
     removePairedDevice(payload: Device) {
-      this.pairedDevices = this.pairedDevices.filter(item => payload.deviceId !== item.deviceId)
-    }
+      this.pairedDevices = this.pairedDevices.filter(
+        (item) => payload.deviceId !== item.deviceId
+      );
+    },
   },
-  persist:{
-    paths: ['pairedDevices', 'connectedDevice']
-  }
-})
+  persist: {
+    paths: ["pairedDevices", "connectedDevice"],
+  },
+});

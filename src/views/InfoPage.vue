@@ -16,7 +16,10 @@
           <ion-col size="6">
             <ion-row align-items-center>
               <ion-col size="3">
-                <ion-icon :icon="warningOutline" :color="current ? 'primary' : ''"></ion-icon>
+                <ion-icon
+                  :color="current ? 'primary' : ''"
+                  :icon="warningOutline"
+                ></ion-icon>
               </ion-col>
               <ion-col class="ion-align-self-center" size="9">
                 <ion-text>Current</ion-text>
@@ -26,7 +29,10 @@
           <ion-col size="6">
             <ion-row>
               <ion-col class="ion-align-self-center" size="3">
-                <ion-icon :icon="warningOutline" :color="throttle ? 'danger' : ''"></ion-icon>
+                <ion-icon
+                  :color="throttle ? 'danger' : ''"
+                  :icon="warningOutline"
+                ></ion-icon>
               </ion-col>
               <ion-col class="ion-align-self-center" size="9">
                 <ion-text>Throttle</ion-text>
@@ -38,7 +44,10 @@
           <ion-col size="6">
             <ion-row>
               <ion-col size="3">
-                <ion-icon :icon="warningOutline" :color="motorPhase ? 'danger' : ''"></ion-icon>
+                <ion-icon
+                  :color="motorPhase ? 'danger' : ''"
+                  :icon="warningOutline"
+                ></ion-icon>
               </ion-col>
               <ion-col class="ion-align-self-center" size="9">
                 <ion-text>MotorPhase</ion-text>
@@ -48,7 +57,10 @@
           <ion-col size="6">
             <ion-row>
               <ion-col size="3">
-                <ion-icon :icon="warningOutline" :color="motorHall ? 'danger' : ''"></ion-icon>
+                <ion-icon
+                  :color="motorHall ? 'danger' : ''"
+                  :icon="warningOutline"
+                ></ion-icon>
               </ion-col>
               <ion-col class="ion-align-self-center" size="9">
                 <ion-text>MotorHall</ion-text>
@@ -60,7 +72,10 @@
           <ion-col size="6">
             <ion-row>
               <ion-col size="3">
-                <ion-icon :icon="warningOutline" :color="torqueSensor ? 'danger' : ''"></ion-icon>
+                <ion-icon
+                  :color="torqueSensor ? 'danger' : ''"
+                  :icon="warningOutline"
+                ></ion-icon>
               </ion-col>
               <ion-col class="ion-align-self-center" size="9">
                 <ion-text>TorqueSensor</ion-text>
@@ -70,7 +85,10 @@
           <ion-col size="6">
             <ion-row>
               <ion-col size="3">
-                <ion-icon :icon="warningOutline" :color="speedSensor ? 'danger' : ''"></ion-icon>
+                <ion-icon
+                  :color="speedSensor ? 'danger' : ''"
+                  :icon="warningOutline"
+                ></ion-icon>
               </ion-col>
               <ion-col class="ion-align-self-center" size="9">
                 <ion-text>SpeedSensor</ion-text>
@@ -83,13 +101,26 @@
   </ion-page>
 </template>
 
-<script setup lang="ts">
-import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonGrid, IonRow, IonCol, IonIcon, IonText } from '@ionic/vue';
-import {bicycle, warningOutline} from 'ionicons/icons';
-import {useErrorStore} from "@/store/useErrorStore";
-import {storeToRefs} from "pinia";
-const errorStore = useErrorStore()
-const { current, throttle, motorPhase, motorHall, torqueSensor, speedSensor } = storeToRefs(errorStore)
+<script lang="ts" setup>
+import {
+  IonCol,
+  IonContent,
+  IonGrid,
+  IonHeader,
+  IonIcon,
+  IonPage,
+  IonRow,
+  IonText,
+  IonTitle,
+  IonToolbar,
+} from "@ionic/vue";
+import { bicycle, warningOutline } from "ionicons/icons";
+import { useErrorStore } from "@/store/useErrorStore";
+import { storeToRefs } from "pinia";
+
+const errorStore = useErrorStore();
+const { current, throttle, motorPhase, motorHall, torqueSensor, speedSensor } =
+  storeToRefs(errorStore);
 </script>
 <style lang="scss">
 .info-page {
@@ -97,10 +128,12 @@ const { current, throttle, motorPhase, motorHall, torqueSensor, speedSensor } = 
     display: flex;
     align-items: center;
     justify-content: center;
+
     ion-icon {
       font-size: 15rem;
     }
   }
+
   ion-icon {
     font-size: 2rem;
   }

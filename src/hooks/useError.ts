@@ -1,19 +1,19 @@
-import {computed, ref} from "vue";
+import { computed, ref } from "vue";
 
 export function useError() {
-  const errorCode = ref(-1)
-  const current = ref(false)
-  const throttle = ref(false)
-  const motorPhase = ref(false)
-  const motorHall = ref(false)
-  const torqueSensor = ref(false)
-  const speedSensor = ref(false)
+  const errorCode = ref(-1);
+  const current = ref(false);
+  const throttle = ref(false);
+  const motorPhase = ref(false);
+  const motorHall = ref(false);
+  const torqueSensor = ref(false);
+  const speedSensor = ref(false);
   const hasError = computed(() => {
-    return errorCode.value > 0
-  })
+    return errorCode.value > 0;
+  });
   const setError = (code: number) => {
-    errorCode.value = code
-    debugger
+    errorCode.value = code;
+    debugger;
     switch (code) {
       case 33:
         current.value = true;
@@ -34,22 +34,30 @@ export function useError() {
         speedSensor.value = true;
         break;
       case 0:
-        resetError()
+        resetError();
         break;
       default:
         break;
     }
-  }
+  };
   const resetError = () => {
-    current.value = false
-    throttle.value = false
-    motorPhase.value = false
-    motorHall.value = false
-    torqueSensor.value = false
-    speedSensor.value = false
-  }
+    current.value = false;
+    throttle.value = false;
+    motorPhase.value = false;
+    motorHall.value = false;
+    torqueSensor.value = false;
+    speedSensor.value = false;
+  };
 
   return {
-    setError,errorCode,current,throttle,motorPhase,motorHall,torqueSensor,speedSensor,hasError
-  }
+    setError,
+    errorCode,
+    current,
+    throttle,
+    motorPhase,
+    motorHall,
+    torqueSensor,
+    speedSensor,
+    hasError,
+  };
 }

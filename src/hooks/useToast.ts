@@ -1,7 +1,11 @@
-import {toastController} from "@ionic/vue";
+import { toastController } from "@ionic/vue";
 
-export function useToast () {
-  const presentToast = async (message: string, position: 'top' | 'middle' | 'bottom' = 'top', duration = 3000) => {
+export function useToast() {
+  const presentToast = async (
+    message: string,
+    position: "top" | "middle" | "bottom" = "top",
+    duration = 3000
+  ) => {
     const toast = await toastController.create({
       message,
       duration,
@@ -9,8 +13,8 @@ export function useToast () {
     });
 
     await toast.present();
-  }
+  };
   return {
-    presentToast
-  }
+    presentToast,
+  };
 }

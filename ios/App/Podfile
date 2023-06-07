@@ -9,12 +9,12 @@ use_frameworks!
 install! 'cocoapods', :disable_input_output_paths => true
 
 def capacitor_pods
-  pod 'Capacitor', :path => '../../node_modules/@capacitor/ios'
-  pod 'CapacitorCordova', :path => '../../node_modules/@capacitor/ios'
-  pod 'CapacitorCommunityBluetoothLe', :path => '../../node_modules/@capacitor-community/bluetooth-le'
+  pod 'Capacitor', :path => '../../node_modules/.store/@capacitor+ios@5.0.4/node_modules/@capacitor/ios'
+  pod 'CapacitorCordova', :path => '../../node_modules/.store/@capacitor+ios@5.0.4/node_modules/@capacitor/ios'
+  pod 'CapacitorCommunityBluetoothLe', :path => '../../node_modules/.store/@capacitor-community+bluetooth-le@3.0.0/node_modules/@capacitor-community/bluetooth-le'
   pod 'CapacitorApp', :path => '../../node_modules/.store/@capacitor+app@5.0.2/node_modules/@capacitor/app'
   pod 'CapacitorGeolocation', :path => '../../node_modules/.store/@capacitor+geolocation@5.0.2/node_modules/@capacitor/geolocation'
-  pod 'CapacitorGoogleMaps', :path => '../../node_modules/@capacitor/google-maps'
+  pod 'CapacitorGoogleMaps', :path => '../../node_modules/.store/@capacitor+google-maps@5.1.0/node_modules/@capacitor/google-maps'
   pod 'CapacitorHaptics', :path => '../../node_modules/.store/@capacitor+haptics@5.0.2/node_modules/@capacitor/haptics'
   pod 'CapacitorKeyboard', :path => '../../node_modules/.store/@capacitor+keyboard@5.0.2/node_modules/@capacitor/keyboard'
   pod 'CapacitorStatusBar', :path => '../../node_modules/.store/@capacitor+status-bar@5.0.2/node_modules/@capacitor/status-bar'

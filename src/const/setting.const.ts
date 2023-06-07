@@ -1,4 +1,4 @@
-import {DefaultSize} from "@/const/bike.const";
+import { DefaultSize } from "@/const/bike.const";
 
 export const DefaultSetting = {
   maxSpeed: 72,
@@ -20,5 +20,5 @@ export const DefaultSetting = {
   percent: 50,
   handlebarMaxSpeed: 20,
   candidateParam: 12,
-  displayType: 'kilometer'
+  displayType: "kilometer",
 };
