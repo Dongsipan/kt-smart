@@ -8,7 +8,7 @@
     "build": "vue-tsc && vite build",
     "debug:ios": "npm run build && ionic capacitor sync ios && ionic capacitor open ios",
     "debug:android": "npm run build && ionic capacitor sync android && ionic capacitor open android",
-    "live:ios": "ionic capacitor run ios --livereload --external",
+    "live:ios": "ionic capacitor run ios --livereload --external -s -c",
     "live:android": "ionic capacitor run android --livereload --external",
     "preview": "vite preview",
     "test:e2e": "cypress run",
@@ -16,6 +16,8 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@amap/amap-jsapi-loader": "^1.0.1",
+    "@amap/amap-jsapi-types": "^0.0.13",
     "@capacitor-community/bluetooth-le": "^3.0.0",
     "@capacitor/android": "5.0.4",
     "@capacitor/app": "5.0.2",

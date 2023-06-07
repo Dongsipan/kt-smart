@@ -24,7 +24,7 @@
             size="mini"
           ></ion-icon>
         </ion-tab-button>
-        <ion-tab-button href="/tabs/tab3" tab="tab3">
+        <ion-tab-button href="/tabs/track" tab="track">
           <ion-icon :icon="infinite" aria-hidden="true" />
           <ion-label>Track</ion-label>
         </ion-tab-button>

@@ -1,38 +1,51 @@
 <template>
-  <capacitor-google-map ref="mapRef"></capacitor-google-map>
-  <button @click="createMap()">Create Map</button>
+  <ion-page>
+    <ion-header>
+      <ion-toolbar>
+        <ion-title>Track</ion-title>
+      </ion-toolbar>
+    </ion-header>
+    <ion-content :fullscreen="true" class="ion-padding-horizontal">
+      <AMapContainer ref="mapRef" />
+
+      <ion-button
+        size="small"
+        style="position: absolute; bottom: 80px; right: 16px"
+        @click="printCurrentPosition"
+      >
+        <ion-icon :icon="navigateOutline"></ion-icon>
+      </ion-button>
+    </ion-content>
+  </ion-page>
 </template>
 
 <script lang="ts" setup>
-import { GoogleMap } from "@capacitor/google-maps";
+import {
+  IonButton,
+  IonContent,
+  IonHeader,
+  IonIcon,
+  IonPage,
+  IonTitle,
+  IonToolbar,
+} from "@ionic/vue";
+import { navigateOutline } from "ionicons/icons";
+import { Geolocation } from "@capacitor/geolocation";
 import { ref } from "vue";
+import { useToast } from "@/hooks/useToast";
+import AMapContainer from "@/components/AMapContainer.vue";
 
-const mapRef = ref<HTMLElement | null>(null);
+const mapRef = ref(null) as any;
 
-let newMap: GoogleMap;
+const { presentToast } = useToast();
 
-const createMap = async () => {
+const printCurrentPosition = async () => {
+  const coordinates = await Geolocation.getCurrentPosition();
+  await presentToast(`Current position: ${JSON.stringify(coordinates)}`);
   if (!mapRef.value) return;
-
-  newMap = await GoogleMap.create({
-    id: "my-map", // Unique identifier for this map instance
-    element: mapRef.value, // reference to the capacitor-google-map element
-    apiKey: "YOUR_API_KEY_HERE", // Your Google Maps API Key
-    config: {
-      center: {
-        // The initial position to be rendered by the map
-        lat: 33.6,
-        lng: -117.9,
-      },
-      zoom: 8, // The initial zoom level to be rendered by the map
-    },
-  });
+  const { latitude, longitude } = coordinates.coords;
+  mapRef.value.setLocation(longitude, latitude);
+  console.log("Current position:", coordinates);
 };
 </script>
-<style>
-capacitor-google-map {
-  display: inline-block;
-  width: 275px;
-  height: 400px;
-}
-</style>
+<style></style>
