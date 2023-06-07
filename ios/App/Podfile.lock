@@ -44,12 +44,12 @@ PODS:
     - GoogleMaps/Base
 
 DEPENDENCIES:
-  - "Capacitor (from `../../node_modules/.store/@capacitor+ios@5.0.4/node_modules/@capacitor/ios`)"
+  - "Capacitor (from `../../node_modules/@capacitor/ios`)"
   - "CapacitorApp (from `../../node_modules/.store/@capacitor+app@5.0.2/node_modules/@capacitor/app`)"
-  - "CapacitorCommunityBluetoothLe (from `../../node_modules/.store/@capacitor-community+bluetooth-le@3.0.0/node_modules/@capacitor-community/bluetooth-le`)"
-  - "CapacitorCordova (from `../../node_modules/.store/@capacitor+ios@5.0.4/node_modules/@capacitor/ios`)"
+  - "CapacitorCommunityBluetoothLe (from `../../node_modules/@capacitor-community/bluetooth-le`)"
+  - "CapacitorCordova (from `../../node_modules/@capacitor/ios`)"
   - "CapacitorGeolocation (from `../../node_modules/.store/@capacitor+geolocation@5.0.2/node_modules/@capacitor/geolocation`)"
-  - "CapacitorGoogleMaps (from `../../node_modules/.store/@capacitor+google-maps@5.1.0/node_modules/@capacitor/google-maps`)"
+  - "CapacitorGoogleMaps (from `../../node_modules/@capacitor/google-maps`)"
   - "CapacitorHaptics (from `../../node_modules/.store/@capacitor+haptics@5.0.2/node_modules/@capacitor/haptics`)"
   - "CapacitorKeyboard (from `../../node_modules/.store/@capacitor+keyboard@5.0.2/node_modules/@capacitor/keyboard`)"
   - "CapacitorStatusBar (from `../../node_modules/.store/@capacitor+status-bar@5.0.2/node_modules/@capacitor/status-bar`)"
@@ -61,17 +61,17 @@ SPEC REPOS:
 
 EXTERNAL SOURCES:
   Capacitor:
-    :path: "../../node_modules/.store/@capacitor+ios@5.0.4/node_modules/@capacitor/ios"
+    :path: "../../node_modules/@capacitor/ios"
   CapacitorApp:
     :path: "../../node_modules/.store/@capacitor+app@5.0.2/node_modules/@capacitor/app"
   CapacitorCommunityBluetoothLe:
-    :path: "../../node_modules/.store/@capacitor-community+bluetooth-le@3.0.0/node_modules/@capacitor-community/bluetooth-le"
+    :path: "../../node_modules/@capacitor-community/bluetooth-le"
   CapacitorCordova:
-    :path: "../../node_modules/.store/@capacitor+ios@5.0.4/node_modules/@capacitor/ios"
+    :path: "../../node_modules/@capacitor/ios"
   CapacitorGeolocation:
     :path: "../../node_modules/.store/@capacitor+geolocation@5.0.2/node_modules/@capacitor/geolocation"
   CapacitorGoogleMaps:
-    :path: "../../node_modules/.store/@capacitor+google-maps@5.1.0/node_modules/@capacitor/google-maps"
+    :path: "../../node_modules/@capacitor/google-maps"
   CapacitorHaptics:
     :path: "../../node_modules/.store/@capacitor+haptics@5.0.2/node_modules/@capacitor/haptics"
   CapacitorKeyboard:
@@ -92,6 +92,6 @@ SPEC CHECKSUMS:
   Google-Maps-iOS-Utils: d0921b7f1c4097e95fd8754fae6fd39d01dae01f
   GoogleMaps: 032f676450ba0779bd8ce16840690915f84e57ac
 
-PODFILE CHECKSUM: 26bc8820761b63018f353ab95f2c0756c91ffc3d
+PODFILE CHECKSUM: b66a78512d9521ae1a9255626ab4ea0b4f3151f0
 
 COCOAPODS: 1.12.1

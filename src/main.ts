@@ -2,7 +2,6 @@ import { createApp } from "vue";
 import App from "./App.vue";
 import router from "./router";
 import pinia from "./store";
-import "@amap/amap-jsapi-types";
 
 import { IonicVue } from "@ionic/vue";
 
