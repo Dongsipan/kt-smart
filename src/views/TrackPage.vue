@@ -39,7 +39,7 @@ import { locateOutline, navigateOutline } from "ionicons/icons";
 import AMapContainer from "@/components/AMapContainer.vue";
 import { ref } from "vue";
 
-const mapRef = ref<AMapContainer>(null);
+const mapRef = ref(null) as any;
 
 const setMapToCenter = () => {
   mapRef.value.setMapToCenter();

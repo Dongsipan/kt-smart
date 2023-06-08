@@ -10,6 +10,7 @@ import { Capacitor } from "@capacitor/core";
 import { storeToRefs } from "pinia";
 import { useToast } from "@/hooks/useToast";
 import { ServiceUUID } from "@/const/ble.const";
+import { isPlatform } from "@ionic/vue";
 
 export function useBluetoothLe() {
   const bleStore = useBleStore();
@@ -65,7 +66,10 @@ export function useBluetoothLe() {
         await presentToast("BT not enabled, or not supported!");
       } else {
         if (!connectedDevice.isPaired) {
-          await BleClient.getDevices([connectedDevice.deviceId]);
+          // if ()
+          if (isPlatform("ios")) {
+            await BleClient.getDevices([connectedDevice.deviceId]);
+          }
           await connectBle(connectedDevice, false);
         }
       }

@@ -3,6 +3,9 @@
     <ion-header>
       <ion-toolbar>
         <ion-title>Setting</ion-title>
+        <ion-buttons slot="end">
+          <ion-button>Save</ion-button>
+        </ion-buttons>
       </ion-toolbar>
     </ion-header>
     <ion-content :fullscreen="true">
@@ -16,12 +19,12 @@
             v-model="maxSpeed"
             :maxlength="2"
             label="MaxSpeed"
-            max="72"
-            min="0"
+            :max="72"
+            :min="0"
             name="maxSpeed"
             placeholder="km/h"
-            step="1"
             type="number"
+            inputmode="numeric"
             @change="setMaxSpeed"
           >
           </ion-input>
@@ -52,6 +55,7 @@
             name="p1"
             placeholder="P1"
             type="number"
+            inputmode="numeric"
           ></ion-input>
         </ion-item>
 
@@ -62,6 +66,7 @@
             name="p2"
             placeholder="P2"
             type="number"
+            inputmode="numeric"
           ></ion-input>
         </ion-item>
 
@@ -72,6 +77,7 @@
             name="p3"
             placeholder="P3"
             type="number"
+            inputmode="numeric"
           ></ion-input>
         </ion-item>
 
@@ -82,6 +88,7 @@
             name="p4"
             placeholder="P4"
             type="number"
+            inputmode="numeric"
           ></ion-input>
         </ion-item>
 
@@ -92,6 +99,7 @@
             name="p5"
             placeholder="P5"
             type="number"
+            inputmode="numeric"
           ></ion-input>
         </ion-item>
 
@@ -102,6 +110,7 @@
             name="c1"
             placeholder="C1"
             type="number"
+            inputmode="numeric"
           ></ion-input>
         </ion-item>
 
@@ -112,6 +121,7 @@
             name="c2"
             placeholder="C2"
             type="number"
+            inputmode="numeric"
           ></ion-input>
         </ion-item>
 
@@ -140,6 +150,7 @@
             name="c4"
             placeholder="C4"
             type="number"
+            inputmode="numeric"
           ></ion-input>
         </ion-item>
 
@@ -150,6 +161,7 @@
             name="c5"
             placeholder="C5"
             type="number"
+            inputmode="numeric"
           ></ion-input>
         </ion-item>
 
@@ -160,6 +172,7 @@
             name="c7"
             placeholder="C7"
             type="number"
+            inputmode="numeric"
           ></ion-input>
         </ion-item>
 
@@ -170,6 +183,7 @@
             name="c12"
             placeholder="C12"
             type="number"
+            inputmode="numeric"
           ></ion-input>
         </ion-item>
 
@@ -180,6 +194,7 @@
             name="c13"
             placeholder="C13"
             type="number"
+            inputmode="numeric"
           ></ion-input>
         </ion-item>
 
@@ -190,6 +205,7 @@
             name="c14"
             placeholder="C14"
             type="number"
+            inputmode="numeric"
           ></ion-input>
         </ion-item>
 
@@ -200,6 +216,7 @@
             name="handleBarSpeed"
             placeholder="data.displayType === 'kilometer' ? 'km/h' : 'mile/h'"
             type="number"
+            inputmode="numeric"
           ></ion-input>
           <!--TODO  c4必须等于2，才会起作用        -->
         </ion-item>
@@ -211,6 +228,7 @@
             name="percent"
             placeholder="percentage"
             type="number"
+            inputmode="numeric"
           ></ion-input>
           <!--TODO  c4必须等于4，才会起作用        -->
         </ion-item>
@@ -222,6 +240,7 @@
             name="candidate"
             placeholder="Signal of PAS"
             type="number"
+            inputmode="numeric"
           ></ion-input>
         </ion-item>
 
@@ -256,6 +275,7 @@
 
 <script lang="ts" setup>
 import {
+  IonButtons,
   IonButton,
   IonCol,
   IonContent,
@@ -282,6 +302,7 @@ import { useMessage } from "@/hooks/useMessage";
 import { useSetting } from "@/hooks/useSetting";
 import { useErrorStore } from "@/store/useErrorStore";
 import { storeToRefs } from "pinia";
+import { ref } from "vue";
 
 const settingStore = useSettingStore();
 const errorStore = useErrorStore();
@@ -325,6 +346,26 @@ const restore = () => {
   settingStore.$reset();
   errorStore.$reset();
 };
+// const ionMaxSpeedEl = ref();
+// const onMaxSpeedInput = (ev: any) => {
+//   const value = ev.target!.value;
+//   const filteredValue = value.replace(/[^0-9]+/g, "");
+//   maxSpeed.value = filteredValue;
+//   const inputCmp = ionMaxSpeedEl.value;
+//   if (inputCmp !== undefined) {
+//     inputCmp.$el.value = filteredValue;
+//   }
+// };
+// const ionP1El = ref();
+// const onP1Input = (ev: any) => {
+//   const value = ev.target!.value;
+//   const filteredValue = value.replace(/[^0-9]+/g, "");
+//   p1.value = filteredValue;
+//   const inputCmp = ionP1El.value;
+//   if (inputCmp !== undefined) {
+//     inputCmp.$el.value = filteredValue;
+//   }
+// };
 </script>
 <style lang="scss">
 .page-setting {
