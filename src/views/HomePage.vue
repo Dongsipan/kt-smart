@@ -204,12 +204,14 @@ const dashboard = ref<ComponentPublicInstance | null>(null);
 // })
 
 onIonViewDidEnter(async () => {
+  debugger;
   if (connectedDevice.value.isPaired) {
     await sendMessage();
   } else {
     // 防止蓝牙初始化报错
     setTimeout(async () => {
       await initialBle();
+      await sendMessage();
     }, 1000);
   }
 });

@@ -74,6 +74,7 @@ export function useBluetoothLe() {
         }
       }
     } catch (e) {
+      await presentToast("Please connect your Bluetooth device first");
       console.error("Bluetooth Unavailable");
     }
   };

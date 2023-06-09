@@ -42,11 +42,12 @@ export function useMessage() {
   let singleTimeInterval: any;
   let singleTimeSecond = 0;
   const sendMessage = async () => {
+    if (!connectedDevice.value.deviceId || !connectedDevice.value.isPaired) {
+      await presentToast("Please connect your Bluetooth device first");
+      return;
+    }
     clearInterval(writeInterval);
     writeInterval = setInterval(async () => {
-      if (!connectedDevice.value.deviceId) {
-        await presentToast("Please connect your Bluetooth device first");
-      }
       try {
         console.log(
           chalk.red(
