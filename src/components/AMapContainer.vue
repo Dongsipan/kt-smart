@@ -8,18 +8,23 @@ import { onMounted, ref, shallowRef } from "vue";
 import { useGeoLocation } from "@/hooks/useGeoLocation";
 import { Position } from "@capacitor/geolocation/dist/esm/definitions";
 import { Capacitor } from "@capacitor/core";
+import { useToast } from "@/hooks/useToast";
+import { usePositionStore } from "@/store/usePositionStore";
+import { storeToRefs } from "pinia";
+import LocationStartIcon from "@/assets/icon/location-start.png";
 type LngLat = {
   lng: number;
   lat: number;
 };
 const map = shallowRef<any>(null);
 const { getCurrentPosition } = useGeoLocation();
-const coords = ref<Position>();
+const positionStore = usePositionStore();
+const { currentPosition } = storeToRefs(positionStore);
 const isNative = Capacitor.isNativePlatform();
 let AMapInstance: any;
+
+const { presentToast } = useToast();
 const initMap = async () => {
-  coords.value = await getCurrentPosition();
-  if (!coords.value?.coords) return;
   AMapLoader.load({
     key: "f4470fae2fb3b8aa6b1c753b8cac5c26", // 申请好的Web端开发者Key，首次调用 load 时必填
     version: "2.0", // 指定要加载的 JSAPI 的版本，缺省时默认为 1.4.15
@@ -27,25 +32,50 @@ const initMap = async () => {
   })
     .then((AMap) => {
       AMapInstance = AMap;
-      convertFrom(
-        coords.value!.coords.longitude,
-        coords.value!.coords.latitude,
-        ({ lat, lng }: LngLat) => {
-          coords.value!.coords.longitude = lng;
-          coords.value!.coords.latitude = lat;
-        }
-      );
       map.value = new AMap.Map("container", {
         //设置地图容器id
         viewMode: "3D", //是否为3D地图模式
-        zoom: 14, //初始化地图级别
+        zoom: 16, //初始化地图级别
         mapStyle: "amap://styles/dark", //设置地图的显示样式
-        center: [coords.value!.coords.longitude, coords.value!.coords.latitude], //初始化地图中心点位置
+        center: currentPosition.value.coords
+          ? [
+              currentPosition.value.coords.longitude,
+              currentPosition.value.coords.latitude,
+            ]
+          : undefined, //初始化地图中心点位置
+      });
+      map.value.on("complete", () => {
+        if (currentPosition.value.coords) {
+          addCurrentPositionMarker([
+            currentPosition.value.coords.longitude,
+            currentPosition.value.coords.latitude,
+          ]);
+        }
       });
     })
     .catch((e) => {
       console.log(e);
     });
+};
+
+const addCurrentPositionMarker = (position: number[]) => {
+  // 创建一个 Icon
+  const startIcon = new AMapInstance.Icon({
+    // 图标尺寸
+    size: new AMapInstance.Size(20, 20),
+    // 图标的取图地址
+    image: LocationStartIcon,
+    // 图标所用图片大小
+    imageSize: new AMapInstance.Size(20, 20),
+  });
+
+  // 将 icon 传入 marker
+  const startMarker = new AMapInstance.Marker({
+    position: new AMapInstance.LngLat(position[0], position[1]),
+    icon: startIcon,
+    offset: new AMapInstance.Pixel(-20, -20),
+  });
+  map.value.add([startMarker]);
 };
 const initWebMap = () => {
   AMapLoader.load({
@@ -54,12 +84,17 @@ const initWebMap = () => {
     plugins: [""], // 需要使用的的插件列表，如比例尺'AMap.Scale'等
   })
     .then((AMap) => {
+      AMapInstance = AMap;
       map.value = new AMap.Map("container", {
         //设置地图容器id
         viewMode: "3D", //是否为3D地图模式
-        zoom: 15, //初始化地图级别
+        zoom: 17, //初始化地图级别
         mapStyle: "amap://styles/dark", //设置地图的显示样式
         center: [120.452543, 31.123945], //初始化地图中心点位置
+      });
+
+      map.value.on("complete", () => {
+        addCurrentPositionMarker([120.452543, 31.123945]);
       });
     })
     .catch((e) => {
@@ -68,19 +103,20 @@ const initWebMap = () => {
 };
 
 const setMapToCenter = async () => {
-  coords.value = await getCurrentPosition();
-  if (!coords.value?.coords) return;
+  await getCurrentPosition();
+  await presentToast(JSON.stringify(currentPosition.value.coords));
+  if (!currentPosition.value.coords) return;
   convertFrom(
-    coords.value!.coords.longitude,
-    coords.value!.coords.latitude,
+    currentPosition.value.coords.longitude,
+    currentPosition.value.coords.latitude,
     ({ lat, lng }: LngLat) => {
-      coords.value!.coords.longitude = lng;
-      coords.value!.coords.latitude = lat;
+      currentPosition.value.coords.longitude = lng;
+      currentPosition.value.coords.latitude = lat;
     }
   );
   map.value.setCenter([
-    coords.value!.coords.longitude,
-    coords.value!.coords.latitude,
+    currentPosition.value.coords.longitude,
+    currentPosition.value.coords.latitude,
   ]);
 };
 const convertFrom = (lng: number, lat: number, callback: Function) => {

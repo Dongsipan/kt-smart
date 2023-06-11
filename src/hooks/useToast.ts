@@ -10,6 +10,7 @@ export function useToast() {
       message,
       duration,
       position,
+      layout: "stacked",
     });
 
     await toast.present();

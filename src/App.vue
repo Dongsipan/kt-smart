@@ -9,7 +9,10 @@ import { IonApp, IonRouterOutlet, useBackButton } from "@ionic/vue";
 import { App } from "@capacitor/app";
 import { onMounted, ref } from "vue";
 import { useToast } from "@/hooks/useToast";
+import { usePositionStore } from "@/store/usePositionStore";
+import { useGeoLocation } from "@/hooks/useGeoLocation";
 
+const { getCurrentPosition } = useGeoLocation();
 const { presentToast } = useToast();
 const backButtonPressedTwiceToExit = ref(false);
 const listenBackButton = () => {
@@ -26,7 +29,8 @@ const listenBackButton = () => {
   });
 };
 
-onMounted(() => {
+onMounted(async () => {
   listenBackButton();
+  await getCurrentPosition();
 });
 </script>
