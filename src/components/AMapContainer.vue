@@ -132,6 +132,20 @@ const convertFrom = (lng: number, lat: number, callback: Function) => {
     }
   });
 };
+const convertGpsToAMap = (location: number[]) => {
+  return new Promise((resolve, reject) => {
+    try {
+      AMapInstance.convertFrom(location, "gps", (status: any, result: any) => {
+        if (result.info === "ok") {
+          const lngLats = result.locations; // Array.<LngLat>
+          resolve(lngLats[0]);
+        }
+      });
+    } catch (error) {
+      reject(error);
+    }
+  });
+};
 
 defineExpose({
   setMapToCenter,

@@ -35,7 +35,10 @@
                   fill="none"
                 ></path>
               </svg>
-              <ion-button shape="round" class="dashboard-main__action-trigger"
+              <ion-button
+                @click="startRide"
+                shape="round"
+                class="dashboard-main__action-trigger"
                 >start<br />
                 ride</ion-button
               >
@@ -87,6 +90,7 @@ import { onMounted, ref } from "vue";
 import { useAndroidPermission } from "@/hooks/uesAndroidPermissions";
 import { useGeoLocation } from "@/hooks/useGeoLocation";
 import { useToast } from "@/hooks/useToast";
+import { usePositionStore } from "@/store/usePositionStore";
 
 const { requestLocationPermission } = useAndroidPermission();
 const mapRef = ref(null) as any;
@@ -96,6 +100,27 @@ const { presentToast } = useToast();
 const setMapToCenter = () => {
   mapRef.value.setMapToCenter();
 };
+
+const currentTrack = ref<number[][]>([]);
+const currentSpeed = ref<number | null>(null);
+const currentAltitude = ref<number | null>(null);
+
+const startRide = () => {
+  watchCurrentPosition(async (location) => {
+    await presentToast(JSON.stringify(location));
+    const { longitude, latitude, altitude, speed } = location!.coords;
+    currentSpeed.value = speed;
+    currentAltitude.value = altitude;
+    const positions = await mapRef.value.convertGpsToAMap([
+      longitude,
+      latitude,
+    ]);
+    currentTrack.value.push(positions);
+    setPolyline();
+  });
+};
+
+const setPolyline = () => {};
 
 // onMounted(() => {
 //   initCycle();
