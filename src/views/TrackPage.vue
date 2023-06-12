@@ -23,25 +23,35 @@
             </div>
             <div class="dashboard-main__action">
               <svg
-                xmlns="http://www.w3.org/2000/svg"
+                id="dashboard__action-outer"
                 height="150px"
                 width="150px"
-                id="dashboard__action-outer"
+                xmlns="http://www.w3.org/2000/svg"
               >
                 <path
                   d="M75 0.5 A73.5 73.5 0 1 0 147.38 86.76"
+                  fill="none"
                   stroke="white"
                   stroke-width="0.5"
-                  fill="none"
                 ></path>
               </svg>
               <ion-button
-                @click="startRide"
-                shape="round"
+                v-if="!isRiding"
                 class="dashboard-main__action-trigger"
-                >start<br />
-                ride</ion-button
-              >
+                shape="round"
+                @click="startRide"
+                >Start<br />
+                Ride
+              </ion-button>
+              <ion-button
+                v-else
+                class="dashboard-main__action-trigger"
+                color="secondary"
+                shape="round"
+                @click="stopRide"
+                >Stop<br />
+                Ride
+              </ion-button>
               <div class="dashboard-main__data">
                 <div>mileage</div>
                 <div>--</div>
@@ -74,54 +84,60 @@
 
 <script lang="ts" setup>
 import {
-  IonButtons,
   IonButton,
+  IonButtons,
   IonContent,
+  IonFooter,
   IonHeader,
   IonIcon,
   IonPage,
   IonTitle,
   IonToolbar,
-  IonFooter,
 } from "@ionic/vue";
 import { locateOutline } from "ionicons/icons";
 import AMapContainer from "@/components/AMapContainer.vue";
-import { onMounted, ref } from "vue";
-import { useAndroidPermission } from "@/hooks/uesAndroidPermissions";
+import { ref } from "vue";
 import { useGeoLocation } from "@/hooks/useGeoLocation";
 import { useToast } from "@/hooks/useToast";
-import { usePositionStore } from "@/store/usePositionStore";
+import GPSKalmanFilter from "@/services/GPSKalmanFilter";
 
-const { requestLocationPermission } = useAndroidPermission();
 const mapRef = ref(null) as any;
 
-const { watchCurrentPosition } = useGeoLocation();
+const { watchCurrentPosition, clearWatch } = useGeoLocation();
 const { presentToast } = useToast();
 const setMapToCenter = () => {
   mapRef.value.setMapToCenter();
 };
-
+const kalmanFilter = new GPSKalmanFilter();
 const currentTrack = ref<number[][]>([]);
 const currentSpeed = ref<number | null>(null);
 const currentAltitude = ref<number | null>(null);
 
+const isRiding = ref(false);
+
 const startRide = () => {
+  isRiding.value = true;
   watchCurrentPosition(async (location) => {
     await presentToast(JSON.stringify(location));
-    const { longitude, latitude, altitude, speed } = location!.coords;
+    const { longitude, latitude, altitude, speed, accuracy } = location!.coords;
     currentSpeed.value = speed;
     currentAltitude.value = altitude;
-    const positions = await mapRef.value.convertGpsToAMap([
+    const lnglat = kalmanFilter.filter(
       longitude,
       latitude,
-    ]);
+      accuracy,
+      location!.timestamp
+    );
+    const positions = await mapRef.value.convertGpsToAMap(lnglat);
     currentTrack.value.push(positions);
-    setPolyline();
+    mapRef.value.addPointToPath(longitude, latitude);
   });
 };
 
-const setPolyline = () => {};
-
+const stopRide = () => {
+  isRiding.value = false;
+  clearWatch();
+};
 // onMounted(() => {
 //   initCycle();
 // });
@@ -187,6 +203,7 @@ const createSVGPath = (
 ion-content {
   position: relative;
 }
+
 .dashboard {
   display: flex;
   flex-direction: column;
@@ -196,6 +213,7 @@ ion-content {
   background-color: transparent;
   backdrop-filter: blur(4px);
   color: #fff;
+
   .dashboard-main {
     display: flex;
     justify-content: space-around;
@@ -204,10 +222,12 @@ ion-content {
       position: relative;
       width: 150px;
       height: 150px;
+
       #dashboard__action-outer {
         position: absolute;
         transform: rotate(130deg);
       }
+
       .dashboard-main__action-trigger {
         position: relative;
         width: 80px;
@@ -216,20 +236,24 @@ ion-content {
         transform: translate(36px, 8px);
       }
     }
+
     .dashboard-main__data {
       display: flex;
       flex-direction: column;
       align-items: center;
       margin-top: 1rem;
+
       &.dashboard-main__data--outer {
         margin-top: 2.5rem;
       }
     }
   }
+
   .dashboard-info {
     height: 50px;
     display: flex;
     justify-content: space-around;
+
     .dashboard-info__data {
       display: flex;
       flex-direction: column;
@@ -237,6 +261,7 @@ ion-content {
     }
   }
 }
+
 ion-toolbar.dashboard-toolbar {
   --background: transparent;
   --color: white;

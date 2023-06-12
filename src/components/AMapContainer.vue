@@ -4,19 +4,20 @@
 
 <script lang="ts" setup>
 import AMapLoader from "@amap/amap-jsapi-loader";
-import { onMounted, ref, shallowRef } from "vue";
+import { onMounted, shallowRef } from "vue";
 import { useGeoLocation } from "@/hooks/useGeoLocation";
-import { Position } from "@capacitor/geolocation/dist/esm/definitions";
 import { Capacitor } from "@capacitor/core";
 import { useToast } from "@/hooks/useToast";
 import { usePositionStore } from "@/store/usePositionStore";
 import { storeToRefs } from "pinia";
 import LocationStartIcon from "@/assets/icon/location-start.png";
+
 type LngLat = {
   lng: number;
   lat: number;
 };
 const map = shallowRef<any>(null);
+const path = shallowRef<any>(null);
 const { getCurrentPosition } = useGeoLocation();
 const positionStore = usePositionStore();
 const { currentPosition } = storeToRefs(positionStore);
@@ -96,6 +97,15 @@ const initWebMap = () => {
       map.value.on("complete", () => {
         addCurrentPositionMarker([120.452543, 31.123945]);
       });
+
+      // 绘制轨迹
+      path.value = new AMapInstance.Polyline({
+        map: map,
+        path: [], // 初始为空数组
+        strokeColor: "#3366FF", // 线条颜色
+        strokeOpacity: 1, // 线条透明度
+        strokeWeight: 5, // 线条宽度
+      });
     })
     .catch((e) => {
       console.log(e);
@@ -147,8 +157,18 @@ const convertGpsToAMap = (location: number[]) => {
   });
 };
 
+// 将新经纬度添加到轨迹中
+function addPointToPath(latitude: number, longitude: number) {
+  // 将坐标转换为AMap.LngLat对象
+  const point = new AMapInstance.LngLat(longitude, latitude);
+  path.getPath().push(point);
+  path.setPath(path.getPath());
+}
+
 defineExpose({
   setMapToCenter,
+  addPointToPath,
+  convertGpsToAMap,
 });
 onMounted(() => {
   if (isNative) {

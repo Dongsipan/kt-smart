@@ -71,7 +71,7 @@ export function useMessage() {
         await presentToast("sendMessage error:" + JSON.stringify(error));
         console.log(chalk.red(`send message error: ${JSON.stringify(error)}`));
         clearInterval(writeInterval);
-        updateConnectedDevicePairedStatus(false);
+        // updateConnectedDevicePairedStatus(false);
       }
     }, 1000);
     // if (!connectedDevice.value.deviceId) {

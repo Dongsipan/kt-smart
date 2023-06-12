@@ -101,6 +101,7 @@ export function useBluetoothLe() {
   const connectBle = async (device: Device, isNewDevice = true) => {
     try {
       if (isNative) {
+        await BleClient.disconnect(device.deviceId);
         await BleClient.connect(device.deviceId, (deviceId) =>
           onDisconnect(deviceId)
         );
