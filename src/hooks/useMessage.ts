@@ -35,12 +35,22 @@ export function useMessage() {
   } = useDashboardStore();
   const { connectedDevice } = storeToRefs(useBleStore());
   const { updateConnectedDevicePairedStatus } = useBleStore();
-  const { write, startNotification, stopNotification } = useBluetoothLe();
+  const {
+    write,
+    startNotification,
+    stopNotification,
+    initialBle,
+    disConnectBle,
+  } = useBluetoothLe();
   const { presentToast } = useToast();
   const { setErrorCode } = useErrorStore();
   let writeInterval: any;
   let singleTimeInterval: any;
   let singleTimeSecond = 0;
+  const exitApp = async () => {
+    await stopSendMessage();
+    await disConnectBle(connectedDevice.value, false);
+  };
   const sendMessage = async () => {
     if (!connectedDevice.value.deviceId || !connectedDevice.value.isPaired) {
       await presentToast("Please connect your Bluetooth device first");
@@ -61,19 +71,26 @@ export function useMessage() {
           numberToUUID(CharacteristicUUID),
           numbersToDataView(writeData.value)
         );
-        await startNotification(
-          connectedDevice.value.deviceId,
-          numberToUUID(ServiceUUID),
-          numberToUUID(CharacteristicUUID),
-          onNotification
-        );
+        // await startNotification(
+        //   connectedDevice.value.deviceId,
+        //   numberToUUID(ServiceUUID),
+        //   numberToUUID(CharacteristicUUID),
+        //   onNotification
+        // );
       } catch (error) {
-        await presentToast("sendMessage error:" + JSON.stringify(error));
+        // await presentToast("sendMessage error:" + JSON.stringify(error));
         console.log(chalk.red(`send message error: ${JSON.stringify(error)}`));
         clearInterval(writeInterval);
+        await initialBle();
         // updateConnectedDevicePairedStatus(false);
       }
-    }, 1000);
+    }, 500);
+    await startNotification(
+      connectedDevice.value.deviceId,
+      numberToUUID(ServiceUUID),
+      numberToUUID(CharacteristicUUID),
+      onNotification
+    );
     // if (!connectedDevice.value.deviceId) {
     //     await stopSendMessage()
     //     await presentToast('Bluetooth device not connected')
@@ -204,5 +221,6 @@ export function useMessage() {
     checkError,
     getAssistance,
     getSingleDistance,
+    exitApp,
   };
 }

@@ -59,24 +59,26 @@ export function useBluetoothLe() {
   }
 
   const initialBle = async () => {
-    try {
-      await BleClient.initialize();
-      const isBtEnabled = await BleClient.isEnabled();
-      if (!isBtEnabled) {
-        await presentToast("BT not enabled, or not supported!");
-      } else {
-        if (!connectedDevice.isPaired) {
-          // if ()
+    return new Promise(async (resolve, reject) => {
+      try {
+        await BleClient.initialize();
+        const isBtEnabled = await BleClient.isEnabled();
+        if (!isBtEnabled) {
+          await presentToast("BT not enabled, or not supported!");
+          reject();
+        } else {
           if (isPlatform("ios")) {
             await BleClient.getDevices([connectedDevice.deviceId]);
           }
           await connectBle(connectedDevice, false);
+          resolve(true);
         }
+      } catch (e) {
+        await presentToast("Please connect your Bluetooth device first");
+        reject();
+        console.error("Bluetooth Unavailable");
       }
-    } catch (e) {
-      await presentToast("Please connect your Bluetooth device first");
-      console.error("Bluetooth Unavailable");
-    }
+    });
   };
   /*TODO 自动连接失败处理，给提示或者不抛错
   * ⚡️  WebView loaded
@@ -101,7 +103,6 @@ export function useBluetoothLe() {
   const connectBle = async (device: Device, isNewDevice = true) => {
     try {
       if (isNative) {
-        await BleClient.disconnect(device.deviceId);
         await BleClient.connect(device.deviceId, (deviceId) =>
           onDisconnect(deviceId)
         );
@@ -132,6 +133,7 @@ export function useBluetoothLe() {
   const disConnectBle = async (device: Device, isDeleteDevice: boolean) => {
     try {
       if (isNative) {
+        await BleClient.initialize();
         await BleClient.disconnect(device.deviceId);
       }
       if (isDeleteDevice) {

@@ -151,7 +151,7 @@ import {
   onIonViewDidEnter,
 } from "@ionic/vue";
 import { bluetooth } from "ionicons/icons";
-import { ComponentPublicInstance, computed, ref } from "vue";
+import { ComponentPublicInstance, computed, onMounted, ref } from "vue";
 import DashboardComponent from "@/components/DashboardComponent.vue";
 import { useDashboardStore } from "@/store/useDashboardStore";
 import { useSetting } from "@/hooks/useSetting";
@@ -161,6 +161,7 @@ import { storeToRefs } from "pinia";
 import { useMessage } from "@/hooks/useMessage";
 import { useBluetoothLe } from "@/hooks/useBluetooth-le";
 import { useSettingStore } from "@/store/useSettingStore";
+import { useExitApp } from "@/hooks/useExitApp";
 // import {dataViewToNumbers, hexStringToDataView} from "@capacitor-community/bluetooth-le";
 
 const dashboardStore = useDashboardStore();
@@ -187,7 +188,7 @@ const { changeGearPosition, changeLightStatus } = useSetting();
 const { sendMessage, stopSendMessage, getAssistance } = useMessage();
 
 const router = useRouter();
-
+const { exitListener } = useExitApp();
 const dashboard = ref<ComponentPublicInstance | null>(null);
 
 // onMounted(() => {
@@ -203,14 +204,19 @@ const dashboard = ref<ComponentPublicInstance | null>(null);
 //
 // })
 
+onMounted(() => {
+  exitListener();
+  initialBle().then(() => {
+    setTimeout(async () => {
+      await sendMessage();
+    }, 1000);
+  });
+});
+
 onIonViewDidEnter(async () => {
-  debugger;
   if (connectedDevice.value.isPaired) {
-    await sendMessage();
-  } else {
     // 防止蓝牙初始化报错
     setTimeout(async () => {
-      await initialBle();
       await sendMessage();
     }, 1000);
   }

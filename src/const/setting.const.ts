@@ -4,7 +4,7 @@ export const DefaultSetting = {
   maxSpeed: 72,
   dimension: DefaultSize,
   p1: 88,
-  p2: 6,
+  p2: 1, // 6
   p3: 1,
   p4: 0,
   p5: 15,

@@ -39,6 +39,7 @@ export function useSetting() {
 
   /*设置最大速度*/
   const setMaxSpeed = () => {
+    const speed = Number(maxSpeed.value) - 10;
     const dimensionMode = getDimension();
     let expand = 0x0;
     let secondData = 0x0;
@@ -48,10 +49,10 @@ export function useSetting() {
     } else {
       expand = 0x0;
     }
-    if (maxSpeed.value < 32) {
+    if (speed < 32) {
       limitSpeed = 0x0;
-      const speed: number = maxSpeed.value << 3;
-      secondData = Int2Bytes(speed + dimensionMode.dimension);
+      const speedBit: number = speed << 3;
+      secondData = Int2Bytes(speedBit + dimensionMode.dimension);
       writeData.value[2] = secondData;
       writeData.value[4] =
         Int2Bytes(p2.value) +
@@ -60,14 +61,14 @@ export function useSetting() {
         limitSpeed +
         expand; // p2+p3+p4+限速+轮径拓展
     }
-    if (maxSpeed.value >= 32 && maxSpeed.value < 64) {
+    if (speed >= 32 && speed < 64) {
       limitSpeed = 0x20;
-      const speedDiff = maxSpeed.value - 32;
+      const speedDiff = speed - 32;
       if (speedDiff === 0) {
         secondData = 0x5;
       } else {
-        const speed: number = speedDiff << 3;
-        secondData = Int2Bytes(speed + dimension.value);
+        const speedBit: number = speedDiff << 3;
+        secondData = Int2Bytes(speedBit + dimension.value);
       }
       writeData.value[2] = secondData;
       writeData.value[4] =
@@ -250,6 +251,7 @@ export function useSetting() {
     return arrBytes;
   };
   const updateSetting = () => {
+    debugger;
     setP1();
     setP2();
     setP5();

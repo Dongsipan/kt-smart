@@ -23,9 +23,11 @@ import "@ionic/vue/css/display.css";
 
 /* Theme variables */
 import "./theme/variables.css";
+import { ScreenOrientation } from "@capacitor/screen-orientation";
 
 const app = createApp(App).use(IonicVue).use(router).use(pinia);
 
 router.isReady().then(() => {
   app.mount("#app");
+  ScreenOrientation.lock({ orientation: "portrait-primary" });
 });
