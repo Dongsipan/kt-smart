@@ -36,7 +36,7 @@
                 ></path>
               </svg>
               <ion-button
-                v-if="!isRiding"
+                v-show="!isRiding"
                 class="dashboard-main__action-trigger"
                 shape="round"
                 @click="startRide"
@@ -44,11 +44,11 @@
                 Ride
               </ion-button>
               <ion-button
-                v-else
+                v-show="isRiding"
+                ref="stopButtonRef"
                 class="dashboard-main__action-trigger"
                 color="secondary"
                 shape="round"
-                @click="stopRide"
                 >Stop<br />
                 Ride
               </ion-button>
@@ -96,7 +96,7 @@ import {
 } from "@ionic/vue";
 import { locateOutline } from "ionicons/icons";
 import AMapContainer from "@/components/AMapContainer.vue";
-import { ref } from "vue";
+import { onMounted, ref } from "vue";
 import { useGeoLocation } from "@/hooks/useGeoLocation";
 import { useToast } from "@/hooks/useToast";
 import GPSKalmanFilter from "@/services/GPSKalmanFilter";
@@ -133,14 +133,57 @@ const startRide = () => {
     mapRef.value.addPointToPath(longitude, latitude);
   });
 };
-
+/*
+ * {"timestamp":1686647786114,"coords":{"altitude":32.022853851318359,"heading":-1,"latitude":31.298159747161719,"altitudeAccuracy":10.407867431640625,"longitude":120.54356498135141,"accuracy":46,"speed":-1}}
+ * */
 const stopRide = () => {
   isRiding.value = false;
   clearWatch();
 };
-// onMounted(() => {
-//   initCycle();
-// });
+const finishRide = () => {
+  stopRide();
+};
+
+const stopButtonRef = ref<any>(null);
+const addLongPressListener = (
+  target: any,
+  callback: (isLongPress: boolean) => void
+) => {
+  let timer: any; // 初始化timer
+
+  target.ontouchstart = () => {
+    timer = 0; // 重置timer
+    timer = setTimeout(() => {
+      callback(true);
+      timer = 0;
+    }, 500); // 超时器回调能成功执行，说明是长按
+  };
+
+  target.ontouchmove = () => {
+    clearTimeout(timer); // 如果来到这里，说明是滑动，清除超时器，不执行回调
+    timer = 0;
+  };
+
+  target.ontouchend = () => {
+    // 到这里如果timer有值，说明此触摸时间不足380ms，是点击，清除超时器，不执行回调
+    if (timer) {
+      clearTimeout(timer);
+      callback(false);
+    }
+  };
+};
+onMounted(() => {
+  debugger;
+  console.log(stopButtonRef.value);
+  addLongPressListener(stopButtonRef.value.$el, (isLongPress) => {
+    if (isLongPress) {
+      finishRide();
+    } else {
+      stopRide();
+    }
+    console.log("long press");
+  });
+});
 
 // onIonViewDidEnter(() => {
 //   requestLocationPermission();
