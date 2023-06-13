@@ -24,7 +24,7 @@ export function useMessage() {
   const settingStore = useSettingStore();
   const { getDisplayType } = storeToRefs(settingStore);
   const dashboardStore = useDashboardStore();
-  const { writeData } = useSetting();
+  const { writeData, updateSetting } = useSetting();
   const { dimension, candidateParam } = storeToRefs(useSettingStore());
   const { speed, singleMileage, totalMileage } = storeToRefs(dashboardStore);
   const {
@@ -52,6 +52,7 @@ export function useMessage() {
       await presentToast("Please connect your Bluetooth device first");
       return;
     }
+    updateSetting();
     clearInterval(writeInterval);
     writeInterval = setInterval(async () => {
       try {

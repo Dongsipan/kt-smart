@@ -102,6 +102,7 @@ import {
   IonPage,
   IonTitle,
   IonToolbar,
+  IonSpinner,
 } from "@ionic/vue";
 import { bluetooth, informationCircle, refresh, trash } from "ionicons/icons";
 import { Device, useBleStore } from "@/store/useBleStore";

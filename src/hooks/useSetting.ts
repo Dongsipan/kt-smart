@@ -2,7 +2,7 @@ import { useSettingStore } from "@/store/useSettingStore";
 import { useDashboardStore } from "@/store/useDashboardStore";
 import { GearDirection, LightDirection } from "@/const/bike.const";
 import { WriteData } from "@/const/ble.const";
-import { ref } from "vue";
+import { onMounted, ref } from "vue";
 import { storeToRefs } from "pinia";
 
 export function useSetting() {
@@ -254,8 +254,13 @@ export function useSetting() {
     setPercent();
     setHandlebar();
     setMaxSpeed();
+
     // setP3() setP4() => 引用 setMaxSpeed
   };
+
+  onMounted(() => {
+    updateSetting();
+  });
   return {
     changeGearPosition,
     changeLightStatus,

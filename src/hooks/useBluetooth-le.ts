@@ -100,13 +100,16 @@ export function useBluetoothLe() {
     ⚡️  [error] - {"errorMessage":"Connection timeout","message":"Connection timeout"}
     ⚡️  [error] - connectToDevice {"errorMessage":"Connection timeout"}
   * */
-
+  let retryNum = 3;
   const connectBle = async (device: Device, isNewDevice = true) => {
     try {
       debugger;
       // updateConnectedDevicePairingStatus(true);
       if (device.deviceId !== connectedDevice.deviceId) {
-        await disConnectBle(connectedDevice, false);
+        if (connectedDevice.isPaired) {
+          await disConnectBle(connectedDevice, false);
+        }
+
         updateConnectedDevicePairedStatus(false);
       }
       device.isPairing = true;
@@ -122,13 +125,17 @@ export function useBluetoothLe() {
       }
       setTimeout(() => {
         updateConnectedDevicePairedStatus(true);
-      }, 2000);
+      }, 1000);
     } catch (error) {
-      updateConnectedDevicePairedStatus(false);
-      console.error("connectToDevice", error);
-      await presentToast(
-        "Bluetooth device connection failed, please try again"
-      );
+      if (retryNum > 0) {
+        retryNum--;
+        await connectBle(device, isNewDevice);
+      } else {
+        updateConnectedDevicePairedStatus(false);
+        await presentToast(
+          "Bluetooth device connection failed, please try again"
+        );
+      }
     }
   };
   // ⚡️  To Native ->  BluetoothLe addListener 86768910
@@ -154,7 +161,6 @@ export function useBluetoothLe() {
       }
     } catch (error) {
       console.error("disconnectFromDevice", error);
-      await presentToast(JSON.stringify(error));
     }
   };
   const onDisconnect = (deviceId: string) => {

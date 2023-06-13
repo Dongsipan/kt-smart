@@ -183,7 +183,7 @@ const {
 const { connectedDevice } = storeToRefs(bleStore);
 
 const { initialBle, disConnectBle } = useBluetoothLe();
-const { changeGearPosition, changeLightStatus, updateSetting } = useSetting();
+const { changeGearPosition, changeLightStatus } = useSetting();
 
 const { sendMessage, stopSendMessage, getAssistance } = useMessage();
 
@@ -206,7 +206,7 @@ const dashboard = ref<ComponentPublicInstance | null>(null);
 
 onMounted(() => {
   exitListener();
-  updateSetting();
+  changeGearPosition(getGearPosition.value);
   initialBle().then(() => {
     setTimeout(async () => {
       await sendMessage();
