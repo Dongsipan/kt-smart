@@ -5,7 +5,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
 	<key>CFBundleDisplayName</key>
-        <string>kt_smart_bicycle</string>
+	<string>KT Smart Bicycle</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -45,15 +45,15 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<true/>
-  <key>NSBluetoothAlwaysUsageDescription</key>
-  <string>Uses Bluetooth to connect and interact with peripheral BLE devices.</string>
-  <key>UIBackgroundModes</key>
-  <array>
-      <string>bluetooth-central</string>
-  </array>
-  <key>NSLocationAlwaysUsageDescription</key>
-  <string>是否允许在使用过程中获取您的定位信息用于展示您当前位置？</string>
-  <key>NSLocationWhenInUseUsageDescription</key>
-  <string>是否允许在使用过程中获取您的定位信息用于展示您当前位置？</string>
+	<key>NSBluetoothAlwaysUsageDescription</key>
+	<string>Uses Bluetooth to connect and interact with peripheral BLE devices.</string>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>bluetooth-central</string>
+	</array>
+	<key>NSLocationAlwaysUsageDescription</key>
+	<string>是否允许在使用过程中获取您的定位信息用于展示您当前位置？</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>是否允许在使用过程中获取您的定位信息用于展示您当前位置？</string>
 </dict>
 </plist>

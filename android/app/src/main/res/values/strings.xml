@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">kt_smart_bicycle</string>
-    <string name="title_activity_main">kt_smart_bicycle</string>
+    <string name="app_name">KT Smart Bicycle</string>
+    <string name="title_activity_main">KT Smart Bicycle</string>
     <string name="package_name">dongsipan.smartbicycle</string>
     <string name="custom_url_scheme">dongsipan.smartbicycle</string>
 </resources>

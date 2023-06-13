@@ -82,15 +82,7 @@ export function useSetting() {
     // code = 0 轮径不需要扩展  code = 1 需要扩展
     // maxSpeed < 31 限速不需要扩展
   };
-  // const setDimension = () => {
-  //   debugger
-  //   let dimension = this.getDimension();
-  //   let p2: any = "0x" + (this.P2.toString(16)).toUpperCase();
-  //   let p3: any = "0x" + (this.P3.toString(16)).toUpperCase();
-  //   let p4: any = "0x" + (this.P4.toString(16)).toUpperCase();
-  //   let maxspeed = this.SETTINGS_MAX_SPEED - 10;
-  //   this.setData(dimension, p2, p3, p4, maxspeed);
-  // }
+
   /*获取不同尺寸轮径的数据*/
   const getDimension = () => {
     if (dimension.value < 10) {
