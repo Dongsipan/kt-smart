@@ -41,15 +41,24 @@ export const useBleStore = defineStore("ble", {
       this.setPairedDevices(payload);
       this.removePairedDeviceFromAvailableDevices(payload);
     },
+    updateConnectedDevice(payload: Device) {
+      this.connectedDevice = payload;
+      this.pairedDevices.forEach((item) => {
+        item.isPaired = false;
+      });
+    },
     updateConnectedDevicePairedStatus(payload: boolean) {
       this.connectedDevice.isPaired = payload;
+      this.connectedDevice.isPairing = false;
       const index = this.pairedDevices.findIndex(
         (item) => item.deviceId === this.connectedDevice.deviceId
       );
       if (index > -1) {
         this.pairedDevices[index].isPaired = payload;
+        this.pairedDevices[index].isPairing = false;
       }
     },
+
     removeConnectedDevice(payload: Device) {
       this.connectedDevice = {} as Device;
       this.removePairedDevice(payload);

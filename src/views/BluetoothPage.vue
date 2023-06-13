@@ -29,7 +29,12 @@
               ></ion-icon>
               <ion-icon v-else slot="start" :icon="bluetooth"></ion-icon>
               <ion-label>{{ item.name }}</ion-label>
-              <ion-note slot="end"
+              <ion-spinner
+                v-if="item.isPairing"
+                slot="end"
+                name="lines-small"
+              ></ion-spinner>
+              <ion-note v-if="!item.isPairing" slot="end"
                 >{{ item.isPaired ? "Connected" : "Not Connected" }}
               </ion-note>
               <ion-icon
@@ -131,21 +136,19 @@ const openDeviceInfo = (device: Device) => {
 };
 
 const selectDevice = async (device: Device) => {
-  if (isPairing.value) return;
+  if (device.isPairing) return;
   try {
-    isPairing.value = true;
     await connectBle(device);
-    isPairing.value = false;
   } catch (e) {
     console.log(e);
   }
 };
-const changePairedStatus = (device: Device) => {
+const changePairedStatus = async (device: Device) => {
   if (device.isPaired) {
     // 确认是否断开连接
     setOpenAlert(true);
   } else {
-    connectBle(device, false);
+    await connectBle(device, false);
   }
 };
 const deletePairedDevice = (device: Device) => {

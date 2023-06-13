@@ -23,6 +23,7 @@ export function useBluetoothLe() {
     setConnectedDevice,
     removeConnectedDevice,
     updateConnectedDevicePairedStatus,
+    updateConnectedDevice,
   } = useBleStore();
   const scanning = ref(false);
   const isNative = Capacitor.isNativePlatform();
@@ -102,16 +103,26 @@ export function useBluetoothLe() {
 
   const connectBle = async (device: Device, isNewDevice = true) => {
     try {
+      debugger;
+      // updateConnectedDevicePairingStatus(true);
+      if (device.deviceId !== connectedDevice.deviceId) {
+        await disConnectBle(connectedDevice, false);
+        updateConnectedDevicePairedStatus(false);
+      }
+      device.isPairing = true;
+      if (isNewDevice) {
+        setConnectedDevice({ ...device, isPaired: true });
+      } else {
+        updateConnectedDevice(device);
+      }
       if (isNative) {
         await BleClient.connect(device.deviceId, (deviceId) =>
           onDisconnect(deviceId)
         );
       }
-      if (isNewDevice) {
-        setConnectedDevice({ ...device, isPaired: true });
-      } else {
+      setTimeout(() => {
         updateConnectedDevicePairedStatus(true);
-      }
+      }, 2000);
     } catch (error) {
       updateConnectedDevicePairedStatus(false);
       console.error("connectToDevice", error);

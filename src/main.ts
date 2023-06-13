@@ -27,7 +27,7 @@ import { ScreenOrientation } from "@capacitor/screen-orientation";
 
 ScreenOrientation.lock({ orientation: "portrait-primary" });
 
-const app = createApp(App).use(IonicVue).use(router).use(pinia);
+const app = createApp(App).use(pinia).use(IonicVue).use(router);
 
 router.isReady().then(() => {
   app.mount("#app");

@@ -1,8 +1,6 @@
 import { defineStore, storeToRefs } from "pinia";
 import { useSettingStore } from "@/store/useSettingStore";
 
-const { getPosition, getDisplayType } = storeToRefs(useSettingStore());
-
 export const useDashboardStore = defineStore("dashboard", {
   state: () => ({
     electricQuantity: 0,
@@ -18,6 +16,7 @@ export const useDashboardStore = defineStore("dashboard", {
     getElectricQuantity: (state) => state.electricQuantity,
     getSpeed: (state) => state.speed,
     getGearPosition: (state) => {
+      const { getPosition } = storeToRefs(useSettingStore());
       return getPosition.value === 8
         ? state.gearPosition === -1
           ? 5

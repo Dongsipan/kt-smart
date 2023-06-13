@@ -15,7 +15,10 @@
     <ion-content>
       <ion-card>
         <ion-card-header>
-          <ion-card-title>{{ device.name }}</ion-card-title>
+          <ion-card-title class="device-modal__title">
+            {{ device.name }}
+            <ion-icon id="present-alert" :icon="createOutline"></ion-icon>
+          </ion-card-title>
           <ion-card-subtitle>Device Information</ion-card-subtitle>
         </ion-card-header>
         <ion-button
@@ -45,6 +48,12 @@
       sub-header="Do you want to disconnect the Bluetooth!"
       @didDismiss="setOpenAlert(false)"
     ></ion-alert>
+    <ion-alert
+      trigger="present-alert"
+      header="Please enter your device name"
+      :buttons="alertEditButtons"
+      :inputs="alertInputs"
+    ></ion-alert>
   </ion-modal>
 </template>
 
@@ -64,10 +73,13 @@ import {
   IonRow,
   IonTitle,
   IonToolbar,
+  IonIcon,
 } from "@ionic/vue";
-import { ref } from "vue";
+import { onMounted, ref } from "vue";
 import { Device } from "@/store/useBleStore";
 import { useBluetoothLe } from "@/hooks/useBluetooth-le";
+import { createOutline } from "ionicons/icons";
+import { useMessage } from "@/hooks/useMessage";
 
 defineProps({
   presentingElement: HTMLElement,
@@ -120,11 +132,43 @@ const alertButtons = [
   {
     text: "Okay",
     handler: () => {
-      debugger;
       disConnectBle(device.value, false);
     },
   },
 ];
+
+const alertInputs = [
+  {
+    placeholder: "Nickname (max 10 characters)",
+    attributes: {
+      maxlength: 10,
+    },
+  },
+];
+const alertEditButtons = ["Cancel"] as any;
+
+onMounted(() => {
+  const { setBLEName } = useMessage();
+  const save = {
+    text: "Save",
+    handler: async (res: any) => {
+      debugger;
+      const nickname = res[0];
+      try {
+        await setBLEName(nickname);
+      } catch (e) {
+        console.log(e);
+      }
+    },
+  };
+  alertEditButtons.push(save);
+});
 </script>
 
-<style scoped></style>
+<style scoped>
+.device-modal__title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+</style>

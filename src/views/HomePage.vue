@@ -164,8 +164,8 @@ import { useSettingStore } from "@/store/useSettingStore";
 import { useExitApp } from "@/hooks/useExitApp";
 // import {dataViewToNumbers, hexStringToDataView} from "@capacitor-community/bluetooth-le";
 
-const dashboardStore = useDashboardStore();
 const bleStore = useBleStore();
+const dashboardStore = useDashboardStore();
 const settingStore = useSettingStore();
 const { getDisplayType, getDisplayUnit } = storeToRefs(settingStore);
 const {
@@ -237,11 +237,12 @@ const alertButtons = [
   },
 ];
 const toBluetoothPage = () => {
-  if (connectedDevice.value.isPaired) {
-    setOpenAlert(true);
-  } else {
-    router.push({ name: "bluetooth" });
-  }
+  // if (connectedDevice.value.isPaired) {
+  //   setOpenAlert(true);
+  // } else {
+  //   router.push({ name: "bluetooth" });
+  // }
+  router.push({ name: "bluetooth" });
 };
 
 const addSpeed = () => {

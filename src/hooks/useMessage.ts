@@ -7,6 +7,7 @@ import { useBleStore } from "@/store/useBleStore";
 import { storeToRefs } from "pinia";
 import chalk from "chalk";
 import {
+  BleClient,
   dataViewToHexString,
   dataViewToNumbers,
   numbersToDataView,
@@ -15,6 +16,7 @@ import {
 import { useToast } from "@/hooks/useToast";
 import { DimensionList } from "@/const/bike.const";
 import { useErrorStore } from "@/store/useErrorStore";
+import { hexStringToDataView } from "@capacitor-community/bluetooth-le/dist/esm/conversion";
 
 chalk.level = 1;
 
@@ -34,14 +36,8 @@ export function useMessage() {
     setAssistance,
   } = useDashboardStore();
   const { connectedDevice } = storeToRefs(useBleStore());
-  const { updateConnectedDevicePairedStatus } = useBleStore();
-  const {
-    write,
-    startNotification,
-    stopNotification,
-    initialBle,
-    disConnectBle,
-  } = useBluetoothLe();
+  const { write, startNotification, stopNotification, disConnectBle } =
+    useBluetoothLe();
   const { presentToast } = useToast();
   const { setErrorCode } = useErrorStore();
   let writeInterval: any;
@@ -81,7 +77,7 @@ export function useMessage() {
         // await presentToast("sendMessage error:" + JSON.stringify(error));
         console.log(chalk.red(`send message error: ${JSON.stringify(error)}`));
         clearInterval(writeInterval);
-        await initialBle();
+        // await initialBle();
         // updateConnectedDevicePairedStatus(false);
       }
     }, 500);
@@ -122,6 +118,29 @@ export function useMessage() {
     getSingleDistance();
     getAssistance(message);
     checkError(message);
+  };
+  const setBLEName = async (nickname: string) => {
+    const command = `AT+NAME=${nickname}`;
+    const bytes = new TextEncoder().encode(command);
+    const dataView = new DataView(bytes.buffer);
+    const hex = dataViewToHexString(dataView) + " d a";
+    const hexToCommand = hexStringToDataView(hex);
+    debugger;
+    await write(
+      connectedDevice.value.deviceId,
+      numberToUUID(ServiceUUID),
+      numberToUUID(CharacteristicUUID),
+      hexToCommand
+    );
+    await BleClient.startNotifications(
+      connectedDevice.value.deviceId,
+      numberToUUID(ServiceUUID),
+      numberToUUID(CharacteristicUUID),
+      (result) => {
+        console.log("rename str", dataViewToHexString(result));
+        console.log("rename", dataViewToNumbers(result));
+      }
+    );
   };
   // 读取电量
   const getBattery = (message: number[]) => {
@@ -222,5 +241,6 @@ export function useMessage() {
     getAssistance,
     getSingleDistance,
     exitApp,
+    setBLEName,
   };
 }
