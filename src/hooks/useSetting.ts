@@ -243,7 +243,6 @@ export function useSetting() {
     return arrBytes;
   };
   const updateSetting = () => {
-    debugger;
     setP1();
     setP2();
     setP5();
