@@ -94,6 +94,7 @@ const initWebMap = () => {
         center: [120.452543, 31.123945], //初始化地图中心点位置
       });
       map.value.on("complete", () => {
+        map.value.setMapStyle("amap://styles/dark");
         addCurrentPositionMarker([120.452543, 31.123945]);
       });
     })
