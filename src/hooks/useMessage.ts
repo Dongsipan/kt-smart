@@ -16,7 +16,6 @@ import {
 import { useToast } from "@/hooks/useToast";
 import { DimensionList } from "@/const/bike.const";
 import { useErrorStore } from "@/store/useErrorStore";
-import { hexStringToDataView } from "@capacitor-community/bluetooth-le/dist/esm/conversion";
 
 chalk.level = 1;
 
@@ -121,17 +120,17 @@ export function useMessage() {
     checkError(message);
   };
   const setBLEName = async (nickname: string) => {
-    const command = `AT+NAME=${nickname}`;
+    const command = `AT+NAME=${nickname}\r\n`;
     const bytes = new TextEncoder().encode(command);
     const dataView = new DataView(bytes.buffer);
-    const hex = dataViewToHexString(dataView) + " d a";
-    const hexToCommand = hexStringToDataView(hex);
+    // const hex = dataViewToHexString(dataView) + " d a";
+    // const hexToCommand = hexStringToDataView(hex);
     debugger;
     await write(
       connectedDevice.value.deviceId,
       numberToUUID(ServiceUUID),
       numberToUUID(CharacteristicUUID),
-      hexToCommand
+      dataView
     );
     await BleClient.startNotifications(
       connectedDevice.value.deviceId,

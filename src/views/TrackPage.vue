@@ -46,6 +46,7 @@
               <ion-button
                 v-show="isRiding"
                 ref="stopButtonRef"
+                v-on-long-press="onLongPressCallbackDirective"
                 class="dashboard-main__action-trigger"
                 color="secondary"
                 shape="round"
@@ -96,7 +97,8 @@ import {
 } from "@ionic/vue";
 import { locateOutline } from "ionicons/icons";
 import AMapContainer from "@/components/AMapContainer.vue";
-import { onMounted, ref } from "vue";
+import { ref } from "vue";
+import { vOnLongPress } from "@vueuse/components";
 import { useGeoLocation } from "@/hooks/useGeoLocation";
 import { useToast } from "@/hooks/useToast";
 import GPSKalmanFilter from "@/services/GPSKalmanFilter";
@@ -116,21 +118,25 @@ const currentAltitude = ref<number | null>(null);
 const isRiding = ref(false);
 
 const startRide = () => {
+  mapRef.value.initPolyline();
   isRiding.value = true;
-  watchCurrentPosition(async (location) => {
-    await presentToast(JSON.stringify(location));
-    const { longitude, latitude, altitude, speed, accuracy } = location!.coords;
+  watchCurrentPosition(async (geolocationPosition) => {
+    if (geolocationPosition === null) return;
+    // await presentToast(JSON.stringify(geolocationPosition));
+    console.log(geolocationPosition, geolocationPosition);
+    const { longitude, latitude, altitude, speed, accuracy } =
+      geolocationPosition!.coords;
     currentSpeed.value = speed;
     currentAltitude.value = altitude;
     const lnglat = kalmanFilter.filter(
       longitude,
       latitude,
       accuracy,
-      location!.timestamp
+      geolocationPosition!.timestamp
     );
     const positions = await mapRef.value.convertGpsToAMap(lnglat);
     currentTrack.value.push(positions);
-    mapRef.value.addPointToPath(longitude, latitude);
+    mapRef.value.addPointToPath(positions[0], positions[1]);
   });
 };
 /*
@@ -144,46 +150,9 @@ const finishRide = () => {
   stopRide();
 };
 
-const stopButtonRef = ref<any>(null);
-const addLongPressListener = (
-  target: any,
-  callback: (isLongPress: boolean) => void
-) => {
-  let timer: any; // 初始化timer
-
-  target.ontouchstart = () => {
-    timer = 0; // 重置timer
-    timer = setTimeout(() => {
-      callback(true);
-      timer = 0;
-    }, 500); // 超时器回调能成功执行，说明是长按
-  };
-
-  target.ontouchmove = () => {
-    clearTimeout(timer); // 如果来到这里，说明是滑动，清除超时器，不执行回调
-    timer = 0;
-  };
-
-  target.ontouchend = () => {
-    // 到这里如果timer有值，说明此触摸时间不足380ms，是点击，清除超时器，不执行回调
-    if (timer) {
-      clearTimeout(timer);
-      callback(false);
-    }
-  };
+const onLongPressCallbackDirective = (e: PointerEvent) => {
+  finishRide();
 };
-onMounted(() => {
-  debugger;
-  console.log(stopButtonRef.value);
-  addLongPressListener(stopButtonRef.value.$el, (isLongPress) => {
-    if (isLongPress) {
-      finishRide();
-    } else {
-      stopRide();
-    }
-    console.log("long press");
-  });
-});
 
 // onIonViewDidEnter(() => {
 //   requestLocationPermission();

@@ -29,6 +29,7 @@
     "@capacitor/status-bar": "5.0.4",
     "@ionic/vue": "^7.0.0",
     "@ionic/vue-router": "^7.0.0",
+    "@vueuse/components": "^10.1.2",
     "@vueuse/core": "^10.1.2",
     "ionicons": "^7.0.0",
     "pinia": "^2.1.1",

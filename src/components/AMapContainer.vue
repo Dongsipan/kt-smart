@@ -17,7 +17,7 @@ type LngLat = {
   lat: number;
 };
 const map = shallowRef<any>(null);
-const path = shallowRef<any>(null);
+const polyline = shallowRef<any>(null);
 const { getCurrentPosition } = useGeoLocation();
 const positionStore = usePositionStore();
 const { currentPosition } = storeToRefs(positionStore);
@@ -93,24 +93,54 @@ const initWebMap = () => {
         mapStyle: "amap://styles/dark", //设置地图的显示样式
         center: [120.452543, 31.123945], //初始化地图中心点位置
       });
-
       map.value.on("complete", () => {
         addCurrentPositionMarker([120.452543, 31.123945]);
-      });
-
-      // 绘制轨迹
-      path.value = new AMapInstance.Polyline({
-        map: map,
-        path: [], // 初始为空数组
-        strokeColor: "#3366FF", // 线条颜色
-        strokeOpacity: 1, // 线条透明度
-        strokeWeight: 5, // 线条宽度
       });
     })
     .catch((e) => {
       console.log(e);
     });
 };
+const initPolyline = () => {
+  // const path = [
+  //   new AMapInstance.LngLat(120.548165, 31.296436),
+  //   new AMapInstance.LngLat(120.548265, 31.296436),
+  //   new AMapInstance.LngLat(120.548365, 31.296436),
+  //   new AMapInstance.LngLat(120.548465, 31.296436),
+  // ];
+  // 绘制轨迹
+  polyline.value = new AMapInstance.Polyline({
+    // path: path, // 初始为空数组
+    strokeColor: "#3366FF", // 线条颜色
+    strokeOpacity: 1, // 线条透明度
+    strokeWeight: 5, // 线条宽度
+  });
+  map.value.add(polyline.value);
+
+  // const location = [
+  //   [120.548165, 31.296436],
+  //   [120.548265, 31.296436],
+  //   [120.548365, 31.296436],
+  //   [120.548465, 31.296436],
+  // ];
+  // location.map((item) => {
+  //   addPointToPath(item[0], item[1]);
+  // });
+};
+
+// 将新经纬度添加到轨迹中
+function addPointToPath(longitude: number, latitude: number) {
+  // 将坐标转换为AMap.LngLat对象
+  const point = new AMapInstance.LngLat(longitude, latitude);
+  const path = polyline.value.getPath();
+  if (path) {
+    path.push(point);
+    polyline.value.setPath(path);
+  } else {
+    polyline.value.setPath([point]);
+  }
+  map.value.setCenter(point);
+}
 
 const setMapToCenter = async () => {
   await getCurrentPosition();
@@ -147,8 +177,10 @@ const convertGpsToAMap = (location: number[]) => {
     try {
       AMapInstance.convertFrom(location, "gps", (status: any, result: any) => {
         if (result.info === "ok") {
-          const lngLats = result.locations; // Array.<LngLat>
-          resolve(lngLats[0]);
+          const transform = result.locations[0];
+          const lngLats = [transform.lng, transform.lat]; // Array.<LngLat>
+
+          resolve(lngLats);
         }
       });
     } catch (error) {
@@ -157,18 +189,11 @@ const convertGpsToAMap = (location: number[]) => {
   });
 };
 
-// 将新经纬度添加到轨迹中
-function addPointToPath(latitude: number, longitude: number) {
-  // 将坐标转换为AMap.LngLat对象
-  const point = new AMapInstance.LngLat(longitude, latitude);
-  path.getPath().push(point);
-  path.setPath(path.getPath());
-}
-
 defineExpose({
   setMapToCenter,
   addPointToPath,
   convertGpsToAMap,
+  initPolyline,
 });
 onMounted(() => {
   if (isNative) {
