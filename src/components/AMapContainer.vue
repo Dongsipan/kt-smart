@@ -33,6 +33,7 @@ const initMap = async () => {
   })
     .then((AMap) => {
       AMapInstance = AMap;
+      window.AMap = AMap;
       map.value = new AMap.Map("container", {
         //设置地图容器id
         viewMode: "3D", //是否为3D地图模式

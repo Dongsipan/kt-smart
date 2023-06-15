@@ -17,6 +17,7 @@
   },
   "dependencies": {
     "@amap/amap-jsapi-loader": "^1.0.1",
+    "@amap/amap-jsapi-types": "^0.0.13",
     "@capacitor-community/bluetooth-le": "^3.0.0",
     "@capacitor/android": "5.0.4",
     "@capacitor/app": "5.0.3",
