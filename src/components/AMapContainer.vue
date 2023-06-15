@@ -17,12 +17,11 @@ type LngLat = {
   lat: number;
 };
 const map = shallowRef<any>(null);
-const polyline = shallowRef<any>(null);
+const polyline = shallowRef<AMap.Polyline>();
 const { getCurrentPosition } = useGeoLocation();
 const positionStore = usePositionStore();
 const { currentPosition } = storeToRefs(positionStore);
 const isNative = Capacitor.isNativePlatform();
-let AMapInstance: any;
 
 const { presentToast } = useToast();
 const initMap = async () => {
@@ -32,7 +31,6 @@ const initMap = async () => {
     plugins: [""], // 需要使用的的插件列表，如比例尺'AMap.Scale'等
   })
     .then((AMap) => {
-      AMapInstance = AMap;
       window.AMap = AMap;
       map.value = new AMap.Map("container", {
         //设置地图容器id
@@ -62,20 +60,20 @@ const initMap = async () => {
 
 const addCurrentPositionMarker = (position: number[]) => {
   // 创建一个 Icon
-  const startIcon = new AMapInstance.Icon({
+  const startIcon = new window.AMap.Icon({
     // 图标尺寸
-    size: new AMapInstance.Size(20, 20),
+    size: new window.AMap.Size(20, 20),
     // 图标的取图地址
     image: LocationStartIcon,
     // 图标所用图片大小
-    imageSize: new AMapInstance.Size(20, 20),
+    imageSize: new window.AMap.Size(20, 20),
   });
 
   // 将 icon 传入 marker
-  const startMarker = new AMapInstance.Marker({
-    position: new AMapInstance.LngLat(position[0], position[1]),
+  const startMarker = new window.AMap.Marker({
+    position: new window.AMap.LngLat(position[0], position[1]),
     icon: startIcon,
-    offset: new AMapInstance.Pixel(-20, -20),
+    offset: new window.AMap.Pixel(-20, -20),
   });
   map.value.add([startMarker]);
 };
@@ -86,7 +84,7 @@ const initWebMap = () => {
     plugins: [""], // 需要使用的的插件列表，如比例尺'AMap.Scale'等
   })
     .then((AMap) => {
-      AMapInstance = AMap;
+      window.AMap = AMap;
       map.value = new AMap.Map("container", {
         //设置地图容器id
         viewMode: "3D", //是否为3D地图模式
@@ -111,7 +109,7 @@ const initPolyline = () => {
   //   new AMapInstance.LngLat(120.548465, 31.296436),
   // ];
   // 绘制轨迹
-  polyline.value = new AMapInstance.Polyline({
+  polyline.value = new window.AMap.Polyline({
     // path: path, // 初始为空数组
     strokeColor: "#3366FF", // 线条颜色
     strokeOpacity: 1, // 线条透明度
@@ -131,18 +129,21 @@ const initPolyline = () => {
 };
 
 // 将新经纬度添加到轨迹中
-function addPointToPath(longitude: number, latitude: number) {
+const addPointToPath = (longitude: number, latitude: number) => {
   // 将坐标转换为AMap.LngLat对象
-  const point = new AMapInstance.LngLat(longitude, latitude);
-  const path = polyline.value.getPath();
-  if (path) {
+  const point = new window.AMap.LngLat(longitude, latitude) as AMap.LngLat;
+  const path = polyline.value!.getPath() as AMap.LngLat[] | undefined;
+  if (path !== undefined) {
     path.push(point);
-    polyline.value.setPath(path);
+    polyline.value!.setPath(path);
   } else {
-    polyline.value.setPath([point]);
+    polyline.value!.setPath([point]);
   }
   map.value.setCenter(point);
-}
+};
+const setPolylineByPath = (path: AMap.LngLat[]) => {
+  polyline.value!.setPath(path);
+};
 
 const setMapToCenter = async () => {
   await getCurrentPosition();
@@ -163,7 +164,7 @@ const setMapToCenter = async () => {
 };
 const convertFrom = (lng: number, lat: number, callback: Function) => {
   const location = [lng, lat];
-  AMapInstance.convertFrom(location, "gps", (status: any, result: any) => {
+  window.AMap.convertFrom(location, "gps", (status: any, result: any) => {
     if (result.info === "ok") {
       const lngLats = result.locations; // Array.<LngLat>
       const { lng, lat }: LngLat = lngLats[0];
@@ -177,12 +178,12 @@ const convertFrom = (lng: number, lat: number, callback: Function) => {
 const convertGpsToAMap = (location: number[]) => {
   return new Promise((resolve, reject) => {
     try {
-      AMapInstance.convertFrom(location, "gps", (status: any, result: any) => {
+      window.AMap.convertFrom(location, "gps", (status: any, result: any) => {
         if (result.info === "ok") {
-          const transform = result.locations[0];
-          const lngLats = [transform.lng, transform.lat]; // Array.<LngLat>
-
-          resolve(lngLats);
+          // const transform = result.locations[0];
+          // const lngLats = [transform.lng, transform.lat]; // Array.<LngLat>
+          const lngLat = result.locations[0];
+          resolve(lngLat);
         }
       });
     } catch (error) {
@@ -196,6 +197,7 @@ defineExpose({
   addPointToPath,
   convertGpsToAMap,
   initPolyline,
+  setPolylineByPath,
 });
 onMounted(() => {
   if (isNative) {

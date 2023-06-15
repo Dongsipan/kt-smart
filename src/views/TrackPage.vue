@@ -11,6 +11,11 @@
       </ion-toolbar>
     </ion-header>
     <ion-content :fullscreen="true" class="ion-no-padding">
+      <ion-fab slot="fixed" vertical="bottom" horizontal="end" :edge="true">
+        <ion-fab-button id="open-modal">
+          <ion-icon :icon="flashOutline"></ion-icon>
+        </ion-fab-button>
+      </ion-fab>
       <AMapContainer ref="mapRef" />
     </ion-content>
     <ion-footer :translucent="true" class="ion-no-border">
@@ -19,7 +24,7 @@
           <div class="dashboard-main">
             <div class="dashboard-main__data dashboard-main__data--outer">
               <div>altitude</div>
-              <div>{{ currentAltitude || "--" }}</div>
+              <div>{{ altitudeToFixed || "--" }}</div>
             </div>
             <div class="dashboard-main__action">
               <svg
@@ -72,7 +77,7 @@
             </div>
             <div class="dashboard-main__data dashboard-main__data--outer">
               <div>speed</div>
-              <div>{{ currentSpeed || "--" }}</div>
+              <div>{{ speedToKm || "--" }}</div>
             </div>
           </div>
           <div class="dashboard-info ion-margin-top">
@@ -99,6 +104,49 @@
         ></ion-alert>
       </ion-toolbar>
     </ion-footer>
+    <ion-modal ref="modal" trigger="open-modal">
+      <ion-header>
+        <ion-toolbar>
+          <ion-buttons slot="start">
+            <ion-button @click="closeModal()">Cancel</ion-button>
+          </ion-buttons>
+          <ion-title>GPS Information</ion-title>
+        </ion-toolbar>
+      </ion-header>
+      <ion-content class="ion-padding">
+        <ion-item>
+          <ion-label>
+            <h3>Longitude</h3>
+            <p>{{ currentLongitude }}</p>
+          </ion-label>
+        </ion-item>
+        <ion-item>
+          <ion-label>
+            <h3>Latitude</h3>
+            <p>{{ currentLatitude }}</p>
+          </ion-label>
+        </ion-item>
+        <ion-item>
+          <ion-label>
+            <h3>Speed</h3>
+            <p>{{ currentSpeed }}</p>
+          </ion-label>
+        </ion-item>
+        <ion-item>
+          <ion-label>
+            <h3>Altitude</h3>
+            <p>{{ currentAltitude }}</p>
+          </ion-label>
+        </ion-item>
+        <ion-item>
+          <ion-label>
+            <h3>Path</h3>
+            <ion-textarea :auto-grow="true" :value="JSON.stringify(path)">
+            </ion-textarea>
+          </ion-label>
+        </ion-item>
+      </ion-content>
+    </ion-modal>
   </ion-page>
 </template>
 
@@ -114,14 +162,166 @@ import {
   IonTitle,
   IonToolbar,
   IonAlert,
+  IonFab,
+  IonFabButton,
+  IonModal,
+  IonItem,
+  IonLabel,
+  IonTextarea,
 } from "@ionic/vue";
-import { locateOutline } from "ionicons/icons";
+import { flashOutline, locateOutline } from "ionicons/icons";
 import AMapContainer from "@/components/AMapContainer.vue";
-import { ref } from "vue";
+import { ComponentPublicInstance, computed, ref } from "vue";
 import { vOnLongPress } from "@vueuse/components";
 import { useGeoLocation } from "@/hooks/useGeoLocation";
 import { useToast } from "@/hooks/useToast";
 import GPSKalmanFilter from "@/services/GPSKalmanFilter";
+import { PathSmoothTool } from "@/services/PathSmoothTool";
+
+const mock = [
+  [120.452928, 31.124645],
+  [120.452914, 31.1246371],
+  [120.452904, 31.124637],
+  [120.452891, 31.124633],
+  [120.452877, 31.124628],
+  [120.452861, 31.124626],
+  [120.452853, 31.124621],
+  [120.452839, 31.12461],
+  [120.452829, 31.124606],
+  [120.45282, 31.124595],
+  [120.452818, 31.12459],
+  [120.45282, 31.124586],
+  [120.452829, 31.124584],
+  [120.452837, 31.124578],
+  [120.452827, 31.124576],
+  [120.452834, 31.124581],
+  [120.452834, 31.124584],
+  [120.452832, 31.124586],
+  [120.452833, 31.124586],
+  [120.452834, 31.124583],
+  [120.452821, 31.124581],
+  [120.452814, 31.124571],
+  [120.452806, 31.12456],
+  [120.452804, 31.124548],
+  [120.452807, 31.124527],
+  [120.452808, 31.124505],
+  [120.45282, 31.124595],
+  [120.452818, 31.12459],
+  [120.45282, 31.124586],
+  [120.452829, 31.124584],
+  [120.452837, 31.124578],
+  [120.452827, 31.124576],
+  [120.452834, 31.124581],
+  [120.452834, 31.124584],
+  [120.452832, 31.124586],
+  [120.452833, 31.124586],
+  [120.452834, 31.124583],
+  [120.452821, 31.124581],
+  [120.452814, 31.124571],
+  [120.452806, 31.12456],
+  [120.452804, 31.124548],
+  [120.452807, 31.1, 24527],
+  [120.45282, 31.124595],
+  [120.452818, 31.12459],
+  [120.45282, 31.124586],
+  [120.452829, 31.124584],
+  [120.452837, 31.124578],
+  [120.452827, 31.124576],
+  [120.452834, 31.124581],
+  [120.452834, 31.124584],
+  [120.452832, 31.124586],
+  [120.452833, 31.124586],
+  [120.452834, 31.124583],
+  [120.452821, 31.124581],
+  [120.453762, 31.124468],
+  [120.453781, 31.124464],
+  [120.453798, 31.124457],
+  [120.453808, 31.124461],
+  [120.45383, 31.124462],
+  [120.453854, 31.1244571],
+  [120.45387, 31.124458],
+  [120.453894, 31.124461],
+  [120.453911, 31.124462],
+  [120.453925, 31.124464],
+  [120.453934, 31.12446],
+  [120.453936, 31.124473],
+  [120.452295, 31.124311],
+  [120.452312, 31.124299],
+  [120.45223, 31.124312],
+  [120.45223, 31.124312],
+  [120.452367, 31.12425],
+  [120.45255, 31.1243061],
+  [120.452295, 31.124311],
+  [120.452312, 31.124299],
+  [120.45223, 31.124312],
+  [120.45223, 31.124312],
+  [120.452367, 31.12425],
+  [120.45255, 31.124306],
+  [120.452418, 31.124187],
+  [120.452425, 31.124202],
+  [120.452457, 31.124192],
+  [120.452482, 31.124188],
+  [120.452505, 31.12417],
+  [120.452521, 31.124191],
+  [120.45253, 31.1241921],
+  [120.452367, 31.12425],
+  [120.45255, 31.124306],
+  [120.452418, 31.124187],
+  [120.452425, 31.1242021],
+  [120.452457, 31.124192],
+  [120.452482, 31.124188],
+  [120.452505, 31.12417],
+  [120.452521, 31.124191],
+  [120.452533, 31.124192],
+  [120.452511, 31.124188],
+  [120.452548, 31.124195],
+  [120.452554, 31.124189],
+  [120.452565, 31.124191],
+  [120.452586, 31.124194],
+  [120.452577, 31.124192],
+  [120.452598, 31.124196],
+  [120.452612, 31.124195],
+  [120.452623, 31.124196],
+  [120.452632, 31.124196],
+  [120.452644, 31.124197],
+  [120.452577, 31.124192],
+  [120.452598, 31.124196],
+  [120.452612, 31.124195],
+  [120.452623, 31.124196],
+  [120.452632, 31.124196],
+  [120.452644, 31.124197],
+  [120.452655, 31.124195],
+  [120.452702, 31.1242],
+  [120.452716, 31.124203],
+  [120.452728, 31.124205],
+  [120.452741, 31.12421],
+  [120.452753, 31.124212],
+  [120.452766, 31.124213],
+  [120.452778, 31.124215],
+  [120.452786, 31.124216],
+  [120.4528, 31.124216],
+  [120.452821, 31.124238],
+  [120.452822, 31.124242],
+  [120.452837, 31.124242],
+  [120.452846, 31.124242],
+  [120.452861, 31.12424],
+  [120.452877, 31.124246],
+  [120.452887, 31.124253],
+  [120.452901, 31.124256],
+  [120.452913, 31.124258],
+  [120.452926, 31.124255],
+  [120.452939, 31.124268],
+  [120.452957, 31.124269],
+  [120.452971, 31.124272],
+  [120.452986, 31.124274],
+  [120.452999, 31.124278],
+  [120.453014, 31.124282],
+  [120.453031, 31.124288],
+  [120.453045, 31.124296],
+  [120.453057, 31.124301],
+  [120.453074, 31.124303],
+  [120.453089, 31.124309],
+];
 
 const mapRef = ref(null) as any;
 
@@ -131,36 +331,61 @@ const setMapToCenter = () => {
   mapRef.value.setMapToCenter();
 };
 const kalmanFilter = new GPSKalmanFilter();
-const currentTrack = ref<number[][]>([]);
-const currentSpeed = ref<number | string | null>(null);
-const currentAltitude = ref<number | string | null>(null);
+const path = [] as AMap.LngLat[]; // ref<AMap.LngLat[]>([]);
+const pathSmoothTool = new PathSmoothTool();
+// const currentSpeed = ref<number | string | null>(null);
+const currentLongitude = ref();
+const currentLatitude = ref();
+const currentSpeed = ref<number>();
+const currentAltitude = ref<number>();
+const currentAccuracy = ref();
 
 const isRiding = ref(false);
 const isStopRiding = ref(false);
 
+const speedToKm = computed(() => {
+  return currentSpeed.value
+    ? ((currentSpeed.value * 3600) / 1000).toFixed(1)
+    : currentSpeed.value;
+});
+const altitudeToFixed = computed(() => {
+  return currentAltitude.value
+    ? currentAltitude.value?.toFixed(1)
+    : currentAltitude.value;
+});
 const startRide = () => {
   mapRef.value.initPolyline();
   isRiding.value = true;
+  // mockPath();
   watchPosition();
+};
+const mockPath = () => {
+  // mock
+  mock.forEach((item) => {
+    path.push(new window.AMap.LngLat(item[0], item[1]));
+  });
+  const smoothPath = pathSmoothTool.pathOptimize(path);
+  mapRef.value.setPolylineByPath(smoothPath);
 };
 const watchPosition = () => {
   watchCurrentPosition(async (geolocationPosition) => {
     if (geolocationPosition === null) return;
-    // await presentToast(JSON.stringify(geolocationPosition));
-    console.log(geolocationPosition, geolocationPosition);
     const { longitude, latitude, altitude, speed, accuracy } =
       geolocationPosition!.coords;
-    currentSpeed.value = speed ? ((speed * 3600) / 1000).toFixed(1) : speed;
-    currentAltitude.value = altitude ? altitude.toFixed(1) : altitude;
-    const lnglat = kalmanFilter.filter(
+    currentSpeed.value = speed || 0;
+    currentAltitude.value = altitude || 0;
+    currentLongitude.value = longitude;
+    currentLatitude.value = latitude;
+    currentAccuracy.value = accuracy;
+
+    const positions = await mapRef.value.convertGpsToAMap([
       longitude,
       latitude,
-      accuracy,
-      geolocationPosition!.timestamp
-    );
-    const positions = await mapRef.value.convertGpsToAMap(lnglat);
-    currentTrack.value.push(positions);
-    mapRef.value.addPointToPath(positions[0], positions[1]);
+    ]);
+    path.push(positions);
+    const smoothPath = pathSmoothTool.pathOptimize(path);
+    mapRef.value.setPolylineByPath(smoothPath);
+    // mapRef.value.addPointToPath(positions[0], positions[1]);
   });
 };
 /*
@@ -198,6 +423,11 @@ const alertButtons = [
 const isOpenFinishAlert = ref(false);
 const setOpenFinishAlert = (isOpen: boolean) => {
   isOpenFinishAlert.value = isOpen;
+};
+
+const modal = ref(null) as any;
+const closeModal = () => {
+  modal.value.$el.dismiss(null, "cancel");
 };
 // onIonViewDidEnter(() => {
 //   requestLocationPermission();
