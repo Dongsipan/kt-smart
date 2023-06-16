@@ -11,17 +11,20 @@ import { useToast } from "@/hooks/useToast";
 import { usePositionStore } from "@/store/usePositionStore";
 import { storeToRefs } from "pinia";
 import LocationStartIcon from "@/assets/icon/location-start.png";
+import LocationEndIcon from "@/assets/icon/location-end.png";
 
 type LngLat = {
   lng: number;
   lat: number;
 };
-const map = shallowRef<any>(null);
+const map = shallowRef<AMap.Map>();
 const polyline = shallowRef<AMap.Polyline>();
 const { getCurrentPosition } = useGeoLocation();
 const positionStore = usePositionStore();
 const { currentPosition } = storeToRefs(positionStore);
 const isNative = Capacitor.isNativePlatform();
+const startMarker = shallowRef<AMap.Marker>();
+const endMarker = shallowRef<AMap.Marker>();
 
 const { presentToast } = useToast();
 const initMap = async () => {
@@ -37,19 +40,15 @@ const initMap = async () => {
         viewMode: "3D", //是否为3D地图模式
         zoom: 16, //初始化地图级别
         mapStyle: "amap://styles/dark", //设置地图的显示样式
-        center: currentPosition.value.coords
-          ? [
-              currentPosition.value.coords.longitude,
-              currentPosition.value.coords.latitude,
-            ]
-          : undefined, //初始化地图中心点位置
       });
-      map.value.on("complete", () => {
+      map.value!.on("complete", () => {
         if (currentPosition.value.coords) {
-          addCurrentPositionMarker([
+          addStartPositionMarker(
             currentPosition.value.coords.longitude,
-            currentPosition.value.coords.latitude,
-          ]);
+            currentPosition.value.coords.latitude
+          );
+        } else {
+          setMapToCenter();
         }
       });
     })
@@ -58,24 +57,32 @@ const initMap = async () => {
     });
 };
 
-const addCurrentPositionMarker = (position: number[]) => {
+const addStartPositionMarker = (lng: number, lat: number) => {
+  const lnglat = new window.AMap.LngLat(lng, lat);
+  setMarker(lnglat, LocationStartIcon, startMarker.value!);
+};
+const addEndPositionMarker = (lng: number, lat: number) => {
+  const lnglat = new window.AMap.LngLat(lng, lat);
+  setMarker(lnglat, LocationEndIcon, endMarker.value!);
+};
+const setMarker = (position: AMap.LngLat, image: any, marker: AMap.Marker) => {
   // 创建一个 Icon
-  const startIcon = new window.AMap.Icon({
+  const icon = new window.AMap.Icon({
     // 图标尺寸
     size: new window.AMap.Size(20, 20),
     // 图标的取图地址
-    image: LocationStartIcon,
+    image: image,
     // 图标所用图片大小
     imageSize: new window.AMap.Size(20, 20),
   });
 
   // 将 icon 传入 marker
-  const startMarker = new window.AMap.Marker({
-    position: new window.AMap.LngLat(position[0], position[1]),
-    icon: startIcon,
+  marker = new window.AMap.Marker({
+    position: position,
+    icon: icon,
     offset: new window.AMap.Pixel(-20, -20),
   });
-  map.value.add([startMarker]);
+  map.value!.add([marker]);
 };
 const initWebMap = () => {
   AMapLoader.load({
@@ -87,14 +94,15 @@ const initWebMap = () => {
       window.AMap = AMap;
       map.value = new AMap.Map("container", {
         //设置地图容器id
+        pitch: 2,
         viewMode: "3D", //是否为3D地图模式
         zoom: 17, //初始化地图级别
         mapStyle: "amap://styles/dark", //设置地图的显示样式
         center: [120.452543, 31.123945], //初始化地图中心点位置
       });
-      map.value.on("complete", () => {
-        map.value.setMapStyle("amap://styles/dark");
-        addCurrentPositionMarker([120.452543, 31.123945]);
+      map.value!.on("complete", () => {
+        map.value!.setMapStyle("amap://styles/dark");
+        addStartPositionMarker(120.452543, 31.123945);
       });
     })
     .catch((e) => {
@@ -102,30 +110,18 @@ const initWebMap = () => {
     });
 };
 const initPolyline = () => {
-  // const path = [
-  //   new AMapInstance.LngLat(120.548165, 31.296436),
-  //   new AMapInstance.LngLat(120.548265, 31.296436),
-  //   new AMapInstance.LngLat(120.548365, 31.296436),
-  //   new AMapInstance.LngLat(120.548465, 31.296436),
-  // ];
   // 绘制轨迹
   polyline.value = new window.AMap.Polyline({
     // path: path, // 初始为空数组
     strokeColor: "#3366FF", // 线条颜色
     strokeOpacity: 1, // 线条透明度
-    strokeWeight: 5, // 线条宽度
+    strokeWeight: 3, // 线条宽度
   });
-  map.value.add(polyline.value);
+  map.value!.add(polyline.value);
+};
 
-  // const location = [
-  //   [120.548165, 31.296436],
-  //   [120.548265, 31.296436],
-  //   [120.548365, 31.296436],
-  //   [120.548465, 31.296436],
-  // ];
-  // location.map((item) => {
-  //   addPointToPath(item[0], item[1]);
-  // });
+const getPolyLineLength = () => {
+  return polyline.value!.getLength();
 };
 
 // 将新经纬度添加到轨迹中
@@ -139,15 +135,19 @@ const addPointToPath = (longitude: number, latitude: number) => {
   } else {
     polyline.value!.setPath([point]);
   }
-  map.value.setCenter(point);
+  map.value!.setCenter(point);
 };
 const setPolylineByPath = (path: AMap.LngLat[]) => {
   polyline.value!.setPath(path);
+  map.value!.setCenter(path[path.length - 1]);
+};
+
+const getDistance = (point1: AMap.LngLat, point2: AMap.LngLat) => {
+  return window.AMap.GeometryUtil.distance(point1, point2);
 };
 
 const setMapToCenter = async () => {
   await getCurrentPosition();
-  await presentToast(JSON.stringify(currentPosition.value.coords));
   if (!currentPosition.value.coords) return;
   convertFrom(
     currentPosition.value.coords.longitude,
@@ -157,10 +157,14 @@ const setMapToCenter = async () => {
       currentPosition.value.coords.latitude = lat;
     }
   );
-  map.value.setCenter([
+  map.value!.setCenter([
     currentPosition.value.coords.longitude,
     currentPosition.value.coords.latitude,
   ]);
+  addStartPositionMarker(
+    currentPosition.value.coords.longitude,
+    currentPosition.value.coords.latitude
+  );
 };
 const convertFrom = (lng: number, lat: number, callback: Function) => {
   const location = [lng, lat];
@@ -180,8 +184,6 @@ const convertGpsToAMap = (location: number[]) => {
     try {
       window.AMap.convertFrom(location, "gps", (status: any, result: any) => {
         if (result.info === "ok") {
-          // const transform = result.locations[0];
-          // const lngLats = [transform.lng, transform.lat]; // Array.<LngLat>
           const lngLat = result.locations[0];
           resolve(lngLat);
         }
@@ -198,6 +200,10 @@ defineExpose({
   convertGpsToAMap,
   initPolyline,
   setPolylineByPath,
+  addStartPositionMarker,
+  addEndPositionMarker,
+  getPolyLineLength,
+  getDistance,
 });
 onMounted(() => {
   if (isNative) {

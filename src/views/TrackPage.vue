@@ -11,7 +11,7 @@
       </ion-toolbar>
     </ion-header>
     <ion-content :fullscreen="true" class="ion-no-padding">
-      <ion-fab slot="fixed" vertical="bottom" horizontal="end" :edge="true">
+      <ion-fab slot="fixed" :edge="true" horizontal="end" vertical="bottom">
         <ion-fab-button id="open-modal">
           <ion-icon :icon="flashOutline"></ion-icon>
         </ion-fab-button>
@@ -51,21 +51,21 @@
               <template v-else>
                 <ion-button
                   v-if="!isStopRiding"
-                  @click="stopRide"
                   v-on-long-press="onLongPressCallbackDirective"
                   class="dashboard-main__action-trigger"
                   color="success"
                   shape="round"
+                  @click="stopRide"
                 >
                   <span>Stop<br />Ride</span>
                 </ion-button>
                 <ion-button
                   v-else
-                  @click="restoreRide"
                   v-on-long-press="onLongPressCallbackDirective"
                   class="dashboard-main__action-trigger"
                   color="warning"
                   shape="round"
+                  @click="restoreRide"
                 >
                   <span>Restore<br />Ride</span>
                 </ion-button>
@@ -83,23 +83,23 @@
           <div class="dashboard-info ion-margin-top">
             <div class="dashboard-info__data">
               <div>Time</div>
-              <div>--</div>
+              <div>{{ formatTime || "--" }}</div>
             </div>
             <div class="dashboard-info__data">
               <div>Extreme speed</div>
-              <div>--</div>
+              <div>{{ maxSpeed || "--" }}</div>
             </div>
             <div class="dashboard-info__data">
               <div>Uniform speed</div>
-              <div>--</div>
+              <div>{{ averageSpeedToKm || "--" }}</div>
             </div>
           </div>
         </div>
         <ion-alert
+          :buttons="alertButtons"
           :is-open="isOpenFinishAlert"
           header="End cycling"
           sub-header="Whether to end cycling"
-          :buttons="alertButtons"
           @didDismiss="setOpenFinishAlert(false)"
         ></ion-alert>
       </ion-toolbar>
@@ -152,31 +152,33 @@
 
 <script lang="ts" setup>
 import {
+  IonAlert,
   IonButton,
   IonButtons,
   IonContent,
+  IonFab,
+  IonFabButton,
   IonFooter,
   IonHeader,
   IonIcon,
-  IonPage,
-  IonTitle,
-  IonToolbar,
-  IonAlert,
-  IonFab,
-  IonFabButton,
-  IonModal,
   IonItem,
   IonLabel,
+  IonModal,
+  IonPage,
   IonTextarea,
+  IonTitle,
+  IonToolbar,
 } from "@ionic/vue";
 import { flashOutline, locateOutline } from "ionicons/icons";
 import AMapContainer from "@/components/AMapContainer.vue";
-import { ComponentPublicInstance, computed, ref } from "vue";
+import { computed, ref } from "vue";
 import { vOnLongPress } from "@vueuse/components";
 import { useGeoLocation } from "@/hooks/useGeoLocation";
 import { useToast } from "@/hooks/useToast";
-import GPSKalmanFilter from "@/services/GPSKalmanFilter";
 import { PathSmoothTool } from "@/services/PathSmoothTool";
+import { usePositionStore } from "@/store/usePositionStore";
+import { useTimer } from "@/hooks/useTimer";
+import { Position } from "@capacitor/geolocation";
 
 const mock = [
   [120.452928, 31.124645],
@@ -325,13 +327,15 @@ const mock = [
 
 const mapRef = ref(null) as any;
 
+const positionStore = usePositionStore();
 const { watchCurrentPosition, clearWatch } = useGeoLocation();
 const { presentToast } = useToast();
 const setMapToCenter = () => {
   mapRef.value.setMapToCenter();
 };
-const kalmanFilter = new GPSKalmanFilter();
+const geoLocationData = [] as Position[];
 const path = [] as AMap.LngLat[]; // ref<AMap.LngLat[]>([]);
+let smoothedPath = [] as AMap.LngLat[];
 const pathSmoothTool = new PathSmoothTool();
 // const currentSpeed = ref<number | string | null>(null);
 const currentLongitude = ref();
@@ -339,23 +343,32 @@ const currentLatitude = ref();
 const currentSpeed = ref<number>();
 const currentAltitude = ref<number>();
 const currentAccuracy = ref();
+const currentAverageSpeed = ref<number>();
+const currentDistance = ref<number>();
 
 const isRiding = ref(false);
 const isStopRiding = ref(false);
+const { elapsedTime, toggleTimer, formatTime } = useTimer();
 
 const speedToKm = computed(() => {
-  return currentSpeed.value
+  return currentSpeed.value && currentSpeed.value !== -1
     ? ((currentSpeed.value * 3600) / 1000).toFixed(1)
-    : currentSpeed.value;
+    : 0;
+});
+
+const averageSpeedToKm = computed(() => {
+  return currentAverageSpeed.value && currentAverageSpeed.value < 1
+    ? (currentAverageSpeed.value * 3.6).toFixed(1)
+    : 0;
 });
 const altitudeToFixed = computed(() => {
-  return currentAltitude.value
-    ? currentAltitude.value?.toFixed(1)
-    : currentAltitude.value;
+  return currentAltitude.value ? currentAltitude.value?.toFixed(1) : 0;
 });
 const startRide = () => {
+  setMapToCenter();
   mapRef.value.initPolyline();
   isRiding.value = true;
+  toggleTimer();
   // mockPath();
   watchPosition();
 };
@@ -364,8 +377,8 @@ const mockPath = () => {
   mock.forEach((item) => {
     path.push(new window.AMap.LngLat(item[0], item[1]));
   });
-  const smoothPath = pathSmoothTool.pathOptimize(path);
-  mapRef.value.setPolylineByPath(smoothPath);
+  smoothedPath = pathSmoothTool.pathOptimize(path);
+  mapRef.value.setPolylineByPath(smoothedPath);
 };
 const watchPosition = () => {
   watchCurrentPosition(async (geolocationPosition) => {
@@ -377,15 +390,18 @@ const watchPosition = () => {
     currentLongitude.value = longitude;
     currentLatitude.value = latitude;
     currentAccuracy.value = accuracy;
+    geoLocationData.push(geolocationPosition); // 存储原始数据
 
     const positions = await mapRef.value.convertGpsToAMap([
       longitude,
       latitude,
-    ]);
+    ]); // 转化成高德坐标
     path.push(positions);
-    const smoothPath = pathSmoothTool.pathOptimize(path);
-    mapRef.value.setPolylineByPath(smoothPath);
-    // mapRef.value.addPointToPath(positions[0], positions[1]);
+    smoothedPath = pathSmoothTool.pathOptimize(path); // 优化轨迹
+    mapRef.value.setPolylineByPath(smoothedPath); // 绘制轨迹
+    getMaxData(); // 从GPS数据中计算最大速度、最高海拔
+    calculateAverageSpeed(); // 计算平均速度
+    currentDistance.value = mapRef.value.getPolyLineLength();
   });
 };
 /*
@@ -393,17 +409,84 @@ const watchPosition = () => {
  * */
 const stopRide = () => {
   isStopRiding.value = true;
+  toggleTimer();
   clearWatch();
 };
 const restoreRide = () => {
   isStopRiding.value = false;
+  toggleTimer();
   watchPosition();
 };
+const { addHistoryTrack } = usePositionStore();
 const finishRide = () => {
   isRiding.value = false;
   isStopRiding.value = false;
+  toggleTimer();
   clearWatch();
-  // TODO store locations
+  const lastPosition = smoothedPath[smoothedPath.length - 1];
+  mapRef.value.addEndPositionMarker(lastPosition.lng, lastPosition.lat);
+  saveHistory();
+};
+/*获取最高海拔、最大速度*/
+const maxSpeed = ref(0);
+const maxAltitude = ref(0);
+const getMaxData = () => {
+  const { _maxSpeed, _maxAltitude } = geoLocationData.reduce(
+    (acc: any, curr: any) => {
+      if (curr.coords.speed) {
+        if (curr.coords.speed > acc.maxSpeed) {
+          acc.maxSpeed = curr.coords.speed;
+        }
+      }
+      if (curr.coords.altitude) {
+        if (curr.coords.altitude > acc.maxAltitude) {
+          acc.maxAltitude = curr.coords.altitude;
+        }
+      }
+      return acc;
+    },
+    { _maxSpeed: 0, _maxAltitude: 0 }
+  );
+  maxSpeed.value = Number(_maxSpeed);
+  maxAltitude.value = Number(_maxAltitude);
+};
+
+const calculateAverageSpeed = () => {
+  // 计算总行驶距离和总行驶时间
+  let totalDistance = 0;
+  let totalTime = 0;
+  for (let i = 1; i < geoLocationData.length; i++) {
+    const prevPoint = geoLocationData[i - 1];
+    const currPoint = geoLocationData[i];
+    const prevLnglat = new AMap.LngLat(
+      prevPoint.coords.longitude,
+      prevPoint.coords.latitude
+    );
+    const currLnglat = new AMap.LngLat(
+      currPoint.coords.longitude,
+      currPoint.coords.latitude
+    );
+    const distance = mapRef.value.getDistance(prevLnglat, currLnglat);
+    const timeDiff = currPoint.timestamp - prevPoint.timestamp;
+    totalDistance += distance;
+    totalTime += timeDiff;
+  }
+
+  // 计算平均速度（单位：米/秒）
+  const averageSpeed = totalDistance / totalTime;
+  currentAverageSpeed.value = averageSpeed;
+};
+const saveHistory = () => {
+  const distance = mapRef.value.getPolyLineLength();
+  const history = {
+    id: new Date().valueOf(),
+    path: smoothedPath,
+    maxSpeed: maxSpeed.value,
+    maxAltitude: maxAltitude.value,
+    distance: distance,
+    time: elapsedTime.value,
+  };
+  positionStore.addHistoryTrack(history);
 };
 
 const onLongPressCallbackDirective = (e: PointerEvent) => {
@@ -521,6 +604,7 @@ ion-content {
         height: 80px;
         border-radius: 50%;
         transform: translate(36px, 8px);
+
         span {
           color: #fff;
         }
