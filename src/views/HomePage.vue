@@ -9,7 +9,7 @@
             style="width: 2.5rem; height: 2rem; margin-left: 0.5rem"
           ></ion-icon>
         </ion-buttons>
-        <ion-title>Dashboard</ion-title>
+        <!--        <ion-title>Dashboard</ion-title>-->
         <ion-buttons slot="end">
           <ion-button @click="toBluetoothPage">
             <ion-icon
@@ -118,6 +118,11 @@
             </ion-button>
           </ion-col>
         </ion-row>
+        <div>
+          {{
+            `regenative: ${regenative},undervoltage:${undervoltage},reverse: ${reverse},turnRight: ${turnRight},turnLeft: ${turnLeft},throttle: ${throttle},cruise: ${cruise},brake: ${brake}`
+          }}
+        </div>
       </ion-grid>
       <ion-alert
         :buttons="alertButtons"
@@ -146,7 +151,6 @@ import {
   IonRippleEffect,
   IonRow,
   IonText,
-  IonTitle,
   IonToolbar,
   onIonViewDidEnter,
 } from "@ionic/vue";
@@ -179,6 +183,14 @@ const {
   lightStatus,
   getGearPosition,
   electricQuantity,
+  regenative,
+  undervoltage,
+  reverse,
+  turnRight,
+  turnLeft,
+  throttle,
+  cruise,
+  brake,
 } = storeToRefs(dashboardStore);
 const { connectedDevice } = storeToRefs(bleStore);
 
@@ -316,3 +328,4 @@ const isAssistance = computed(() => {
   }
 }
 </style>
+<!--TODO 千米位置调到顶部、添加转把状态，转把状态优先展示-->

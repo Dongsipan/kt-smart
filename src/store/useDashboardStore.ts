@@ -11,6 +11,14 @@ export const useDashboardStore = defineStore("dashboard", {
     totalMileage: 0,
     lightStatus: false,
     assistance: 0,
+    regenative: 0,
+    undervoltage: 0,
+    reverse: 0,
+    turnRight: 0,
+    turnLeft: 0,
+    throttle: 0,
+    cruise: 0,
+    brake: 0,
   }),
   getters: {
     getElectricQuantity: (state) => state.electricQuantity,
@@ -68,6 +76,30 @@ export const useDashboardStore = defineStore("dashboard", {
     },
     setAssistance(payload: number) {
       this.assistance = payload;
+    },
+    setRegenative(payload: number) {
+      this.regenative = payload;
+    },
+    setUndervoltage(payload: number) {
+      this.undervoltage = payload;
+    },
+    setReverse(payload: number) {
+      this.reverse = payload;
+    },
+    setTurnRight(payload: number) {
+      this.turnRight = payload;
+    },
+    setTurnLeft(payload: number) {
+      this.turnLeft = payload;
+    },
+    setThrottle(payload: number) {
+      this.throttle = payload;
+    },
+    setCruise(payload: number) {
+      this.cruise = payload;
+    },
+    setBrake(payload: number) {
+      this.brake = payload;
     },
   },
   persist: {

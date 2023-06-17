@@ -214,6 +214,7 @@ export function useSetting() {
     updateFiveIndexOfData();
   };
   const setHandlebar = () => {
+    debugger;
     writeData.value[9] = Int2Bytes(handlebarMaxSpeed.value);
     updateFiveIndexOfData();
   };

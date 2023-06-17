@@ -4,7 +4,7 @@
       <ion-toolbar>
         <ion-title>Setting</ion-title>
         <ion-buttons slot="end">
-          <ion-button>Save</ion-button>
+          <ion-button @click="updateSetting">Save</ion-button>
         </ion-buttons>
       </ion-toolbar>
     </ion-header>
@@ -17,15 +17,14 @@
         <ion-item>
           <ion-input
             v-model="maxSpeed"
-            :maxlength="2"
-            label="MaxSpeed"
             :max="72"
-            :min="0"
+            :maxlength="2"
+            :min="10"
+            inputmode="numeric"
+            label="MaxSpeed"
             name="maxSpeed"
             placeholder="km/h"
             type="number"
-            inputmode="numeric"
-            @change="setMaxSpeed"
           >
           </ion-input>
         </ion-item>
@@ -51,77 +50,77 @@
         <ion-item>
           <ion-input
             v-model="p1"
+            inputmode="numeric"
             label="MotorSetting (P1)"
             name="p1"
             placeholder="P1"
             type="number"
-            inputmode="numeric"
           ></ion-input>
         </ion-item>
 
         <ion-item>
           <ion-input
             v-model="p2"
+            inputmode="numeric"
             label="SpeedSensor (P2)"
             name="p2"
             placeholder="P2"
             type="number"
-            inputmode="numeric"
           ></ion-input>
         </ion-item>
 
         <ion-item>
           <ion-input
             v-model="p3"
+            inputmode="numeric"
             label="Torque (P3)"
             name="p3"
             placeholder="P3"
             type="number"
-            inputmode="numeric"
           ></ion-input>
         </ion-item>
 
         <ion-item>
           <ion-input
             v-model="p4"
+            inputmode="numeric"
             label="ZeroStart (P4)"
             name="p4"
             placeholder="P4"
             type="number"
-            inputmode="numeric"
           ></ion-input>
         </ion-item>
 
         <ion-item>
           <ion-input
             v-model="p5"
+            inputmode="numeric"
             label="Battery (P5)"
             name="p5"
             placeholder="P5"
             type="number"
-            inputmode="numeric"
           ></ion-input>
         </ion-item>
 
         <ion-item>
           <ion-input
             v-model="c1"
+            inputmode="numeric"
             label="PAS (C1)"
             name="c1"
             placeholder="C1"
             type="number"
-            inputmode="numeric"
           ></ion-input>
         </ion-item>
 
         <ion-item>
           <ion-input
             v-model="c2"
+            inputmode="numeric"
             label="MotorPhase (C2)"
             name="c2"
             placeholder="C2"
             type="number"
-            inputmode="numeric"
           ></ion-input>
         </ion-item>
 
@@ -146,77 +145,77 @@
         <ion-item>
           <ion-input
             v-model="c4"
+            inputmode="numeric"
             label="Throttle (C4)"
             name="c4"
             placeholder="C4"
             type="number"
-            inputmode="numeric"
           ></ion-input>
         </ion-item>
 
         <ion-item>
           <ion-input
             v-model="c5"
+            inputmode="numeric"
             label="Current (C5)"
             name="c5"
             placeholder="C5"
             type="number"
-            inputmode="numeric"
           ></ion-input>
         </ion-item>
 
         <ion-item>
           <ion-input
             v-model="c7"
+            inputmode="numeric"
             label="Cruise (C7)"
             name="c7"
             placeholder="C7"
             type="number"
-            inputmode="numeric"
           ></ion-input>
         </ion-item>
 
         <ion-item>
           <ion-input
             v-model="c12"
+            inputmode="numeric"
             label="UVLO (C12)"
             name="c12"
             placeholder="C12"
             type="number"
-            inputmode="numeric"
           ></ion-input>
         </ion-item>
 
         <ion-item>
           <ion-input
             v-model="c13"
+            inputmode="numeric"
             label="Regenerative (C13)"
             name="c13"
             placeholder="C13"
             type="number"
-            inputmode="numeric"
           ></ion-input>
         </ion-item>
 
         <ion-item>
           <ion-input
             v-model="c14"
+            inputmode="numeric"
             label="PASPower (C14)"
             name="c14"
             placeholder="C14"
             type="number"
-            inputmode="numeric"
           ></ion-input>
         </ion-item>
 
         <ion-item>
           <ion-input
             v-model="handlebarMaxSpeed"
+            inputmode="numeric"
             label="Handlebar Maximum Speed"
             name="handleBarSpeed"
             placeholder="data.displayType === 'kilometer' ? 'km/h' : 'mile/h'"
             type="number"
-            inputmode="numeric"
           ></ion-input>
           <!--TODO  c4必须等于2，才会起作用        -->
         </ion-item>
@@ -224,11 +223,11 @@
         <ion-item>
           <ion-input
             v-model="percent"
+            inputmode="numeric"
             label="FirstLevelPercent (Throttle)"
             name="percent"
             placeholder="percentage"
             type="number"
-            inputmode="numeric"
           ></ion-input>
           <!--TODO  c4必须等于4，才会起作用        -->
         </ion-item>
@@ -236,11 +235,11 @@
         <ion-item>
           <ion-input
             v-model="candidateParam"
+            inputmode="numeric"
             label="Candidate"
             name="candidate"
             placeholder="Signal of PAS"
             type="number"
-            inputmode="numeric"
           ></ion-input>
         </ion-item>
 
@@ -275,8 +274,8 @@
 
 <script lang="ts" setup>
 import {
-  IonButtons,
   IonButton,
+  IonButtons,
   IonCol,
   IonContent,
   IonGrid,
@@ -302,7 +301,6 @@ import { useMessage } from "@/hooks/useMessage";
 import { useSetting } from "@/hooks/useSetting";
 import { useErrorStore } from "@/store/useErrorStore";
 import { storeToRefs } from "pinia";
-import { ref } from "vue";
 
 const settingStore = useSettingStore();
 const errorStore = useErrorStore();
@@ -332,7 +330,7 @@ const {
 } = storeToRefs(settingStore);
 
 const { stopSendMessage } = useMessage();
-const { setMaxSpeed, updateSetting } = useSetting();
+const { updateSetting } = useSetting();
 
 onIonViewWillEnter(() => {
   stopSendMessage();

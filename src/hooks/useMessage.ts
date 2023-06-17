@@ -33,6 +33,14 @@ export function useMessage() {
     setSingleMileage,
     setTotalMileage,
     setAssistance,
+    setRegenative,
+    setUndervoltage,
+    setReverse,
+    setTurnRight,
+    setTurnLeft,
+    setThrottle,
+    setCruise,
+    setBrake,
   } = useDashboardStore();
   const { connectedDevice } = storeToRefs(useBleStore());
   const { write, startNotification, stopNotification, disConnectBle } =
@@ -111,6 +119,8 @@ export function useMessage() {
     );
   };
   const onNotification = (value: DataView) => {
+    // TODO 欠压、反冲电 message[1]
+    // TODO 倒档、转向 message[2]
     const message = dataViewToNumbers(value);
     console.log(chalk.green("onNotification", message));
     getBattery(message);
@@ -118,6 +128,34 @@ export function useMessage() {
     getSingleDistance();
     getAssistance(message);
     checkError(message);
+    computedMessageFirst(message);
+    computedMessageSecond(message);
+    computedMessageSeventh(message);
+  };
+  const computedMessageFirst = (message: number[]) => {
+    const command = message[1];
+    const undervoltage = command & 1; // 是否是欠压
+    const regenative = (command & 2) >> 1; // 是否是反冲电
+    setRegenative(regenative);
+    setUndervoltage(undervoltage);
+  };
+  const computedMessageSecond = (message: number[]) => {
+    const command = message[2];
+    const reverse = (command & 0x40) >> 5; // 是否是倒档
+    const turnRight = command & 1; // 是否是右转
+    const turnLeft = (command & 2) >> 1; // 是否是左转
+    setReverse(reverse);
+    setTurnRight(turnRight);
+    setTurnLeft(turnLeft);
+  };
+  const computedMessageSeventh = (message: number[]) => {
+    const command = message[7];
+    const throttle = command & 3; // 转把状态 1 停止工作，2工作中
+    const cruise = (command & 8) >> 3; // 巡航状态 1 代表巡航
+    const brake = (command & 32) >> 5; // 刹车状态 1代表刹车
+    setThrottle(throttle);
+    setCruise(cruise);
+    setBrake(brake);
   };
   const setBLEName = async (nickname: string) => {
     const command = `AT+NAME=${nickname}\r\n`;
