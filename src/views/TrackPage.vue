@@ -637,7 +637,7 @@ ion-content {
 }
 
 ion-toolbar.dashboard-toolbar {
-  --background: transparent;
+  --background: rgba(0, 0, 0, 0.3);
   --color: white;
 }
 </style>

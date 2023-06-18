@@ -97,11 +97,9 @@ const initWebMap = () => {
         pitch: 2,
         viewMode: "3D", //是否为3D地图模式
         zoom: 17, //初始化地图级别
-        mapStyle: "amap://styles/dark", //设置地图的显示样式
         center: [120.452543, 31.123945], //初始化地图中心点位置
       });
       map.value!.on("complete", () => {
-        map.value!.setMapStyle("amap://styles/dark");
         addStartPositionMarker(120.452543, 31.123945);
       });
     })

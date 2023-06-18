@@ -75,18 +75,9 @@ export function useMessage() {
           numberToUUID(CharacteristicUUID),
           numbersToDataView(writeData.value)
         );
-        // await startNotification(
-        //   connectedDevice.value.deviceId,
-        //   numberToUUID(ServiceUUID),
-        //   numberToUUID(CharacteristicUUID),
-        //   onNotification
-        // );
       } catch (error) {
-        // await presentToast("sendMessage error:" + JSON.stringify(error));
         console.log(chalk.red(`send message error: ${JSON.stringify(error)}`));
         clearInterval(writeInterval);
-        // await initialBle();
-        // updateConnectedDevicePairedStatus(false);
       }
     }, 500);
     await startNotification(
@@ -119,8 +110,8 @@ export function useMessage() {
     );
   };
   const onNotification = (value: DataView) => {
-    // TODO 欠压、反冲电 message[1]
-    // TODO 倒档、转向 message[2]
+    // 欠压、反冲电 message[1]
+    // 倒档、转向 message[2]
     const message = dataViewToNumbers(value);
     console.log(chalk.green("onNotification", message));
     getBattery(message);
@@ -161,9 +152,6 @@ export function useMessage() {
     const command = `AT+NAME=${nickname}\r\n`;
     const bytes = new TextEncoder().encode(command);
     const dataView = new DataView(bytes.buffer);
-    // const hex = dataViewToHexString(dataView) + " d a";
-    // const hexToCommand = hexStringToDataView(hex);
-    debugger;
     await write(
       connectedDevice.value.deviceId,
       numberToUUID(ServiceUUID),

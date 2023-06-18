@@ -17,7 +17,7 @@
         <ion-card-header>
           <ion-card-title class="device-modal__title">
             {{ device.name }}
-            <ion-icon id="present-alert" :icon="createOutline"></ion-icon>
+            <!--            <ion-icon id="present-alert" :icon="createOutline"></ion-icon>-->
           </ion-card-title>
           <ion-card-subtitle>Device Information</ion-card-subtitle>
         </ion-card-header>
@@ -73,12 +73,10 @@ import {
   IonRow,
   IonTitle,
   IonToolbar,
-  IonIcon,
 } from "@ionic/vue";
 import { onMounted, ref } from "vue";
 import { Device } from "@/store/useBleStore";
 import { useBluetoothLe } from "@/hooks/useBluetooth-le";
-import { createOutline } from "ionicons/icons";
 import { useMessage } from "@/hooks/useMessage";
 
 defineProps({

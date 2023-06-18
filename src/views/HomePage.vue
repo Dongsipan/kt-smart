@@ -5,19 +5,26 @@
         <ion-buttons slot="start">
           <ion-icon
             :class="{ 'home-page__battery--undervoltage': undervoltage }"
-            :src="`/assets/icon/battery_${electricQuantity}.svg`"
+            :src="
+              isBatteryAnimate
+                ? batteryIconSource
+                : `/assets/icon/battery_${electricQuantity}.svg`
+            "
             class="home-page__battery"
             style="width: 3.5rem; height: 3rem; margin-left: 0.5rem"
           ></ion-icon>
           <ion-icon
+            v-if="brake"
             :src="`/assets/icon/brake-outline.svg`"
             class="ion-margin-start"
           ></ion-icon>
           <ion-icon
+            v-if="turnLeft"
             :icon="arrowBackOutline"
             class="ion-margin-start"
           ></ion-icon>
           <ion-icon
+            v-if="turnRight"
             :icon="arrowForwardOutline"
             class="ion-margin-start"
           ></ion-icon>
@@ -45,6 +52,7 @@
         :is-assistance="isAssistance"
         :is-km-unit="isKmUnit"
         :speed="speed"
+        :throttle-status="throttle"
       />
 
       <ion-grid>
@@ -135,7 +143,7 @@
             </ion-button>
           </ion-col>
         </ion-row>
-        <div>
+        <div style="display: none">
           {{
             `反冲电: ${regenative},欠压:${undervoltage},倒档: ${reverse},右转: ${turnRight},左转: ${turnLeft},转把状态: ${throttle},巡航状态: ${cruise},刹车状态: ${brake}`
           }}
@@ -176,7 +184,7 @@ import {
   arrowForwardOutline,
   bluetooth,
 } from "ionicons/icons";
-import { ComponentPublicInstance, computed, onMounted, ref } from "vue";
+import { ComponentPublicInstance, computed, onMounted, ref, watch } from "vue";
 import DashboardComponent from "@/components/DashboardComponent.vue";
 import { useDashboardStore } from "@/store/useDashboardStore";
 import { useSetting } from "@/hooks/useSetting";
@@ -284,6 +292,7 @@ const addSpeed = () => {
   const position = getGearPosition.value + 1;
   changeGearPosition(position);
   sendMessage();
+  // batteryAnimate();
 };
 const reduceSpeed = () => {
   if (getGearPosition.value <= 0) return;
@@ -304,6 +313,41 @@ const isKmUnit = computed(() => {
 const isAssistance = computed(() => {
   return assistance.value > 0;
 });
+watch(regenative, (value) => {
+  if (value === 1) {
+    batteryAnimate();
+  }
+});
+const isBatteryAnimate = ref(false);
+const batteryIconSource = ref("/assets/icon/battery_0.svg");
+const batteryAnimate = () => {
+  isBatteryAnimate.value = true;
+  const batteryIcons = [
+    "/assets/icon/battery_0.svg",
+    "/assets/icon/battery_1.svg",
+    "/assets/icon/battery_2.svg",
+    "/assets/icon/battery_3.svg",
+    "/assets/icon/battery_4.svg",
+  ];
+  let index = 0;
+  let count = 0;
+
+  const printBatteryIcon = () => {
+    console.log(batteryIcons[index]);
+    batteryIconSource.value = batteryIcons[index];
+    index++;
+    if (index === batteryIcons.length) {
+      index = 0;
+      count++;
+    }
+    if (count === 2) {
+      clearInterval(intervalId);
+      isBatteryAnimate.value = false;
+    }
+  };
+
+  const intervalId = setInterval(printBatteryIcon, 500);
+};
 </script>
 <style lang="scss" scoped>
 @keyframes twinkle {
@@ -325,7 +369,7 @@ const isAssistance = computed(() => {
   }
 
   .home-page__bluetooth-button {
-    &ion-button {
+    ion-icon {
       font-size: 2.2rem;
     }
   }
@@ -365,7 +409,9 @@ const isAssistance = computed(() => {
 
   ion-row {
     margin-top: 1rem;
+    &:first-child {
+      margin-top: 0;
+    }
   }
 }
 </style>
-<!--TODO 千米位置调到顶部、添加转把状态，转把状态优先展示-->

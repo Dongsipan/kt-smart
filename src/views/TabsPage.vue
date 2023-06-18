@@ -18,7 +18,7 @@
           <ion-label>Info</ion-label>
           <ion-icon
             :class="hasError ? 'tabs-icon__alert--on' : 'tabs-icon__alert--off'"
-            :icon="notificationsOutline"
+            :icon="notifications"
             class="tabs-icon__alert tabs-icon__alert--on"
             color="danger"
             size="mini"
@@ -46,7 +46,7 @@ import {
 import {
   bicycle,
   infinite,
-  notificationsOutline,
+  notifications,
   settings,
   speedometer,
 } from "ionicons/icons";

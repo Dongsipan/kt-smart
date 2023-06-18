@@ -1,7 +1,7 @@
 <template>
-  <ion-grid class="no-padding bg-black">
+  <ion-grid class="ion-padding-top bg-black">
     <ion-row>
-      <ion-col class="no-padding">
+      <ion-col class="ion-no-padding">
         <div id="chartEl" class="dashboard">
           <svg id="svgEl">
             <defs>
@@ -20,14 +20,17 @@
           <ion-grid class="speed-container">
             <ion-row>
               <ion-col size="12">
-                <span>{{ speed }}</span>
-                <span>{{ unit }}</span>
+                <div class="speed-container__unit">{{ unit }}</div>
+                <div class="speed-container__speed">{{ speed }}</div>
               </ion-col>
             </ion-row>
           </ion-grid>
           <ion-grid class="info-container">
-            <ion-row v-if="isAssistance">
-              <ion-col size="12"> ASSIST </ion-col>
+            <ion-row v-if="throttleStatus === 2">
+              <ion-col size="12"> Throttle </ion-col>
+            </ion-row>
+            <ion-row v-if="isAssistance && throttleStatus !== 2">
+              <ion-col size="12"> Assist </ion-col>
             </ion-row>
             <ion-row>
               <ion-col size="12">
@@ -61,6 +64,10 @@ const props = defineProps({
   isKmUnit: {
     type: Boolean,
     default: false,
+  },
+  throttleStatus: {
+    type: Number,
+    default: 1,
   },
 });
 
@@ -239,15 +246,20 @@ watch(
     width: 100%;
     height: 100%;
     color: #fff;
-    font-size: 6rem;
 
     & ion-col {
       position: relative;
-
-      & span:last-child {
-        position: absolute;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      .speed-container__unit {
         font-size: 1rem;
-        bottom: 1.3rem;
+        text-align: center;
+      }
+      .speed-container__speed {
+        font-size: 6rem;
+        line-height: 5rem;
+        text-align: center;
       }
     }
   }
@@ -266,53 +278,16 @@ watch(
 
     ion-row:first-child {
       font-size: 1rem;
-      padding: 0.5rem 0 0;
     }
 
     ion-row:last-child {
       font-size: 3rem;
+      line-height: 3rem;
 
       ion-col {
         padding: 0;
       }
     }
   }
-
-  .text-area {
-    position: absolute;
-    bottom: 0;
-    width: 100%;
-    height: 100%;
-    font-size: 2.5rem;
-    text-align: center;
-    color: #fff;
-
-    .speed-container {
-      position: relative;
-
-      .speed {
-        font-size: 7.5rem;
-      }
-
-      .unit {
-        position: absolute;
-        bottom: 1.25rem;
-        font-size: 1.75rem;
-      }
-    }
-
-    .assistance {
-      font-size: 1rem;
-      padding: 0 0 0.875rem;
-    }
-
-    .txt-stall {
-      font-size: 2.5rem;
-    }
-  }
-}
-
-.no-padding {
-  padding: 0;
 }
 </style>

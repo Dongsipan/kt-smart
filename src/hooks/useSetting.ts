@@ -29,7 +29,6 @@ export function useSetting() {
     percent,
     handlebarMaxSpeed,
   } = storeToRefs(useSettingStore());
-  const { setDisplayType } = useSettingStore();
   const { gearPosition, lightStatus } = storeToRefs(dashboardStore);
   const { setGearPosition, setLightStatus } = useDashboardStore();
   // const { sendMessage } = useMessage()
@@ -41,7 +40,7 @@ export function useSetting() {
   const setMaxSpeed = () => {
     const speed = Number(maxSpeed.value) - 10;
     const dimensionMode = getDimension();
-    let expand = 0x0;
+    let expand: number;
     let secondData = 0x0;
     let limitSpeed = 0x0;
     if (dimensionMode.code === 1) {
@@ -217,7 +216,6 @@ export function useSetting() {
     writeData.value[9] = Int2Bytes(handlebarMaxSpeed.value);
     updateFiveIndexOfData();
   };
-  const setUnitDisplayType = () => {};
   const Int2Bytes = (value: number | string) => {
     if (typeof value === "string") {
       value = Number(value);
@@ -254,7 +252,6 @@ export function useSetting() {
     setPercent();
     setHandlebar();
     setMaxSpeed();
-
     // setP3() setP4() => 引用 setMaxSpeed
   };
 
@@ -265,17 +262,6 @@ export function useSetting() {
     changeGearPosition,
     changeLightStatus,
     setMaxSpeed,
-    // setP1,
-    // setP2,
-    // setP3,
-    // setP4,
-    // setP5,
-    // setC1C2,
-    // setC5C14,
-    // setC4C7C12,
-    // setC13,
-    // setPercent,
-    // setHandlebar,
     writeData,
     updateSetting,
   };
