@@ -171,7 +171,7 @@ const addPointToPath = (longitude: number, latitude: number) => {
   }
   map.value!.setCenter(point);
 };
-const setPolylineByPath = (path: LngLatLike) => {
+const setPolylineByPath = (path: any) => {
   polyline.value!.setPath(path);
   map.value!.setCenter(path[path.length - 1]);
 };

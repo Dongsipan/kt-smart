@@ -1,7 +1,8 @@
 {
   "name": "KT Smart Bicycle",
   "integrations": {
-    "capacitor": {}
+    "capacitor": {},
+    "cordova": {}
   },
   "type": "vue-vite",
   "id": "20ed80fe"
