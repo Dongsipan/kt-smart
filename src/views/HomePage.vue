@@ -4,18 +4,35 @@
       <ion-toolbar>
         <ion-buttons slot="start">
           <ion-icon
+            :class="{ 'home-page__battery--undervoltage': undervoltage }"
             :src="`/assets/icon/battery_${electricQuantity}.svg`"
             class="home-page__battery"
-            style="width: 2.5rem; height: 2rem; margin-left: 0.5rem"
+            style="width: 3.5rem; height: 3rem; margin-left: 0.5rem"
+          ></ion-icon>
+          <ion-icon
+            :src="`/assets/icon/brake-outline.svg`"
+            class="ion-margin-start"
+          ></ion-icon>
+          <ion-icon
+            :icon="arrowBackOutline"
+            class="ion-margin-start"
+          ></ion-icon>
+          <ion-icon
+            :icon="arrowForwardOutline"
+            class="ion-margin-start"
           ></ion-icon>
         </ion-buttons>
         <!--        <ion-title>Dashboard</ion-title>-->
         <ion-buttons slot="end">
-          <ion-button @click="toBluetoothPage">
+          <ion-button
+            class="home-page__bluetooth-button"
+            size="large"
+            @click="toBluetoothPage"
+          >
             <ion-icon
               :color="connectedDevice.isPaired ? 'primary' : 'light'"
               :icon="bluetooth"
-              class="bluetooth"
+              class="bluetooth ion-padding-start"
             />
           </ion-button>
         </ion-buttons>
@@ -120,7 +137,7 @@
         </ion-row>
         <div>
           {{
-            `regenative: ${regenative},undervoltage:${undervoltage},reverse: ${reverse},turnRight: ${turnRight},turnLeft: ${turnLeft},throttle: ${throttle},cruise: ${cruise},brake: ${brake}`
+            `反冲电: ${regenative},欠压:${undervoltage},倒档: ${reverse},右转: ${turnRight},左转: ${turnLeft},转把状态: ${throttle},巡航状态: ${cruise},刹车状态: ${brake}`
           }}
         </div>
       </ion-grid>
@@ -154,7 +171,11 @@ import {
   IonToolbar,
   onIonViewDidEnter,
 } from "@ionic/vue";
-import { bluetooth } from "ionicons/icons";
+import {
+  arrowBackOutline,
+  arrowForwardOutline,
+  bluetooth,
+} from "ionicons/icons";
 import { ComponentPublicInstance, computed, onMounted, ref } from "vue";
 import DashboardComponent from "@/components/DashboardComponent.vue";
 import { useDashboardStore } from "@/store/useDashboardStore";
@@ -285,9 +306,28 @@ const isAssistance = computed(() => {
 });
 </script>
 <style lang="scss" scoped>
+@keyframes twinkle {
+  0% {
+    opacity: 0.8;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
 .home-page {
   .home-page__battery {
     width: 2.5rem;
+
+    &.home-page__battery--undervoltage {
+      animation: twinkle 0.5s infinite alternate;
+    }
+  }
+
+  .home-page__bluetooth-button {
+    &ion-button {
+      font-size: 2.2rem;
+    }
   }
 
   .text-align-center {
@@ -305,7 +345,7 @@ const isAssistance = computed(() => {
   }
 
   ion-icon {
-    font-size: 2rem;
+    font-size: 2.5rem;
   }
 
   ion-toolbar {
