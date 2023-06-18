@@ -43,6 +43,16 @@ const routes: Array<RouteRecordRaw> = [
     path: "/bluetooth",
     component: BluetoothPage,
   },
+  {
+    name: "histories",
+    path: "/track/histories",
+    component: () => import("@/views/TrackHistoryListPage.vue"),
+  },
+  {
+    name: "history",
+    path: "/track/history/:id",
+    component: () => import("@/views/TrackHistoryPage.vue"),
+  },
 ];
 
 const router = createRouter({

@@ -7,6 +7,9 @@
           <ion-button @click="setMapToCenter">
             <ion-icon :icon="locateOutline"></ion-icon>
           </ion-button>
+          <ion-button @click="toHistoriesPage">
+            <ion-icon :icon="footstepsOutline"></ion-icon>
+          </ion-button>
         </ion-buttons>
       </ion-toolbar>
     </ion-header>
@@ -95,13 +98,6 @@
             </div>
           </div>
         </div>
-        <ion-alert
-          :buttons="alertButtons"
-          :is-open="isOpenFinishAlert"
-          header="End cycling"
-          sub-header="Whether to end cycling"
-          @didDismiss="setOpenFinishAlert(false)"
-        ></ion-alert>
       </ion-toolbar>
     </ion-footer>
     <ion-modal ref="modal" trigger="open-modal">
@@ -152,6 +148,7 @@
 
 <script lang="ts" setup>
 import {
+  alertController,
   IonAlert,
   IonButton,
   IonButtons,
@@ -168,10 +165,16 @@ import {
   IonTextarea,
   IonTitle,
   IonToolbar,
+  onIonViewDidEnter,
 } from "@ionic/vue";
-import { flashOutline, locateOutline } from "ionicons/icons";
+import {
+  flashOutline,
+  footstepsOutline,
+  locateOutline,
+  mapOutline,
+} from "ionicons/icons";
 import AMapContainer from "@/components/AMapContainer.vue";
-import { computed, ref } from "vue";
+import { computed, onMounted, ref } from "vue";
 import { vOnLongPress } from "@vueuse/components";
 import { useGeoLocation } from "@/hooks/useGeoLocation";
 import { useToast } from "@/hooks/useToast";
@@ -179,159 +182,20 @@ import { PathSmoothTool } from "@/services/PathSmoothTool";
 import { usePositionStore } from "@/store/usePositionStore";
 import { useTimer } from "@/hooks/useTimer";
 import { Position } from "@capacitor/geolocation";
-
-const mock = [
-  [120.452928, 31.124645],
-  [120.452914, 31.1246371],
-  [120.452904, 31.124637],
-  [120.452891, 31.124633],
-  [120.452877, 31.124628],
-  [120.452861, 31.124626],
-  [120.452853, 31.124621],
-  [120.452839, 31.12461],
-  [120.452829, 31.124606],
-  [120.45282, 31.124595],
-  [120.452818, 31.12459],
-  [120.45282, 31.124586],
-  [120.452829, 31.124584],
-  [120.452837, 31.124578],
-  [120.452827, 31.124576],
-  [120.452834, 31.124581],
-  [120.452834, 31.124584],
-  [120.452832, 31.124586],
-  [120.452833, 31.124586],
-  [120.452834, 31.124583],
-  [120.452821, 31.124581],
-  [120.452814, 31.124571],
-  [120.452806, 31.12456],
-  [120.452804, 31.124548],
-  [120.452807, 31.124527],
-  [120.452808, 31.124505],
-  [120.45282, 31.124595],
-  [120.452818, 31.12459],
-  [120.45282, 31.124586],
-  [120.452829, 31.124584],
-  [120.452837, 31.124578],
-  [120.452827, 31.124576],
-  [120.452834, 31.124581],
-  [120.452834, 31.124584],
-  [120.452832, 31.124586],
-  [120.452833, 31.124586],
-  [120.452834, 31.124583],
-  [120.452821, 31.124581],
-  [120.452814, 31.124571],
-  [120.452806, 31.12456],
-  [120.452804, 31.124548],
-  [120.452807, 31.1, 24527],
-  [120.45282, 31.124595],
-  [120.452818, 31.12459],
-  [120.45282, 31.124586],
-  [120.452829, 31.124584],
-  [120.452837, 31.124578],
-  [120.452827, 31.124576],
-  [120.452834, 31.124581],
-  [120.452834, 31.124584],
-  [120.452832, 31.124586],
-  [120.452833, 31.124586],
-  [120.452834, 31.124583],
-  [120.452821, 31.124581],
-  [120.453762, 31.124468],
-  [120.453781, 31.124464],
-  [120.453798, 31.124457],
-  [120.453808, 31.124461],
-  [120.45383, 31.124462],
-  [120.453854, 31.1244571],
-  [120.45387, 31.124458],
-  [120.453894, 31.124461],
-  [120.453911, 31.124462],
-  [120.453925, 31.124464],
-  [120.453934, 31.12446],
-  [120.453936, 31.124473],
-  [120.452295, 31.124311],
-  [120.452312, 31.124299],
-  [120.45223, 31.124312],
-  [120.45223, 31.124312],
-  [120.452367, 31.12425],
-  [120.45255, 31.1243061],
-  [120.452295, 31.124311],
-  [120.452312, 31.124299],
-  [120.45223, 31.124312],
-  [120.45223, 31.124312],
-  [120.452367, 31.12425],
-  [120.45255, 31.124306],
-  [120.452418, 31.124187],
-  [120.452425, 31.124202],
-  [120.452457, 31.124192],
-  [120.452482, 31.124188],
-  [120.452505, 31.12417],
-  [120.452521, 31.124191],
-  [120.45253, 31.1241921],
-  [120.452367, 31.12425],
-  [120.45255, 31.124306],
-  [120.452418, 31.124187],
-  [120.452425, 31.1242021],
-  [120.452457, 31.124192],
-  [120.452482, 31.124188],
-  [120.452505, 31.12417],
-  [120.452521, 31.124191],
-  [120.452533, 31.124192],
-  [120.452511, 31.124188],
-  [120.452548, 31.124195],
-  [120.452554, 31.124189],
-  [120.452565, 31.124191],
-  [120.452586, 31.124194],
-  [120.452577, 31.124192],
-  [120.452598, 31.124196],
-  [120.452612, 31.124195],
-  [120.452623, 31.124196],
-  [120.452632, 31.124196],
-  [120.452644, 31.124197],
-  [120.452577, 31.124192],
-  [120.452598, 31.124196],
-  [120.452612, 31.124195],
-  [120.452623, 31.124196],
-  [120.452632, 31.124196],
-  [120.452644, 31.124197],
-  [120.452655, 31.124195],
-  [120.452702, 31.1242],
-  [120.452716, 31.124203],
-  [120.452728, 31.124205],
-  [120.452741, 31.12421],
-  [120.452753, 31.124212],
-  [120.452766, 31.124213],
-  [120.452778, 31.124215],
-  [120.452786, 31.124216],
-  [120.4528, 31.124216],
-  [120.452821, 31.124238],
-  [120.452822, 31.124242],
-  [120.452837, 31.124242],
-  [120.452846, 31.124242],
-  [120.452861, 31.12424],
-  [120.452877, 31.124246],
-  [120.452887, 31.124253],
-  [120.452901, 31.124256],
-  [120.452913, 31.124258],
-  [120.452926, 31.124255],
-  [120.452939, 31.124268],
-  [120.452957, 31.124269],
-  [120.452971, 31.124272],
-  [120.452986, 31.124274],
-  [120.452999, 31.124278],
-  [120.453014, 31.124282],
-  [120.453031, 31.124288],
-  [120.453045, 31.124296],
-  [120.453057, 31.124301],
-  [120.453074, 31.124303],
-  [120.453089, 31.124309],
-];
+import { useRouter } from "vue-router";
+import { Capacitor } from "@capacitor/core";
 
 const mapRef = ref(null) as any;
 
 const positionStore = usePositionStore();
 const { watchCurrentPosition, clearWatch } = useGeoLocation();
 const { presentToast } = useToast();
+const router = useRouter();
 const setMapToCenter = () => {
   mapRef.value.setMapToCenter();
+};
+const toHistoriesPage = () => {
+  router.push({ name: "histories" });
 };
 const geoLocationData = [] as Position[];
 const path = [] as AMap.LngLat[]; // ref<AMap.LngLat[]>([]);
@@ -364,6 +228,14 @@ const averageSpeedToKm = computed(() => {
 const altitudeToFixed = computed(() => {
   return currentAltitude.value ? currentAltitude.value?.toFixed(1) : 0;
 });
+const isNative = Capacitor.isNativePlatform();
+onMounted(() => {
+  if (isNative) {
+    mapRef.value.initMap();
+  } else {
+    mapRef.value.initWebMap();
+  }
+});
 const startRide = () => {
   setMapToCenter();
   mapRef.value.initPolyline();
@@ -371,14 +243,6 @@ const startRide = () => {
   toggleTimer();
   // mockPath();
   watchPosition();
-};
-const mockPath = () => {
-  // mock
-  mock.forEach((item) => {
-    path.push(new window.AMap.LngLat(item[0], item[1]));
-  });
-  smoothedPath = pathSmoothTool.pathOptimize(path);
-  mapRef.value.setPolylineByPath(smoothedPath);
 };
 const watchPosition = () => {
   watchCurrentPosition(async (geolocationPosition) => {
@@ -407,6 +271,7 @@ const watchPosition = () => {
 /*
  * {"timestamp":1686647786114,"coords":{"altitude":32.022853851318359,"heading":-1,"latitude":31.298159747161719,"altitudeAccuracy":10.407867431640625,"longitude":120.54356498135141,"accuracy":46,"speed":-1}}
  * */
+
 const stopRide = () => {
   isStopRiding.value = true;
   toggleTimer();
@@ -423,10 +288,42 @@ const finishRide = () => {
   isStopRiding.value = false;
   toggleTimer();
   clearWatch();
-  const lastPosition = smoothedPath[smoothedPath.length - 1];
-  mapRef.value.addEndPositionMarker(lastPosition.lng, lastPosition.lat);
-  saveHistory();
+  if (smoothedPath.length < 10) {
+    presentNotSaveAlert();
+  } else {
+    const lastPosition = smoothedPath[smoothedPath.length - 1];
+    mapRef.value.addEndPositionMarker(lastPosition.lng, lastPosition.lat);
+    saveHistory();
+  }
 };
+const presentFinishAlert = async () => {
+  const alert = await alertController.create({
+    header: "End cycling",
+    subHeader: "Whether to end cycling",
+    buttons: alertButtons,
+  });
+
+  await alert.present();
+};
+const presentNotSaveAlert = async () => {
+  const alert = await alertController.create({
+    header: "Alert",
+    subHeader: "The distance is too short and will not be stored",
+    buttons: ["OK"],
+  });
+
+  await alert.present();
+};
+const alertButtons = [
+  "Cancel",
+  {
+    text: "OK",
+    role: "confirm",
+    handler: () => {
+      finishRide();
+    },
+  },
+];
 /*获取最高海拔、最大速度*/
 const maxSpeed = ref(0);
 const maxAltitude = ref(0);
@@ -490,22 +387,7 @@ const saveHistory = () => {
 };
 
 const onLongPressCallbackDirective = (e: PointerEvent) => {
-  setOpenFinishAlert(true);
-};
-
-const alertButtons = [
-  "Cancel",
-  {
-    text: "OK",
-    role: "confirm",
-    handler: () => {
-      finishRide();
-    },
-  },
-];
-const isOpenFinishAlert = ref(false);
-const setOpenFinishAlert = (isOpen: boolean) => {
-  isOpenFinishAlert.value = isOpen;
+  presentFinishAlert();
 };
 
 const modal = ref(null) as any;

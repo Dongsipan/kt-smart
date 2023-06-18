@@ -75,8 +75,11 @@ export function useMessage() {
           numberToUUID(CharacteristicUUID),
           numbersToDataView(writeData.value)
         );
-      } catch (error) {
+      } catch (error: any) {
         console.log(chalk.red(`send message error: ${JSON.stringify(error)}`));
+        if (error.errorMessage === "Not connected to device.") {
+          await disConnectBle(connectedDevice.value, false);
+        }
         clearInterval(writeInterval);
       }
     }, 500);

@@ -25,7 +25,7 @@
           ></ion-icon>
         </ion-tab-button>
         <ion-tab-button href="/tabs/track" tab="track">
-          <ion-icon :icon="infinite" aria-hidden="true" />
+          <ion-icon :icon="mapOutline" aria-hidden="true" />
           <ion-label>Track</ion-label>
         </ion-tab-button>
       </ion-tab-bar>
@@ -46,6 +46,7 @@ import {
 import {
   bicycle,
   infinite,
+  mapOutline,
   notifications,
   settings,
   speedometer,

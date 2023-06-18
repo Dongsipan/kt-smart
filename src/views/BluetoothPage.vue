@@ -67,13 +67,13 @@
         </ion-item-group>
       </ion-list>
     </ion-content>
-    <ion-alert
-      :buttons="alertButtons"
-      :is-open="isOpenAlert"
-      header="Alert"
-      sub-header="Do you want to disconnect the Bluetooth!"
-      @didDismiss="setOpenAlert(false)"
-    ></ion-alert>
+    <!--    <ion-alert-->
+    <!--      :buttons="alertButtons"-->
+    <!--      :is-open="isOpenAlert"-->
+    <!--      header="Alert"-->
+    <!--      sub-header="Do you want to disconnect the Bluetooth!"-->
+    <!--      @didDismiss="setOpenAlert(false)"-->
+    <!--    ></ion-alert>-->
     <device-manage-modal
       ref="deviceManageModal"
       :presentingElement="presentingElement"
@@ -103,6 +103,7 @@ import {
   IonTitle,
   IonToolbar,
   IonSpinner,
+  alertController,
 } from "@ionic/vue";
 import { bluetooth, informationCircle, refresh, trash } from "ionicons/icons";
 import { Device, useBleStore } from "@/store/useBleStore";
@@ -147,7 +148,7 @@ const selectDevice = async (device: Device) => {
 const changePairedStatus = async (device: Device) => {
   if (device.isPaired) {
     // 确认是否断开连接
-    setOpenAlert(true);
+    await presentAlert();
   } else {
     await connectBle(device, false);
   }
@@ -155,11 +156,6 @@ const changePairedStatus = async (device: Device) => {
 const deletePairedDevice = (device: Device) => {
   disConnectBle(device, true);
   scan();
-};
-
-const isOpenAlert = ref(false);
-const setOpenAlert = (value: boolean) => {
-  isOpenAlert.value = value;
 };
 const alertButtons = [
   "Cancel",
@@ -170,6 +166,15 @@ const alertButtons = [
     },
   },
 ];
+const presentAlert = async () => {
+  const alert = await alertController.create({
+    header: "Alert",
+    subHeader: "Do you want to disconnect the Bluetooth!",
+    buttons: alertButtons,
+  });
+
+  await alert.present();
+};
 const clearLocalStorage = () => {
   window.localStorage.clear();
 };

@@ -52,8 +52,8 @@
 		<string>bluetooth-central</string>
 	</array>
 	<key>NSLocationAlwaysUsageDescription</key>
-	<string>是否允许在使用过程中获取您的定位信息用于展示您当前位置？</string>
+	<string>Is it allowed to obtain your location information during use to display your current location?</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>是否允许在使用过程中获取您的定位信息用于展示您当前位置？</string>
+	<string>Is it allowed to obtain your location information during use to display your current location?</string>
 </dict>
 </plist>

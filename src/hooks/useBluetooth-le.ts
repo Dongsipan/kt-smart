@@ -103,7 +103,6 @@ export function useBluetoothLe() {
   let retryNum = 3;
   const connectBle = async (device: Device, isNewDevice = true) => {
     try {
-      debugger;
       // updateConnectedDevicePairingStatus(true);
       if (device.deviceId !== connectedDevice.deviceId) {
         if (connectedDevice.isPaired) {
