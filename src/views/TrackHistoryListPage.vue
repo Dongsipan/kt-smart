@@ -19,7 +19,7 @@
           <ion-label>{{ dateFormat(item.id) }}</ion-label>
         </ion-item>
       </ion-list>
-      <ion-list>
+      <ion-list v-else>
         <ion-item> No Data </ion-item>
       </ion-list>
     </ion-content>

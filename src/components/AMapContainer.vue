@@ -117,10 +117,16 @@ const initTrack = async (path: [number, number][]) => {
 };
 const addStartPositionMarker = (lng: number, lat: number) => {
   const lnglat = new window.AMap.LngLat(lng, lat);
+  if (startMarker.value) {
+    map.value?.remove(startMarker.value as any);
+  }
   setMarker(lnglat, LocationStartIcon, startMarker.value!);
 };
 const addEndPositionMarker = (lng: number, lat: number) => {
   const lnglat = new window.AMap.LngLat(lng, lat);
+  if (endMarker.value) {
+    map.value?.remove(endMarker.value as any);
+  }
   setMarker(lnglat, LocationEndIcon, endMarker.value!);
 };
 const setMarker = (position: AMap.LngLat, image: any, marker: AMap.Marker) => {
