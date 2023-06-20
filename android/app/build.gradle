@@ -1,10 +1,10 @@
 apply plugin: 'com.android.application'
 
 android {
-    namespace "dongsipan.smartbicycle"
+    namespace "com.dongsipan.smartbicycle"
     compileSdkVersion rootProject.ext.compileSdkVersion
     defaultConfig {
-        applicationId "dongsipan.smartbicycle"
+        applicationId "com.dongsipan.smartbicycle"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1

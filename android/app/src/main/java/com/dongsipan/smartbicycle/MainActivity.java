@@ -1,4 +1,4 @@
-package dongsipan.smartbicycle;
+package com.dongsipan.smartbicycle;
 
 import com.getcapacitor.BridgeActivity;
 
