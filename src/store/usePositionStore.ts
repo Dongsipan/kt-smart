@@ -4,10 +4,11 @@ import { Position } from "@capacitor/geolocation";
 export interface Track {
   id: number;
   path: AMap.LngLat[];
-  maxSpeed: number;
-  maxAltitude: number;
-  distance: number;
-  time: number;
+  maxSpeed: string | number;
+  maxAltitude: string | number;
+  averageSpeed: string | number;
+  distance: string | number;
+  time: string;
 }
 
 export const usePositionStore = defineStore("position", {

@@ -9,15 +9,18 @@
       </ion-toolbar>
     </ion-header>
     <ion-content :fullscreen="true">
-      <ion-list>
+      <ion-list v-if="historyTrack.length">
         <ion-item
           v-for="item in historyTrack"
           :key="item.id"
           @click="toHistoryPage(item.id)"
         >
-          <ion-icon :icon="mapOutline" slot="start" />
+          <ion-icon slot="start" :icon="mapOutline" />
           <ion-label>{{ dateFormat(item.id) }}</ion-label>
         </ion-item>
+      </ion-list>
+      <ion-list>
+        <ion-item> No Data </ion-item>
       </ion-list>
     </ion-content>
   </ion-page>

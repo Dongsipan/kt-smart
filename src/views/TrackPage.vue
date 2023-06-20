@@ -1,5 +1,5 @@
 <template>
-  <ion-page>
+  <ion-page class="track-page">
     <ion-header>
       <ion-toolbar>
         <ion-title>Track</ion-title>
@@ -74,12 +74,12 @@
                 </ion-button>
               </template>
               <div class="dashboard-main__data">
-                <div>mileage</div>
-                <div>--</div>
+                <div>Distance</div>
+                <div>{{ distanceToKm || "--" }}--</div>
               </div>
             </div>
             <div class="dashboard-main__data dashboard-main__data--outer">
-              <div>speed</div>
+              <div>Speed</div>
               <div>{{ speedToKm || "--" }}</div>
             </div>
           </div>
@@ -90,7 +90,7 @@
             </div>
             <div class="dashboard-info__data">
               <div>Extreme speed</div>
-              <div>{{ maxSpeed || "--" }}</div>
+              <div>{{ maxSpeedToKm || "--" }}</div>
             </div>
             <div class="dashboard-info__data">
               <div>Uniform speed</div>
@@ -149,7 +149,6 @@
 <script lang="ts" setup>
 import {
   alertController,
-  IonAlert,
   IonButton,
   IonButtons,
   IonContent,
@@ -165,14 +164,8 @@ import {
   IonTextarea,
   IonTitle,
   IonToolbar,
-  onIonViewDidEnter,
 } from "@ionic/vue";
-import {
-  flashOutline,
-  footstepsOutline,
-  locateOutline,
-  mapOutline,
-} from "ionicons/icons";
+import { flashOutline, footstepsOutline, locateOutline } from "ionicons/icons";
 import AMapContainer from "@/components/AMapContainer.vue";
 import { computed, onMounted, ref } from "vue";
 import { vOnLongPress } from "@vueuse/components";
@@ -220,10 +213,20 @@ const speedToKm = computed(() => {
     : 0;
 });
 
+const maxSpeedToKm = computed(() => {
+  return maxSpeed.value && maxSpeed.value > 1
+    ? (maxSpeed.value * 3.6).toFixed(1)
+    : 0;
+});
+
 const averageSpeedToKm = computed(() => {
-  return currentAverageSpeed.value && currentAverageSpeed.value < 1
+  return currentAverageSpeed.value && currentAverageSpeed.value > 1
     ? (currentAverageSpeed.value * 3.6).toFixed(1)
     : 0;
+});
+
+const distanceToKm = computed(() => {
+  return currentDistance.value ? (currentDistance.value / 1000).toFixed(1) : 0;
 });
 const altitudeToFixed = computed(() => {
   return currentAltitude.value ? currentAltitude.value?.toFixed(1) : 0;
@@ -265,7 +268,6 @@ const watchPosition = () => {
     mapRef.value.setPolylineByPath(smoothedPath); // 绘制轨迹
     getMaxData(); // 从GPS数据中计算最大速度、最高海拔
     calculateAverageSpeed(); // 计算平均速度
-    currentDistance.value = mapRef.value.getPolyLineLength();
   });
 };
 /*
@@ -372,16 +374,17 @@ const calculateAverageSpeed = () => {
   // 计算平均速度（单位：米/秒）
   const averageSpeed = totalDistance / totalTime;
   currentAverageSpeed.value = averageSpeed;
+  currentDistance.value = totalDistance;
 };
 const saveHistory = () => {
-  const distance = mapRef.value.getPolyLineLength();
   const history = {
     id: new Date().valueOf(),
     path: smoothedPath,
-    maxSpeed: maxSpeed.value,
-    maxAltitude: maxAltitude.value,
-    distance: distance,
-    time: elapsedTime.value,
+    maxSpeed: maxSpeedToKm.value,
+    maxAltitude: altitudeToFixed.value,
+    averageSpeed: averageSpeedToKm.value,
+    distance: distanceToKm.value.toString(),
+    time: formatTime.value,
   };
   positionStore.addHistoryTrack(history);
 };
@@ -451,69 +454,72 @@ const createSVGPath = (
   return path;
 };
 </script>
-<style lang="scss" scoped>
-ion-content {
-  position: relative;
-}
+<style lang="scss">
+.track-page {
+  ion-content {
+    position: relative;
+  }
 
-.dashboard {
-  display: flex;
-  flex-direction: column;
-  //position: absolute;
-  //bottom: 50px;
-  //width: 100%;
-  background-color: transparent;
-  backdrop-filter: blur(4px);
-  color: #fff;
-
-  .dashboard-main {
+  .dashboard {
     display: flex;
-    justify-content: space-around;
+    flex-direction: column;
+    //position: absolute;
+    //bottom: 50px;
+    //width: 100%;
+    background-color: transparent;
+    backdrop-filter: blur(4px);
+    color: #fff;
 
-    .dashboard-main__action {
-      position: relative;
-      width: 150px;
-      height: 150px;
+    .dashboard-main {
+      display: flex;
+      justify-content: space-around;
 
-      #dashboard__action-outer {
-        position: absolute;
-        transform: rotate(130deg);
+      .dashboard-main__action {
+        position: relative;
+        width: 150px;
+        height: 150px;
+
+        #dashboard__action-outer {
+          position: absolute;
+          transform: rotate(130deg);
+        }
+
+        .dashboard-main__action-trigger {
+          position: relative;
+          width: 80px;
+          height: 80px;
+          border-radius: 50%;
+          transform: translate(36px, 8px);
+
+          span {
+            color: #fff;
+          }
+        }
       }
 
-      .dashboard-main__action-trigger {
-        position: relative;
-        width: 80px;
-        height: 80px;
-        border-radius: 50%;
-        transform: translate(36px, 8px);
+      .dashboard-main__data {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin-top: 1rem;
 
-        span {
-          color: #fff;
+        &.dashboard-main__data--outer {
+          margin-top: 2.5rem;
         }
       }
     }
 
-    .dashboard-main__data {
+    .dashboard-info {
+      height: 50px;
       display: flex;
-      flex-direction: column;
-      align-items: center;
-      margin-top: 1rem;
+      justify-content: space-around;
 
-      &.dashboard-main__data--outer {
-        margin-top: 2.5rem;
+      .dashboard-info__data {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        flex: 1;
       }
-    }
-  }
-
-  .dashboard-info {
-    height: 50px;
-    display: flex;
-    justify-content: space-around;
-
-    .dashboard-info__data {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
     }
   }
 }
