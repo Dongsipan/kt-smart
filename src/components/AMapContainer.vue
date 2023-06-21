@@ -1,14 +1,14 @@
 <template>
-  <div class="amap-container" :id="container"></div>
+  <div :id="container" class="amap-container"></div>
 </template>
 
 <script lang="ts" setup>
 import AMapLoader from "@amap/amap-jsapi-loader";
-import { onMounted, shallowRef, UnwrapRef } from "vue";
+import { shallowRef } from "vue";
 import { useGeoLocation } from "@/hooks/useGeoLocation";
 import { Capacitor } from "@capacitor/core";
 import { useToast } from "@/hooks/useToast";
-import { Track, usePositionStore } from "@/store/usePositionStore";
+import { usePositionStore } from "@/store/usePositionStore";
 import { storeToRefs } from "pinia";
 import LocationStartIcon from "@/assets/icon/location-start.png";
 import LocationEndIcon from "@/assets/icon/location-end.png";
@@ -44,19 +44,13 @@ const initMap = async () => {
       window.AMap = AMap;
       map.value = new AMap.Map(props.container.toString(), {
         //设置地图容器id
+        pitch: 2,
         viewMode: "3D", //是否为3D地图模式
         zoom: 16, //初始化地图级别
         mapStyle: "amap://styles/dark", //设置地图的显示样式
       });
       map.value!.on("complete", () => {
-        if (currentPosition.value.coords) {
-          addStartPositionMarker(
-            currentPosition.value.coords.longitude,
-            currentPosition.value.coords.latitude
-          );
-        } else {
-          setMapToCenter();
-        }
+        setMapToCenter();
       });
     })
     .catch((e) => {
@@ -78,9 +72,9 @@ const initWebMap = () => {
         zoom: 17, //初始化地图级别
         center: [120.452543, 31.123945], //初始化地图中心点位置
       });
-      map.value!.on("complete", () => {
-        addStartPositionMarker(120.452543, 31.123945);
-      });
+      // map.value!.on("complete", () => {
+      //   addStartPositionMarker(120.452543, 31.123945);
+      // });
     })
     .catch((e) => {
       console.log(e);
@@ -117,19 +111,20 @@ const initTrack = async (path: [number, number][]) => {
 };
 const addStartPositionMarker = (lng: number, lat: number) => {
   const lnglat = new window.AMap.LngLat(lng, lat);
-  if (startMarker.value) {
-    map.value?.remove(startMarker.value as any);
+  if (!startMarker.value) {
+    // map.value?.remove(startMarker.value as any);
+    setMarker(lnglat, LocationStartIcon, startMarker!);
   }
-  setMarker(lnglat, LocationStartIcon, startMarker.value!);
 };
 const addEndPositionMarker = (lng: number, lat: number) => {
   const lnglat = new window.AMap.LngLat(lng, lat);
-  if (endMarker.value) {
-    map.value?.remove(endMarker.value as any);
+  if (!endMarker.value) {
+    // map.value?.remove(endMarker.value as any);
+    setMarker(lnglat, LocationEndIcon, endMarker);
   }
-  setMarker(lnglat, LocationEndIcon, endMarker.value!);
+  // setMarker(lnglat, LocationEndIcon, endMarker);
 };
-const setMarker = (position: AMap.LngLat, image: any, marker: AMap.Marker) => {
+const setMarker = (position: AMap.LngLat, image: any, marker: any) => {
   // 创建一个 Icon
   const icon = new window.AMap.Icon({
     // 图标尺寸
@@ -141,12 +136,12 @@ const setMarker = (position: AMap.LngLat, image: any, marker: AMap.Marker) => {
   });
 
   // 将 icon 传入 marker
-  marker = new window.AMap.Marker({
+  marker.value = new window.AMap.Marker({
     position: position,
     icon: icon,
     offset: new window.AMap.Pixel(-10, -20),
   });
-  map.value!.add([marker]);
+  map.value!.add([marker.value]);
 };
 
 const initPolyline = () => {
@@ -178,6 +173,9 @@ const addPointToPath = (longitude: number, latitude: number) => {
   map.value!.setCenter(point);
 };
 const setPolylineByPath = (path: any) => {
+  if (path.length < 5) return;
+  const startPoint = path[0];
+  addStartPositionMarker(startPoint.lng, startPoint.lat);
   polyline.value!.setPath(path);
   map.value!.setCenter(path[path.length - 1]);
 };
@@ -187,24 +185,37 @@ const getDistance = (point1: AMap.LngLat, point2: AMap.LngLat) => {
 };
 
 const setMapToCenter = async () => {
-  await getCurrentPosition();
-  if (!currentPosition.value.coords) return;
-  convertFrom(
-    currentPosition.value.coords.longitude,
-    currentPosition.value.coords.latitude,
-    ({ lat, lng }: LngLat) => {
-      currentPosition.value.coords.longitude = lng;
-      currentPosition.value.coords.latitude = lat;
-    }
-  );
-  map.value!.setCenter([
-    currentPosition.value.coords.longitude,
-    currentPosition.value.coords.latitude,
-  ]);
-  addStartPositionMarker(
-    currentPosition.value.coords.longitude,
-    currentPosition.value.coords.latitude
-  );
+  if (isNative) {
+    await getCurrentPosition();
+    if (!currentPosition.value.coords) return;
+    convertFrom(
+      currentPosition.value.coords.longitude,
+      currentPosition.value.coords.latitude,
+      ({ lat, lng }: LngLat) => {
+        currentPosition.value.coords.longitude = lng;
+        currentPosition.value.coords.latitude = lat;
+      }
+    );
+    map.value!.setCenter([
+      currentPosition.value.coords.longitude,
+      currentPosition.value.coords.latitude,
+    ]);
+  } else {
+    const point = {
+      coords: {
+        altitudeAccuracy: 2.7806708812713623,
+        altitude: 33.090038299560547,
+        speed: -1,
+        latitude: 31.298235356747501,
+        accuracy: 68,
+        longitude: 120.54356011142701,
+        heading: -1,
+      },
+      timestamp: 1687313554874,
+    };
+    map.value!.setCenter([point.coords.longitude, point.coords.latitude]);
+    addStartPositionMarker(point.coords.longitude, point.coords.latitude);
+  }
 };
 const convertFrom = (lng: number, lat: number, callback: Function) => {
   const location = [lng, lat];

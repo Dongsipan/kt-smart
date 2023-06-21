@@ -75,7 +75,7 @@
               </template>
               <div class="dashboard-main__data">
                 <div>Distance</div>
-                <div>{{ distanceToKm || "--" }}--</div>
+                <div>{{ distanceToKm || "--" }}</div>
               </div>
             </div>
             <div class="dashboard-main__data dashboard-main__data--outer">
@@ -239,10 +239,11 @@ onMounted(() => {
     mapRef.value.initWebMap();
   }
 });
+let startPosition;
 const startRide = () => {
-  setMapToCenter();
   mapRef.value.initPolyline();
   isRiding.value = true;
+  startPosition = undefined;
   toggleTimer();
   // mockPath();
   watchPosition();
@@ -265,9 +266,12 @@ const watchPosition = () => {
     ]); // 转化成高德坐标
     path.push(positions);
     smoothedPath = pathSmoothTool.pathOptimize(path); // 优化轨迹
-    mapRef.value.setPolylineByPath(smoothedPath); // 绘制轨迹
-    getMaxData(); // 从GPS数据中计算最大速度、最高海拔
-    calculateAverageSpeed(); // 计算平均速度
+    if (smoothedPath.length > 5) {
+      startPosition = smoothedPath[0];
+      mapRef.value.setPolylineByPath(smoothedPath); // 绘制轨迹
+      getMaxData(); // 从GPS数据中计算最大速度、最高海拔
+      calculateAverageSpeed(); // 计算平均速度
+    }
   });
 };
 /*
