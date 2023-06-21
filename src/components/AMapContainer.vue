@@ -47,7 +47,6 @@ const initMap = async () => {
         pitch: 2,
         viewMode: "3D", //是否为3D地图模式
         zoom: 16, //初始化地图级别
-        mapStyle: "amap://styles/dark", //设置地图的显示样式
       });
       map.value!.on("complete", () => {
         setMapToCenter();
