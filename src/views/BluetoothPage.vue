@@ -83,7 +83,7 @@
 
 <script lang="ts" setup>
 import {
-  IonAlert,
+  alertController,
   IonBackButton,
   IonButton,
   IonButtons,
@@ -100,10 +100,9 @@ import {
   IonList,
   IonNote,
   IonPage,
+  IonSpinner,
   IonTitle,
   IonToolbar,
-  IonSpinner,
-  alertController,
 } from "@ionic/vue";
 import { bluetooth, informationCircle, refresh, trash } from "ionicons/icons";
 import { Device, useBleStore } from "@/store/useBleStore";
@@ -138,11 +137,11 @@ const openDeviceInfo = (device: Device) => {
 };
 
 const selectDevice = async (device: Device) => {
-  if (device.isPairing) return;
-  try {
+  if (connectedDevice.value.isPaired) {
+    await presentConnectAlert();
+  } else {
+    if (device.isPairing) return;
     await connectBle(device);
-  } catch (e) {
-    console.log(e);
   }
 };
 const changePairedStatus = async (device: Device) => {
@@ -150,7 +149,11 @@ const changePairedStatus = async (device: Device) => {
     // 确认是否断开连接
     await presentAlert();
   } else {
-    await connectBle(device, false);
+    if (connectedDevice.value.isPaired) {
+      await presentConnectAlert();
+    } else {
+      await connectBle(device, false);
+    }
   }
 };
 const deletePairedDevice = (device: Device) => {
@@ -171,6 +174,16 @@ const presentAlert = async () => {
     header: "Alert",
     subHeader: "Do you want to disconnect the Bluetooth!",
     buttons: alertButtons,
+  });
+
+  await alert.present();
+};
+const alertConnectButtons = ["Okay"];
+const presentConnectAlert = async () => {
+  const alert = await alertController.create({
+    header: "Alert",
+    subHeader: "Please disconnect Bluetooth from the current connection first",
+    buttons: alertConnectButtons,
   });
 
   await alert.present();

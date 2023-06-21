@@ -103,7 +103,7 @@ export function useBluetoothLe() {
   let retryNum = 3;
   const connectBle = async (device: Device, isNewDevice = true) => {
     try {
-      // updateConnectedDevicePairingStatus(true);
+      // 如果设备被更换，需要断开已连接连接的设备，再连接新设备
       if (device.deviceId !== connectedDevice.deviceId) {
         if (connectedDevice.isPaired) {
           await disConnectBle(connectedDevice, false);
