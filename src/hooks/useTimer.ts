@@ -10,6 +10,12 @@ export function useTimer() {
     timerRunning.value = !timerRunning.value;
   };
 
+  const start = () => {
+    timerRunning.value = true;
+  };
+  const stop = () => {
+    timerRunning.value = false;
+  };
   watch(timerRunning, (newVal) => {
     if (newVal) {
       // 开始计时
@@ -35,5 +41,7 @@ export function useTimer() {
     elapsedTime,
     toggleTimer,
     formatTime,
+    start,
+    stop,
   };
 }

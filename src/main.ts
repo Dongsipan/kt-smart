@@ -3,6 +3,7 @@ import App from "./App.vue";
 import router from "./router";
 import pinia from "./store";
 import "@amap/amap-jsapi-types";
+// import VConsole from "vconsole";
 
 import { IonicVue } from "@ionic/vue";
 
@@ -25,9 +26,13 @@ import "@ionic/vue/css/display.css";
 /* Theme variables */
 import "./theme/variables.css";
 import { ScreenOrientation } from "@capacitor/screen-orientation";
+import { Capacitor } from "@capacitor/core";
 
-ScreenOrientation.lock({ orientation: "portrait-primary" });
+// const vConsole = new VConsole();
 
+if (Capacitor.isNativePlatform()) {
+  ScreenOrientation.lock({ orientation: "portrait-primary" });
+}
 const app = createApp(App).use(pinia).use(IonicVue).use(router);
 
 router.isReady().then(() => {

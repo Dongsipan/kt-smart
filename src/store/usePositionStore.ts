@@ -29,6 +29,14 @@ export const usePositionStore = defineStore("position", {
     addHistoryTrack(payload: Track) {
       this.historyTrack.push(payload);
     },
+    deleteHistory(payload: number) {
+      this.historyTrack = this.historyTrack.filter(
+        (item) => item.id !== payload
+      );
+    },
+    clearHistory() {
+      this.historyTrack.length = 0;
+    },
   },
   persist: true,
 });

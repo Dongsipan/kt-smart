@@ -172,11 +172,15 @@ const addPointToPath = (longitude: number, latitude: number) => {
   map.value!.setCenter(point);
 };
 const setPolylineByPath = (path: any) => {
-  if (path.length < 5) return;
-  const startPoint = path[0];
-  addStartPositionMarker(startPoint.lng, startPoint.lat);
+  if (path.length < 2) return;
   polyline.value!.setPath(path);
   map.value!.setCenter(path[path.length - 1]);
+};
+
+const clearPathAndMarker = () => {
+  polyline.value?.remove();
+  startMarker.value?.remove();
+  endMarker.value?.remove();
 };
 
 const getDistance = (point1: AMap.LngLat, point2: AMap.LngLat) => {
@@ -257,6 +261,7 @@ defineExpose({
   initWebMap,
   initMap,
   initTrack,
+  clearPathAndMarker,
 });
 </script>
 
