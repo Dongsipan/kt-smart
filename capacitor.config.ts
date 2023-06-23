@@ -2,7 +2,7 @@ import { CapacitorConfig } from '@capacitor/cli';
 import { KeyboardResize, KeyboardStyle } from '@capacitor/keyboard';
 
 const config: CapacitorConfig = {
-  appId: 'dongsipan.smartbicycle',
+  appId: 'com.dongsipan.smartbicycle',
   appName: 'KT Smart Bicycle',
   webDir: 'dist',
   android: {
