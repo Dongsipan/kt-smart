@@ -277,6 +277,7 @@ watch(
     font-size: 1.5rem;
 
     ion-row:first-child {
+      height: 2rem;
       font-size: 1rem;
     }
 

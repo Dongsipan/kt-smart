@@ -36,7 +36,15 @@ export function useBluetoothLe() {
     try {
       scanning.value = true;
       await BleClient.initialize({ androidNeverForLocation: true });
-
+      const isBtEnabled = await BleClient.isEnabled();
+      if (!isBtEnabled) {
+        if (isPlatform("android")) {
+          await BleClient.openBluetoothSettings();
+        }
+        if (isPlatform("ios")) {
+          await BleClient.openAppSettings();
+        }
+      }
       await BleClient.requestLEScan(
         {
           services: [numberToUUID(ServiceUUID)], // 电动车蓝牙uuid
@@ -101,27 +109,31 @@ export function useBluetoothLe() {
   * */
   let retryNum = 3;
   const connectBle = async (device: Device, isNewDevice = true) => {
-    try {
-      setConnectedDevice(device);
-      updateConnectedDevicePairingStatus(true);
-      if (isNative) {
-        await BleClient.connect(device.deviceId, (deviceId) =>
-          onDisconnect(deviceId)
-        );
+    return new Promise(async (resolve, reject) => {
+      try {
+        setConnectedDevice(device);
+        updateConnectedDevicePairingStatus(true);
+        if (isNative) {
+          await BleClient.connect(device.deviceId, (deviceId) =>
+            onDisconnect(deviceId)
+          );
+        }
+        updateConnectedDevicePairingStatus(false);
+        updateConnectedDevicePairedStatus(true);
+        resolve("");
+      } catch (error) {
+        if (retryNum > 0) {
+          retryNum--;
+          await connectBle(device, isNewDevice);
+        } else {
+          updateConnectedDevicePairedStatus(false);
+          reject();
+          // await presentToast(
+          //     "Bluetooth device connection failed, please try again"
+          // );
+        }
       }
-      updateConnectedDevicePairingStatus(false);
-      updateConnectedDevicePairedStatus(true);
-    } catch (error) {
-      if (retryNum > 0) {
-        retryNum--;
-        await connectBle(device, isNewDevice);
-      } else {
-        updateConnectedDevicePairedStatus(false);
-        await presentToast(
-          "Bluetooth device connection failed, please try again"
-        );
-      }
-    }
+    });
   };
   // ⚡️  To Native ->  BluetoothLe addListener 86768910
   // ⚡️  To Native ->  BluetoothLe connect 86768911
