@@ -6,9 +6,13 @@
           <ion-back-button></ion-back-button>
         </ion-buttons>
         <ion-title>Bluetooth</ion-title>
-        <ion-buttons slot="end">
-          <ion-button @click="clearLocalStorage">
-            <ion-icon slot="icon-only" :icon="refresh"></ion-icon>
+        <ion-buttons slot="end" v-if="!connectedDevice.isPaired">
+          <ion-button @click="scan">
+            <ion-icon
+              slot="icon-only"
+              :class="{ 'icon-refresh--on': scanning }"
+              :icon="refresh"
+            ></ion-icon>
           </ion-button>
         </ion-buttons>
       </ion-toolbar>
@@ -21,6 +25,9 @@
           </ion-card-title>
           <ion-card-subtitle>Device Information</ion-card-subtitle>
         </ion-card-header>
+        <ion-card-content>
+          Device ID:{{ connectedDevice.deviceId }}
+        </ion-card-content>
         <ion-button fill="clear" size="small" @click="presentAlert"
           >Disconnect
         </ion-button>
@@ -38,6 +45,13 @@
             <ion-icon slot="start" :icon="bluetooth"></ion-icon>
             <ion-label>{{ item.name }}</ion-label>
           </ion-item>
+          <ion-item v-if="scanning">
+            <ion-note>Searching for available devices...</ion-note>
+            <ion-spinner slot="end"></ion-spinner>
+          </ion-item>
+          <ion-item v-if="availableDevices.length === 0 && !scanning">
+            <ion-note> No available Bluetooth devices found </ion-note>
+          </ion-item>
         </ion-item-group>
       </ion-list>
     </ion-content>
@@ -54,6 +68,7 @@ import {
   IonCardHeader,
   IonCardSubtitle,
   IonCardTitle,
+  IonCardContent,
   IonContent,
   IonHeader,
   IonIcon,
@@ -65,25 +80,33 @@ import {
   IonPage,
   IonTitle,
   IonToolbar,
+  loadingController,
+  IonNote,
+  IonSpinner,
 } from "@ionic/vue";
 import { bluetooth, refresh } from "ionicons/icons";
 import { Device, useBleStore } from "@/store/useBleStore";
 import { useBluetoothLe } from "@/hooks/useBluetooth-le";
-import { onMounted } from "vue";
+import { onMounted, shallowRef } from "vue";
 import { storeToRefs } from "pinia";
 import { useRouter } from "vue-router";
+import { useMessage } from "@/hooks/useMessage";
 
 const store = useBleStore();
 const { connectedDevice, availableDevices } = storeToRefs(store);
-const { scan, connectBle, disConnectBle } = useBluetoothLe();
+const { scan, scanning, connectBle, disConnectBle } = useBluetoothLe();
+const { stopSendMessage } = useMessage();
 const router = useRouter();
 
 onMounted(() => {
+  if (connectedDevice.value.isPaired) return;
   scan();
 });
 
 const selectDevice = async (device: Device) => {
+  await showConnectLoading();
   await connectBle(device);
+  connectLoading.value?.dismiss();
   router.back();
 };
 const alertButtons = [
@@ -91,21 +114,58 @@ const alertButtons = [
   {
     text: "Okay",
     handler: async () => {
+      alert.value?.dismiss();
+      await showDisconnectLoading();
+      await stopSendMessage();
       await disConnectBle(connectedDevice.value, false);
-      await scan();
+      disconnectLoading.value?.dismiss();
+      setTimeout(async () => {
+        await scan();
+      }, 500);
     },
   },
 ];
+const alert = shallowRef<HTMLIonAlertElement>();
 const presentAlert = async () => {
-  const alert = await alertController.create({
+  alert.value = await alertController.create({
     header: "Alert",
     subHeader: "Do you want to disconnect the Bluetooth!",
     buttons: alertButtons,
   });
 
-  await alert.present();
+  await alert.value.present();
+};
+const connectLoading = shallowRef<HTMLIonLoadingElement>();
+const showConnectLoading = async () => {
+  connectLoading.value = await loadingController.create({
+    message: "Disconnecting Bluetooth device",
+  });
+  await connectLoading.value.present;
+};
+const disconnectLoading = shallowRef<HTMLIonLoadingElement>();
+const showDisconnectLoading = async () => {
+  disconnectLoading.value = await loadingController.create({
+    message: "Disconnecting Bluetooth device",
+  });
+
+  await disconnectLoading.value.present();
 };
 const clearLocalStorage = () => {
   window.localStorage.clear();
 };
 </script>
+<style lang="scss">
+@keyframes refresh {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+.icon-refresh--on {
+  animation-name: refresh;
+  animation-duration: 1s;
+  animation-iteration-count: 1;
+}
+</style>

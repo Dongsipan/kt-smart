@@ -263,6 +263,7 @@ export function useBluetoothLe() {
   return {
     initialBle,
     scan,
+    scanning,
     connectBle,
     disConnectBle,
     write,
