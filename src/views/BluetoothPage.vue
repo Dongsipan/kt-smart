@@ -45,12 +45,25 @@
             <ion-icon slot="start" :icon="bluetooth"></ion-icon>
             <ion-label>{{ item.name }}</ion-label>
           </ion-item>
-          <ion-item v-if="scanning">
-            <ion-note>Searching for available devices...</ion-note>
+          <ion-item lines="none" v-if="scanning">
+            <ion-note v-if="isPlatform('ios')">
+              Searching for available devices...
+            </ion-note>
+            <ion-note slot="start" v-else>
+              Searching for available devices...
+            </ion-note>
             <ion-spinner slot="end"></ion-spinner>
           </ion-item>
-          <ion-item v-if="availableDevices.length === 0 && !scanning">
-            <ion-note> No available Bluetooth devices found </ion-note>
+          <ion-item
+            lines="none"
+            v-if="availableDevices.length === 0 && !scanning"
+          >
+            <ion-note v-if="isPlatform('ios')">
+              No available Bluetooth devices found
+            </ion-note>
+            <ion-note v-else slot="start">
+              No available Bluetooth devices found
+            </ion-note>
           </ion-item>
         </ion-item-group>
       </ion-list>
@@ -83,6 +96,7 @@ import {
   loadingController,
   IonNote,
   IonSpinner,
+  isPlatform,
 } from "@ionic/vue";
 import { bluetooth, refresh } from "ionicons/icons";
 import { Device, useBleStore } from "@/store/useBleStore";
