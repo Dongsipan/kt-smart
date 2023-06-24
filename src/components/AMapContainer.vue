@@ -1,14 +1,14 @@
 <template>
-  <div class="amap-container" :id="container"></div>
+  <div :id="container" class="amap-container"></div>
 </template>
 
 <script lang="ts" setup>
 import AMapLoader from "@amap/amap-jsapi-loader";
-import { onMounted, shallowRef, UnwrapRef } from "vue";
+import { shallowRef } from "vue";
 import { useGeoLocation } from "@/hooks/useGeoLocation";
 import { Capacitor } from "@capacitor/core";
 import { useToast } from "@/hooks/useToast";
-import { Track, usePositionStore } from "@/store/usePositionStore";
+import { usePositionStore } from "@/store/usePositionStore";
 import { storeToRefs } from "pinia";
 import LocationStartIcon from "@/assets/icon/location-start.png";
 import LocationEndIcon from "@/assets/icon/location-end.png";
@@ -42,22 +42,19 @@ const initMap = async () => {
   })
     .then((AMap) => {
       window.AMap = AMap;
-      map.value = new AMap.Map(props.container.toString(), {
-        //设置地图容器id
-        viewMode: "3D", //是否为3D地图模式
-        zoom: 16, //初始化地图级别
-        mapStyle: "amap://styles/dark", //设置地图的显示样式
-      });
-      map.value!.on("complete", () => {
-        if (currentPosition.value.coords) {
-          addStartPositionMarker(
-            currentPosition.value.coords.longitude,
-            currentPosition.value.coords.latitude
-          );
-        } else {
+      if (map.value) {
+        setMapToCenter();
+      } else {
+        map.value = new AMap.Map(props.container.toString(), {
+          //设置地图容器id
+          pitch: 2,
+          viewMode: "3D", //是否为3D地图模式
+          zoom: 16, //初始化地图级别
+        });
+        map.value!.on("complete", () => {
           setMapToCenter();
-        }
-      });
+        });
+      }
     })
     .catch((e) => {
       console.log(e);
@@ -71,16 +68,19 @@ const initWebMap = () => {
   })
     .then((AMap) => {
       window.AMap = AMap;
-      map.value = new AMap.Map(props.container.toString(), {
-        //设置地图容器id
-        pitch: 2,
-        viewMode: "3D", //是否为3D地图模式
-        zoom: 17, //初始化地图级别
-        center: [120.452543, 31.123945], //初始化地图中心点位置
-      });
-      map.value!.on("complete", () => {
-        addStartPositionMarker(120.452543, 31.123945);
-      });
+      if (map.value) {
+        setMapToCenter();
+      } else {
+        map.value = new AMap.Map(props.container.toString(), {
+          //设置地图容器id
+          pitch: 2,
+          viewMode: "3D", //是否为3D地图模式
+          zoom: 16, //初始化地图级别
+        });
+        map.value!.on("complete", () => {
+          setMapToCenter();
+        });
+      }
     })
     .catch((e) => {
       console.log(e);
@@ -117,19 +117,20 @@ const initTrack = async (path: [number, number][]) => {
 };
 const addStartPositionMarker = (lng: number, lat: number) => {
   const lnglat = new window.AMap.LngLat(lng, lat);
-  if (startMarker.value) {
-    map.value?.remove(startMarker.value as any);
+  if (!startMarker.value) {
+    // map.value?.remove(startMarker.value as any);
+    setMarker(lnglat, LocationStartIcon, startMarker!);
   }
-  setMarker(lnglat, LocationStartIcon, startMarker.value!);
 };
 const addEndPositionMarker = (lng: number, lat: number) => {
   const lnglat = new window.AMap.LngLat(lng, lat);
-  if (endMarker.value) {
-    map.value?.remove(endMarker.value as any);
+  if (!endMarker.value) {
+    // map.value?.remove(endMarker.value as any);
+    setMarker(lnglat, LocationEndIcon, endMarker);
   }
-  setMarker(lnglat, LocationEndIcon, endMarker.value!);
+  // setMarker(lnglat, LocationEndIcon, endMarker);
 };
-const setMarker = (position: AMap.LngLat, image: any, marker: AMap.Marker) => {
+const setMarker = (position: AMap.LngLat, image: any, marker: any) => {
   // 创建一个 Icon
   const icon = new window.AMap.Icon({
     // 图标尺寸
@@ -141,12 +142,12 @@ const setMarker = (position: AMap.LngLat, image: any, marker: AMap.Marker) => {
   });
 
   // 将 icon 传入 marker
-  marker = new window.AMap.Marker({
+  marker.value = new window.AMap.Marker({
     position: position,
     icon: icon,
     offset: new window.AMap.Pixel(-10, -20),
   });
-  map.value!.add([marker]);
+  map.value!.add([marker.value]);
 };
 
 const initPolyline = () => {
@@ -154,8 +155,8 @@ const initPolyline = () => {
   polyline.value = new window.AMap.Polyline({
     // path: path, // 初始为空数组
     strokeColor: "#3366FF", // 线条颜色
-    strokeOpacity: 1, // 线条透明度
-    strokeWeight: 4, // 线条宽度
+    strokeOpacity: 0.8, // 线条透明度
+    strokeWeight: 5, // 线条宽度
   });
   map.value!.add(polyline.value);
 };
@@ -178,8 +179,17 @@ const addPointToPath = (longitude: number, latitude: number) => {
   map.value!.setCenter(point);
 };
 const setPolylineByPath = (path: any) => {
+  if (path.length < 2) return;
   polyline.value!.setPath(path);
   map.value!.setCenter(path[path.length - 1]);
+};
+
+const clearPathAndMarker = () => {
+  polyline.value?.remove();
+  startMarker.value?.remove();
+  endMarker.value?.remove();
+  startMarker.value = undefined;
+  endMarker.value = undefined;
 };
 
 const getDistance = (point1: AMap.LngLat, point2: AMap.LngLat) => {
@@ -189,22 +199,11 @@ const getDistance = (point1: AMap.LngLat, point2: AMap.LngLat) => {
 const setMapToCenter = async () => {
   await getCurrentPosition();
   if (!currentPosition.value.coords) return;
-  convertFrom(
+  const position = (await convertGpsToAMap([
     currentPosition.value.coords.longitude,
     currentPosition.value.coords.latitude,
-    ({ lat, lng }: LngLat) => {
-      currentPosition.value.coords.longitude = lng;
-      currentPosition.value.coords.latitude = lat;
-    }
-  );
-  map.value!.setCenter([
-    currentPosition.value.coords.longitude,
-    currentPosition.value.coords.latitude,
-  ]);
-  addStartPositionMarker(
-    currentPosition.value.coords.longitude,
-    currentPosition.value.coords.latitude
-  );
+  ])) as any;
+  map.value!.setCenter(position);
 };
 const convertFrom = (lng: number, lat: number, callback: Function) => {
   const location = [lng, lat];
@@ -247,6 +246,7 @@ defineExpose({
   initWebMap,
   initMap,
   initTrack,
+  clearPathAndMarker,
 });
 </script>
 
@@ -254,7 +254,7 @@ defineExpose({
 .amap-container {
   padding: 0;
   margin: 0;
-  width: 100%;
-  height: 100%;
+  width: 100vw;
+  height: 100vh;
 }
 </style>

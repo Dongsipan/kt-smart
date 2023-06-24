@@ -15,6 +15,8 @@ export const usePositionStore = defineStore("position", {
   state: () => ({
     currentPosition: {} as Position,
     historyTrack: [] as Track[],
+    locating: false,
+    watching: false,
   }),
   getters: {
     getHistoryTrackById: (state) => {
@@ -26,8 +28,22 @@ export const usePositionStore = defineStore("position", {
     setCurrentPosition(payload: Position) {
       this.currentPosition = payload;
     },
+    setLocatingStatus(payload: boolean) {
+      this.locating = payload;
+    },
+    setWatchingStatus(payload: boolean) {
+      this.watching = payload;
+    },
     addHistoryTrack(payload: Track) {
       this.historyTrack.push(payload);
+    },
+    deleteHistory(payload: number) {
+      this.historyTrack = this.historyTrack.filter(
+        (item) => item.id !== payload
+      );
+    },
+    clearHistory() {
+      this.historyTrack.length = 0;
     },
   },
   persist: true,
