@@ -1,11 +1,10 @@
-import { createApp } from "vue";
+import {createApp} from "vue";
 import App from "./App.vue";
 import router from "./router";
 import pinia from "./store";
 import "@amap/amap-jsapi-types";
-import VConsole from "vconsole";
-
-import { IonicVue } from "@ionic/vue";
+// import VConsole from "vconsole";
+import {IonicVue} from "@ionic/vue";
 
 /* Core CSS required for Ionic components to work properly */
 import "@ionic/vue/css/core.css";
@@ -25,10 +24,10 @@ import "@ionic/vue/css/display.css";
 
 /* Theme variables */
 import "./theme/variables.css";
-import { ScreenOrientation } from "@capacitor/screen-orientation";
-import { Capacitor } from "@capacitor/core";
+import {ScreenOrientation} from "@capacitor/screen-orientation";
+import {Capacitor} from "@capacitor/core";
 
-const vConsole = new VConsole();
+// const vConsole = new VConsole();
 
 if (Capacitor.isNativePlatform()) {
   ScreenOrientation.lock({ orientation: "portrait-primary" });
