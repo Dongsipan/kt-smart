@@ -42,15 +42,19 @@ const initMap = async () => {
   })
     .then((AMap) => {
       window.AMap = AMap;
-      map.value = new AMap.Map(props.container.toString(), {
-        //设置地图容器id
-        pitch: 2,
-        viewMode: "3D", //是否为3D地图模式
-        zoom: 16, //初始化地图级别
-      });
-      map.value!.on("complete", () => {
+      if (map.value) {
         setMapToCenter();
-      });
+      } else {
+        map.value = new AMap.Map(props.container.toString(), {
+          //设置地图容器id
+          pitch: 2,
+          viewMode: "3D", //是否为3D地图模式
+          zoom: 16, //初始化地图级别
+        });
+        map.value!.on("complete", () => {
+          setMapToCenter();
+        });
+      }
     })
     .catch((e) => {
       console.log(e);
@@ -64,16 +68,19 @@ const initWebMap = () => {
   })
     .then((AMap) => {
       window.AMap = AMap;
-      map.value = new AMap.Map(props.container.toString(), {
-        //设置地图容器id
-        pitch: 2,
-        viewMode: "3D", //是否为3D地图模式
-        zoom: 17, //初始化地图级别
-        center: [120.452543, 31.123945], //初始化地图中心点位置
-      });
-      // map.value!.on("complete", () => {
-      //   addStartPositionMarker(120.452543, 31.123945);
-      // });
+      if (map.value) {
+        setMapToCenter();
+      } else {
+        map.value = new AMap.Map(props.container.toString(), {
+          //设置地图容器id
+          pitch: 2,
+          viewMode: "3D", //是否为3D地图模式
+          zoom: 16, //初始化地图级别
+        });
+        map.value!.on("complete", () => {
+          setMapToCenter();
+        });
+      }
     })
     .catch((e) => {
       console.log(e);
@@ -148,8 +155,8 @@ const initPolyline = () => {
   polyline.value = new window.AMap.Polyline({
     // path: path, // 初始为空数组
     strokeColor: "#3366FF", // 线条颜色
-    strokeOpacity: 1, // 线条透明度
-    strokeWeight: 4, // 线条宽度
+    strokeOpacity: 0.8, // 线条透明度
+    strokeWeight: 5, // 线条宽度
   });
   map.value!.add(polyline.value);
 };
@@ -181,6 +188,8 @@ const clearPathAndMarker = () => {
   polyline.value?.remove();
   startMarker.value?.remove();
   endMarker.value?.remove();
+  startMarker.value = undefined;
+  endMarker.value = undefined;
 };
 
 const getDistance = (point1: AMap.LngLat, point2: AMap.LngLat) => {
@@ -188,37 +197,13 @@ const getDistance = (point1: AMap.LngLat, point2: AMap.LngLat) => {
 };
 
 const setMapToCenter = async () => {
-  if (isNative) {
-    await getCurrentPosition();
-    if (!currentPosition.value.coords) return;
-    convertFrom(
-      currentPosition.value.coords.longitude,
-      currentPosition.value.coords.latitude,
-      ({ lat, lng }: LngLat) => {
-        currentPosition.value.coords.longitude = lng;
-        currentPosition.value.coords.latitude = lat;
-      }
-    );
-    map.value!.setCenter([
-      currentPosition.value.coords.longitude,
-      currentPosition.value.coords.latitude,
-    ]);
-  } else {
-    const point = {
-      coords: {
-        altitudeAccuracy: 2.7806708812713623,
-        altitude: 33.090038299560547,
-        speed: -1,
-        latitude: 31.298235356747501,
-        accuracy: 68,
-        longitude: 120.54356011142701,
-        heading: -1,
-      },
-      timestamp: 1687313554874,
-    };
-    map.value!.setCenter([point.coords.longitude, point.coords.latitude]);
-    addStartPositionMarker(point.coords.longitude, point.coords.latitude);
-  }
+  await getCurrentPosition();
+  if (!currentPosition.value.coords) return;
+  const position = (await convertGpsToAMap([
+    currentPosition.value.coords.longitude,
+    currentPosition.value.coords.latitude,
+  ])) as any;
+  map.value!.setCenter(position);
 };
 const convertFrom = (lng: number, lat: number, callback: Function) => {
   const location = [lng, lat];
@@ -269,7 +254,7 @@ defineExpose({
 .amap-container {
   padding: 0;
   margin: 0;
-  width: 100%;
-  height: 100%;
+  width: 100vw;
+  height: 100vh;
 }
 </style>

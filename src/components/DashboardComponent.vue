@@ -26,11 +26,13 @@
             </ion-row>
           </ion-grid>
           <ion-grid class="info-container">
-            <ion-row v-if="throttleStatus === 2">
-              <ion-col size="12"> Throttle </ion-col>
-            </ion-row>
-            <ion-row v-if="isAssistance && throttleStatus !== 2">
-              <ion-col size="12"> Assist </ion-col>
+            <ion-row>
+              <ion-col size="12" v-if="throttleStatus === 2">
+                Throttle
+              </ion-col>
+              <ion-col size="12" v-if="isAssistance && throttleStatus !== 2">
+                Assist
+              </ion-col>
             </ion-row>
             <ion-row>
               <ion-col size="12">

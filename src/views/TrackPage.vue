@@ -4,8 +4,17 @@
       <ion-toolbar>
         <ion-title>Track</ion-title>
         <ion-buttons slot="end">
-          <ion-button @click="setMapToCenter">
-            <ion-icon :icon="locateOutline"></ion-icon>
+          <ion-button @click="setMapToCenter" :disabled="watching">
+            <ion-icon
+              v-if="isPlatform('ios')"
+              :class="{ 'locate-icon--locating--ios': locating }"
+              :icon="locateOutline"
+            ></ion-icon>
+            <ion-icon
+              v-else
+              :class="{ 'locate-icon--locating--android': locating }"
+              :icon="locateOutline"
+            ></ion-icon>
           </ion-button>
           <ion-button @click="toHistoriesPage">
             <ion-icon :icon="footstepsOutline"></ion-icon>
@@ -13,7 +22,11 @@
         </ion-buttons>
       </ion-toolbar>
     </ion-header>
-    <ion-content :fullscreen="true" class="ion-no-padding">
+    <ion-content
+      :fullscreen="true"
+      class="ion-no-padding"
+      style="width: 100vw; height: 100vh"
+    >
       <ion-fab
         style="display: none"
         slot="fixed"
@@ -32,7 +45,7 @@
         <div class="dashboard">
           <div class="dashboard-main">
             <div class="dashboard-main__data dashboard-main__data--outer">
-              <div>altitude</div>
+              <div>Altitude</div>
               <div>{{ altitudeToFixed || "--" }}</div>
             </div>
             <div class="dashboard-main__action">
@@ -89,7 +102,7 @@
               <div>{{ speedToKm || "--" }}</div>
             </div>
           </div>
-          <div class="dashboard-info ion-margin-top">
+          <div class="dashboard-info ion-margin-top ion-margin-horizontal">
             <div class="dashboard-info__data">
               <div>Time</div>
               <div>{{ formatTime || "--" }}</div>
@@ -170,6 +183,8 @@ import {
   IonTextarea,
   IonTitle,
   IonToolbar,
+  isPlatform,
+  onIonViewWillEnter,
 } from "@ionic/vue";
 import { flashOutline, footstepsOutline, locateOutline } from "ionicons/icons";
 import AMapContainer from "@/components/AMapContainer.vue";
@@ -183,10 +198,12 @@ import { useTimer } from "@/hooks/useTimer";
 import { Position } from "@capacitor/geolocation";
 import { useRouter } from "vue-router";
 import { Capacitor } from "@capacitor/core";
+import { storeToRefs } from "pinia";
 
 const mapRef = ref(null) as any;
 
 const positionStore = usePositionStore();
+const { locating, watching } = storeToRefs(positionStore);
 const { watchCurrentPosition, clearWatch } = useGeoLocation();
 const { presentToast } = useToast();
 const router = useRouter();
@@ -211,7 +228,7 @@ const currentDistance = ref<number>();
 
 const isRiding = ref(false);
 const isStopRiding = ref(false);
-const { start, stop, formatTime } = useTimer();
+const { start, stop, reset, formatTime } = useTimer();
 
 const speedToKm = computed(() => {
   return currentSpeed.value && currentSpeed.value > 0
@@ -239,7 +256,7 @@ const altitudeToFixed = computed(() => {
 });
 const isNative = Capacitor.isNativePlatform();
 
-onMounted(() => {
+onIonViewWillEnter(() => {
   if (isNative) {
     mapRef.value.initMap();
   } else {
@@ -249,6 +266,10 @@ onMounted(() => {
 
 let startPosition;
 const startRide = () => {
+  if (locating.value) {
+    presentToast("Positioning in progress, please wait");
+    return;
+  }
   mapRef.value.clearPathAndMarker();
   mapRef.value.initPolyline();
   isRiding.value = true;
@@ -610,10 +631,6 @@ let isFirstPoint = true;
 const watchPosition = () => {
   watchCurrentPosition(async (geolocationPosition) => {
     if (geolocationPosition === null) return;
-    if (isFirstPoint) {
-      isFirstPoint = false;
-      return;
-    }
     await computedRideData(geolocationPosition);
   });
 };
@@ -637,7 +654,6 @@ const computedRideData = async (geolocationPosition: Position) => {
   path.push(positions);
   smoothedPath = pathSmoothTool.pathOptimize(path); // 优化轨迹
   startPosition = smoothedPath[0];
-  debugger;
   if (smoothedPath.length >= 2) {
     mapRef.value.addStartPositionMarker(startPosition.lng, startPosition.lat);
     mapRef.value.setPolylineByPath(smoothedPath); // 绘制轨迹
@@ -666,6 +682,7 @@ const finishRide = () => {
   isRiding.value = false;
   isStopRiding.value = false;
   stop();
+  reset();
   clearWatch();
   if (smoothedPath.length < 10) {
     presentNotSaveAlert();
@@ -797,7 +814,29 @@ const closeModal = () => {
 };
 </script>
 <style lang="scss">
+@keyframes ios-locating {
+  from {
+    color: var(--ion-toolbar-color, var(--color));
+  }
+  to {
+    color: #fff;
+  }
+}
+@keyframes android-locating {
+  from {
+    color: var(--ion-toolbar-color, var(--color));
+  }
+  to {
+    color: #ef4c28;
+  }
+}
 .track-page {
+  .locate-icon--locating--ios {
+    animation: ios-locating 0.8s infinite alternate;
+  }
+  .locate-icon--locating--android {
+    animation: android-locating 0.8s infinite alternate;
+  }
   ion-content {
     position: relative;
   }
@@ -859,11 +898,11 @@ const closeModal = () => {
       .dashboard-info__data {
         display: flex;
         flex-direction: column;
-        align-items: center;
+        //align-items: center;
         flex: 1;
         div:last-child {
           width: 100%;
-          text-align: center;
+          //text-align: center;
         }
       }
     }

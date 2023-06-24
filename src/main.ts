@@ -3,7 +3,7 @@ import App from "./App.vue";
 import router from "./router";
 import pinia from "./store";
 import "@amap/amap-jsapi-types";
-// import VConsole from "vconsole";
+import VConsole from "vconsole";
 
 import { IonicVue } from "@ionic/vue";
 
@@ -28,7 +28,7 @@ import "./theme/variables.css";
 import { ScreenOrientation } from "@capacitor/screen-orientation";
 import { Capacitor } from "@capacitor/core";
 
-// const vConsole = new VConsole();
+const vConsole = new VConsole();
 
 if (Capacitor.isNativePlatform()) {
   ScreenOrientation.lock({ orientation: "portrait-primary" });

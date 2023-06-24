@@ -24,7 +24,7 @@
               <div>{{ distance || "--" }}</div>
             </div>
           </div>
-          <div class="dashboard-info ion-margin-top">
+          <div class="dashboard-info ion-margin-top ion-margin-horizontal">
             <div class="dashboard-info__data">
               <div>Time</div>
               <div>{{ time || "--" }}</div>
@@ -149,11 +149,9 @@ onIonViewDidEnter(() => {
       .dashboard-info__data {
         display: flex;
         flex-direction: column;
-        align-items: center;
         flex: 1;
         div:last-child {
           width: 100%;
-          text-align: center;
         }
       }
     }
