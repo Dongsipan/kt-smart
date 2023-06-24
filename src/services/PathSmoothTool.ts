@@ -61,7 +61,6 @@ export class PathSmoothTool {
    * @return 优化后轨迹list
    */
   public pathOptimize(originlist: AMap.LngLat[]) {
-    debugger;
     const list = this.removeNoisePoint(originlist) as AMap.LngLat[]; //去噪
     const afterList = this.kalmanFilterPath(list) as AMap.LngLat[]; //滤波
     const pathoptimizeList = this.reducerVerticalThreshold(

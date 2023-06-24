@@ -15,15 +15,14 @@ import { isPlatform } from "@ionic/vue";
 export function useBluetoothLe() {
   const bleStore = useBleStore();
   const { presentToast } = useToast();
-  const { pairedDevices } = storeToRefs(bleStore);
+  const { connectedDevice } = storeToRefs(bleStore);
   const {
-    connectedDevice,
     setAvailableDevice,
     clearAvailableDevices,
     setConnectedDevice,
     removeConnectedDevice,
     updateConnectedDevicePairedStatus,
-    updateConnectedDevice,
+    updateConnectedDevicePairingStatus,
   } = useBleStore();
   const scanning = ref(false);
   const isNative = Capacitor.isNativePlatform();
@@ -37,7 +36,15 @@ export function useBluetoothLe() {
     try {
       scanning.value = true;
       await BleClient.initialize({ androidNeverForLocation: true });
-
+      const isBtEnabled = await BleClient.isEnabled();
+      if (!isBtEnabled) {
+        if (isPlatform("android")) {
+          await BleClient.openBluetoothSettings();
+        }
+        if (isPlatform("ios")) {
+          await BleClient.openAppSettings();
+        }
+      }
       await BleClient.requestLEScan(
         {
           services: [numberToUUID(ServiceUUID)], // 电动车蓝牙uuid
@@ -69,9 +76,9 @@ export function useBluetoothLe() {
           reject();
         } else {
           if (isPlatform("ios")) {
-            await BleClient.getDevices([connectedDevice.deviceId]);
+            await BleClient.getDevices([connectedDevice.value.deviceId]);
           }
-          await connectBle(connectedDevice, false);
+          await connectBle(connectedDevice.value, false);
           resolve(true);
         }
       } catch (e) {
@@ -102,40 +109,31 @@ export function useBluetoothLe() {
   * */
   let retryNum = 3;
   const connectBle = async (device: Device, isNewDevice = true) => {
-    try {
-      // updateConnectedDevicePairingStatus(true);
-      if (device.deviceId !== connectedDevice.deviceId) {
-        if (connectedDevice.isPaired) {
-          await disConnectBle(connectedDevice, false);
+    return new Promise(async (resolve, reject) => {
+      try {
+        setConnectedDevice(device);
+        updateConnectedDevicePairingStatus(true);
+        if (isNative) {
+          await BleClient.connect(device.deviceId, (deviceId) =>
+            onDisconnect(deviceId)
+          );
         }
-
-        updateConnectedDevicePairedStatus(false);
-      }
-      device.isPairing = true;
-      if (isNewDevice) {
-        setConnectedDevice({ ...device, isPaired: true });
-      } else {
-        updateConnectedDevice(device);
-      }
-      if (isNative) {
-        await BleClient.connect(device.deviceId, (deviceId) =>
-          onDisconnect(deviceId)
-        );
-      }
-      setTimeout(() => {
+        updateConnectedDevicePairingStatus(false);
         updateConnectedDevicePairedStatus(true);
-      }, 1000);
-    } catch (error) {
-      if (retryNum > 0) {
-        retryNum--;
-        await connectBle(device, isNewDevice);
-      } else {
-        updateConnectedDevicePairedStatus(false);
-        await presentToast(
-          "Bluetooth device connection failed, please try again"
-        );
+        resolve("");
+      } catch (error) {
+        if (retryNum > 0) {
+          retryNum--;
+          await connectBle(device, isNewDevice);
+        } else {
+          updateConnectedDevicePairedStatus(false);
+          reject();
+          // await presentToast(
+          //     "Bluetooth device connection failed, please try again"
+          // );
+        }
       }
-    }
+    });
   };
   // ⚡️  To Native ->  BluetoothLe addListener 86768910
   // ⚡️  To Native ->  BluetoothLe connect 86768911
@@ -204,13 +202,6 @@ export function useBluetoothLe() {
       serviceUUID,
       characteristicUUID
     );
-    // try {
-    //   await BleClient.stopNotifications(deviceId, serviceUUID, characteristicUUID);
-    //   // await BleClient.disconnect(deviceId);
-    // } catch (error) {
-    //   console.error('stopNotifications error', JSON.stringify(error))
-    //   await presentToast('Please connect your Bluetooth device first');
-    // }
   };
 
   const testBleDevice = () => {
@@ -278,18 +269,13 @@ export function useBluetoothLe() {
       isPaired: false,
       isPairing: false,
     };
-    if (
-      pairedDevices.value.findIndex(
-        (item) => item.deviceId === device.deviceId
-      ) > -1
-    )
-      return;
     setAvailableDevice(availableDevices);
   };
 
   return {
     initialBle,
     scan,
+    scanning,
     connectBle,
     disConnectBle,
     write,

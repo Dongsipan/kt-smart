@@ -6,55 +6,36 @@
           <ion-back-button></ion-back-button>
         </ion-buttons>
         <ion-title>Bluetooth</ion-title>
-        <ion-buttons slot="end">
-          <ion-button @click="clearLocalStorage">
-            <ion-icon slot="icon-only" :icon="refresh"></ion-icon>
+        <ion-buttons slot="end" v-if="!connectedDevice.isPaired">
+          <ion-button @click="scan">
+            <ion-icon
+              slot="icon-only"
+              :class="{ 'icon-refresh--on': scanning }"
+              :icon="refresh"
+            ></ion-icon>
           </ion-button>
         </ion-buttons>
       </ion-toolbar>
     </ion-header>
     <ion-content :fullscreen="true">
-      <ion-list>
-        <ion-item-group v-if="pairedDevices.length">
-          <ion-item-divider>
-            <ion-label> MY DEVICES</ion-label>
-          </ion-item-divider>
-          <ion-item-sliding v-for="(item, index) in pairedDevices" :key="index">
-            <ion-item @click="changePairedStatus(item)">
-              <ion-icon
-                v-if="item.isPaired"
-                slot="start"
-                :icon="bluetooth"
-                color="primary"
-              ></ion-icon>
-              <ion-icon v-else slot="start" :icon="bluetooth"></ion-icon>
-              <ion-label>{{ item.name }}</ion-label>
-              <ion-spinner
-                v-if="item.isPairing"
-                slot="end"
-                name="lines-small"
-              ></ion-spinner>
-              <ion-note v-if="!item.isPairing" slot="end"
-                >{{ item.isPaired ? "Connected" : "Not Connected" }}
-              </ion-note>
-              <ion-icon
-                slot="end"
-                :icon="informationCircle"
-                class="ion-margin-start"
-                @click.stop="openDeviceInfo(item)"
-              ></ion-icon>
-            </ion-item>
-            <ion-item-options side="end">
-              <ion-item-option color="danger" @click="deletePairedDevice(item)">
-                <ion-icon slot="icon-only" :icon="trash"></ion-icon>
-              </ion-item-option>
-            </ion-item-options>
-          </ion-item-sliding>
-        </ion-item-group>
-
+      <ion-card v-if="connectedDevice.isPaired">
+        <ion-card-header>
+          <ion-card-title class="device-modal__title">
+            {{ connectedDevice.name }}
+          </ion-card-title>
+          <ion-card-subtitle>Device Information</ion-card-subtitle>
+        </ion-card-header>
+        <ion-card-content>
+          Device ID:{{ connectedDevice.deviceId }}
+        </ion-card-content>
+        <ion-button fill="clear" size="small" @click="presentAlert"
+          >Disconnect
+        </ion-button>
+      </ion-card>
+      <ion-list v-else>
         <ion-item-group>
           <ion-item-divider>
-            <ion-label> OTHER DEVICES</ion-label>
+            <ion-label>Available Devices</ion-label>
           </ion-item-divider>
           <ion-item
             v-for="(item, index) in availableDevices"
@@ -64,118 +45,141 @@
             <ion-icon slot="start" :icon="bluetooth"></ion-icon>
             <ion-label>{{ item.name }}</ion-label>
           </ion-item>
+          <ion-item lines="none" v-if="scanning">
+            <ion-note v-if="isPlatform('ios')">
+              Searching for available devices...
+            </ion-note>
+            <ion-note slot="start" v-else>
+              Searching for available devices...
+            </ion-note>
+            <ion-spinner slot="end"></ion-spinner>
+          </ion-item>
+          <ion-item
+            lines="none"
+            v-if="availableDevices.length === 0 && !scanning"
+          >
+            <ion-note v-if="isPlatform('ios')">
+              No available Bluetooth devices found
+            </ion-note>
+            <ion-note v-else slot="start">
+              No available Bluetooth devices found
+            </ion-note>
+          </ion-item>
         </ion-item-group>
       </ion-list>
     </ion-content>
-    <!--    <ion-alert-->
-    <!--      :buttons="alertButtons"-->
-    <!--      :is-open="isOpenAlert"-->
-    <!--      header="Alert"-->
-    <!--      sub-header="Do you want to disconnect the Bluetooth!"-->
-    <!--      @didDismiss="setOpenAlert(false)"-->
-    <!--    ></ion-alert>-->
-    <device-manage-modal
-      ref="deviceManageModal"
-      :presentingElement="presentingElement"
-    />
   </ion-page>
 </template>
 
 <script lang="ts" setup>
 import {
-  IonAlert,
+  alertController,
   IonBackButton,
   IonButton,
   IonButtons,
+  IonCard,
+  IonCardHeader,
+  IonCardSubtitle,
+  IonCardTitle,
+  IonCardContent,
   IonContent,
   IonHeader,
   IonIcon,
   IonItem,
   IonItemDivider,
   IonItemGroup,
-  IonItemOption,
-  IonItemOptions,
-  IonItemSliding,
   IonLabel,
   IonList,
-  IonNote,
   IonPage,
   IonTitle,
   IonToolbar,
+  loadingController,
+  IonNote,
   IonSpinner,
-  alertController,
+  isPlatform,
 } from "@ionic/vue";
-import { bluetooth, informationCircle, refresh, trash } from "ionicons/icons";
+import { bluetooth, refresh } from "ionicons/icons";
 import { Device, useBleStore } from "@/store/useBleStore";
 import { useBluetoothLe } from "@/hooks/useBluetooth-le";
-import { ComponentPublicInstance, onMounted, ref } from "vue";
+import { onMounted, shallowRef } from "vue";
 import { storeToRefs } from "pinia";
-import DeviceManageModal from "@/components/DeviceManageModal.vue";
+import { useRouter } from "vue-router";
+import { useMessage } from "@/hooks/useMessage";
 
 const store = useBleStore();
-const { connectedDevice, pairedDevices, availableDevices } = storeToRefs(store);
-const { scan, connectBle, disConnectBle } = useBluetoothLe();
-
-const isPairing = ref(false);
+const { connectedDevice, availableDevices } = storeToRefs(store);
+const { scan, scanning, connectBle, disConnectBle } = useBluetoothLe();
+const { stopSendMessage } = useMessage();
+const router = useRouter();
 
 onMounted(() => {
-  presentingElement = page.value?.$el;
+  if (connectedDevice.value.isPaired) return;
   scan();
 });
 
-let presentingElement: HTMLElement;
-
-const page = ref<ComponentPublicInstance | null>(null);
-
-const deviceManageModal = ref<InstanceType<typeof DeviceManageModal> | null>(
-  null
-);
-
-const openDeviceInfo = (device: Device) => {
-  if (deviceManageModal.value) {
-    deviceManageModal.value?.present(device);
-  }
-};
-
 const selectDevice = async (device: Device) => {
-  if (device.isPairing) return;
-  try {
-    await connectBle(device);
-  } catch (e) {
-    console.log(e);
-  }
-};
-const changePairedStatus = async (device: Device) => {
-  if (device.isPaired) {
-    // 确认是否断开连接
-    await presentAlert();
-  } else {
-    await connectBle(device, false);
-  }
-};
-const deletePairedDevice = (device: Device) => {
-  disConnectBle(device, true);
-  scan();
+  await showConnectLoading();
+  await connectBle(device);
+  connectLoading.value?.dismiss();
+  router.back();
 };
 const alertButtons = [
   "Cancel",
   {
     text: "Okay",
-    handler: () => {
-      disConnectBle(connectedDevice.value, false);
+    handler: async () => {
+      alert.value?.dismiss();
+      await showDisconnectLoading();
+      await stopSendMessage();
+      await disConnectBle(connectedDevice.value, false);
+      disconnectLoading.value?.dismiss();
+      setTimeout(async () => {
+        await scan();
+      }, 500);
     },
   },
 ];
+const alert = shallowRef<HTMLIonAlertElement>();
 const presentAlert = async () => {
-  const alert = await alertController.create({
+  alert.value = await alertController.create({
     header: "Alert",
     subHeader: "Do you want to disconnect the Bluetooth!",
     buttons: alertButtons,
   });
 
-  await alert.present();
+  await alert.value.present();
+};
+const connectLoading = shallowRef<HTMLIonLoadingElement>();
+const showConnectLoading = async () => {
+  connectLoading.value = await loadingController.create({
+    message: "Disconnecting Bluetooth device",
+  });
+  await connectLoading.value.present;
+};
+const disconnectLoading = shallowRef<HTMLIonLoadingElement>();
+const showDisconnectLoading = async () => {
+  disconnectLoading.value = await loadingController.create({
+    message: "Disconnecting Bluetooth device",
+  });
+
+  await disconnectLoading.value.present();
 };
 const clearLocalStorage = () => {
   window.localStorage.clear();
 };
 </script>
+<style lang="scss">
+@keyframes refresh {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+.icon-refresh--on {
+  animation-name: refresh;
+  animation-duration: 1s;
+  animation-iteration-count: 1;
+}
+</style>

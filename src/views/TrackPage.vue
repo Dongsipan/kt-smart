@@ -4,8 +4,17 @@
       <ion-toolbar>
         <ion-title>Track</ion-title>
         <ion-buttons slot="end">
-          <ion-button @click="setMapToCenter">
-            <ion-icon :icon="locateOutline"></ion-icon>
+          <ion-button @click="setMapToCenter" :disabled="watching">
+            <ion-icon
+              v-if="isPlatform('ios')"
+              :class="{ 'locate-icon--locating--ios': locating }"
+              :icon="locateOutline"
+            ></ion-icon>
+            <ion-icon
+              v-else
+              :class="{ 'locate-icon--locating--android': locating }"
+              :icon="locateOutline"
+            ></ion-icon>
           </ion-button>
           <ion-button @click="toHistoriesPage">
             <ion-icon :icon="footstepsOutline"></ion-icon>
@@ -13,8 +22,18 @@
         </ion-buttons>
       </ion-toolbar>
     </ion-header>
-    <ion-content :fullscreen="true" class="ion-no-padding">
-      <ion-fab slot="fixed" :edge="true" horizontal="end" vertical="bottom">
+    <ion-content
+      :fullscreen="true"
+      class="ion-no-padding"
+      style="width: 100vw; height: 100vh"
+    >
+      <ion-fab
+        style="display: none"
+        slot="fixed"
+        :edge="true"
+        horizontal="end"
+        vertical="bottom"
+      >
         <ion-fab-button id="open-modal">
           <ion-icon :icon="flashOutline"></ion-icon>
         </ion-fab-button>
@@ -26,7 +45,7 @@
         <div class="dashboard">
           <div class="dashboard-main">
             <div class="dashboard-main__data dashboard-main__data--outer">
-              <div>altitude</div>
+              <div>Altitude</div>
               <div>{{ altitudeToFixed || "--" }}</div>
             </div>
             <div class="dashboard-main__action">
@@ -75,7 +94,7 @@
               </template>
               <div class="dashboard-main__data">
                 <div>Distance</div>
-                <div>{{ distanceToKm || "--" }}--</div>
+                <div>{{ distanceToKm || "--" }}</div>
               </div>
             </div>
             <div class="dashboard-main__data dashboard-main__data--outer">
@@ -83,7 +102,7 @@
               <div>{{ speedToKm || "--" }}</div>
             </div>
           </div>
-          <div class="dashboard-info ion-margin-top">
+          <div class="dashboard-info ion-margin-top ion-margin-horizontal">
             <div class="dashboard-info__data">
               <div>Time</div>
               <div>{{ formatTime || "--" }}</div>
@@ -164,6 +183,8 @@ import {
   IonTextarea,
   IonTitle,
   IonToolbar,
+  isPlatform,
+  onIonViewWillEnter,
 } from "@ionic/vue";
 import { flashOutline, footstepsOutline, locateOutline } from "ionicons/icons";
 import AMapContainer from "@/components/AMapContainer.vue";
@@ -177,10 +198,12 @@ import { useTimer } from "@/hooks/useTimer";
 import { Position } from "@capacitor/geolocation";
 import { useRouter } from "vue-router";
 import { Capacitor } from "@capacitor/core";
+import { storeToRefs } from "pinia";
 
 const mapRef = ref(null) as any;
 
 const positionStore = usePositionStore();
+const { locating, watching } = storeToRefs(positionStore);
 const { watchCurrentPosition, clearWatch } = useGeoLocation();
 const { presentToast } = useToast();
 const router = useRouter();
@@ -205,22 +228,22 @@ const currentDistance = ref<number>();
 
 const isRiding = ref(false);
 const isStopRiding = ref(false);
-const { elapsedTime, toggleTimer, formatTime } = useTimer();
+const { start, stop, reset, formatTime } = useTimer();
 
 const speedToKm = computed(() => {
-  return currentSpeed.value && currentSpeed.value !== -1
+  return currentSpeed.value && currentSpeed.value > 0
     ? ((currentSpeed.value * 3600) / 1000).toFixed(1)
     : 0;
 });
 
 const maxSpeedToKm = computed(() => {
-  return maxSpeed.value && maxSpeed.value > 1
+  return maxSpeed.value && maxSpeed.value > 0
     ? (maxSpeed.value * 3.6).toFixed(1)
     : 0;
 });
 
 const averageSpeedToKm = computed(() => {
-  return currentAverageSpeed.value && currentAverageSpeed.value > 1
+  return currentAverageSpeed.value && currentAverageSpeed.value > 0
     ? (currentAverageSpeed.value * 3.6).toFixed(1)
     : 0;
 });
@@ -232,63 +255,434 @@ const altitudeToFixed = computed(() => {
   return currentAltitude.value ? currentAltitude.value?.toFixed(1) : 0;
 });
 const isNative = Capacitor.isNativePlatform();
-onMounted(() => {
+
+onIonViewWillEnter(() => {
   if (isNative) {
     mapRef.value.initMap();
   } else {
     mapRef.value.initWebMap();
   }
 });
+
+let startPosition;
 const startRide = () => {
-  setMapToCenter();
+  if (locating.value) {
+    presentToast("Positioning in progress, please wait");
+    return;
+  }
+  mapRef.value.clearPathAndMarker();
   mapRef.value.initPolyline();
   isRiding.value = true;
-  toggleTimer();
-  // mockPath();
-  watchPosition();
+  startPosition = undefined;
+  start();
+  if (isNative) {
+    watchPosition();
+  } else {
+    const mock = [
+      {
+        coords: {
+          latitude: 31.1262937,
+          longitude: 120.4477933,
+          accuracy: 12.413000106811523,
+          altitude: 12.85125732421875,
+          altitudeAccuracy: 11.879189491271973,
+          speed: 4.633049488067627,
+          heading: 311.044677734375,
+        },
+        timestamp: 1687532006145,
+      },
+      {
+        coords: {
+          latitude: 31.1263135,
+          longitude: 120.4477688,
+          accuracy: 8.928999900817871,
+          altitude: 15.0125732421875,
+          altitudeAccuracy: 9.62825870513916,
+          speed: 0.27304595708847046,
+          heading: 12.490877151489258,
+        },
+        timestamp: 1687532010742,
+      },
+      {
+        coords: {
+          latitude: 31.1263155,
+          longitude: 120.4477783,
+          accuracy: 14.178999900817871,
+          altitude: 15.0125732421875,
+          altitudeAccuracy: 9.62825870513916,
+          speed: 0.22676877677440643,
+          heading: 41.79863357543945,
+        },
+        timestamp: 1687532015263,
+      },
+      {
+        coords: {
+          latitude: 31.1263037,
+          longitude: 120.4478327,
+          accuracy: 16.02199935913086,
+          altitude: 20.47149658203125,
+          altitudeAccuracy: 14.575793266296387,
+          speed: 0.49227774143218994,
+          heading: 93.03411102294922,
+        },
+        timestamp: 1687532019899,
+      },
+      {
+        coords: {
+          latitude: 31.1262954,
+          longitude: 120.4479044,
+          accuracy: 18.73900032043457,
+          altitude: 20.47149658203125,
+          altitudeAccuracy: 14.575793266296387,
+          speed: 0.8445966839790344,
+          heading: 93.26995849609375,
+        },
+        timestamp: 1687532024883,
+      },
+      {
+        coords: {
+          latitude: 31.1262855,
+          longitude: 120.4479801,
+          accuracy: 21.049999237060547,
+          altitude: 19.33721923828125,
+          altitudeAccuracy: 18.13079833984375,
+          speed: 1.016179084777832,
+          heading: 95.4952621459961,
+        },
+        timestamp: 1687532029403,
+      },
+      {
+        coords: {
+          latitude: 31.1262729,
+          longitude: 120.4480818,
+          accuracy: 20.356000900268555,
+          altitude: 19.33721923828125,
+          altitudeAccuracy: 18.13079833984375,
+          speed: 1.1502346992492676,
+          heading: 95.50843811035156,
+        },
+        timestamp: 1687532034967,
+      },
+      {
+        coords: {
+          latitude: 31.1262617,
+          longitude: 120.4481826,
+          accuracy: 21.375999450683594,
+          altitude: 21.07763671875,
+          altitudeAccuracy: 13.175178527832031,
+          speed: 1.2502585649490356,
+          heading: 92.52903747558594,
+        },
+        timestamp: 1687532039603,
+      },
+      {
+        coords: {
+          latitude: 31.1262504,
+          longitude: 120.4482721,
+          accuracy: 14.932999610900879,
+          altitude: 21.07763671875,
+          altitudeAccuracy: 13.175178527832031,
+          speed: 1.3178050518035889,
+          heading: 93.61415100097656,
+        },
+        timestamp: 1687532044239,
+      },
+      {
+        coords: {
+          latitude: 31.1262446,
+          longitude: 120.4483567,
+          accuracy: 15.11400032043457,
+          altitude: 20.9114990234375,
+          altitudeAccuracy: 11.816811561584473,
+          speed: 1.3209741115570068,
+          heading: 97.40968322753906,
+        },
+        timestamp: 1687532048876,
+      },
+      {
+        coords: {
+          latitude: 31.1262333,
+          longitude: 120.4484153,
+          accuracy: 10.545999526977539,
+          altitude: 20.9114990234375,
+          altitudeAccuracy: 11.816811561584473,
+          speed: 1.2798484563827515,
+          heading: 99.10550689697266,
+        },
+        timestamp: 1687532053859,
+      },
+      {
+        coords: {
+          latitude: 31.1262296,
+          longitude: 120.4484749,
+          accuracy: 13.585000038146973,
+          altitude: 17.26812744140625,
+          altitudeAccuracy: 19.55817222595215,
+          speed: 1.2590947151184082,
+          heading: 95.78394317626953,
+        },
+        timestamp: 1687532058489,
+      },
+      {
+        coords: {
+          latitude: 31.1262346,
+          longitude: 120.4485351,
+          accuracy: 14.946000099182129,
+          altitude: 17.26812744140625,
+          altitudeAccuracy: 19.55817222595215,
+          speed: 1.2882599830627441,
+          heading: 90.07588195800781,
+        },
+        timestamp: 1687532063016,
+      },
+      {
+        coords: {
+          latitude: 31.1262382,
+          longitude: 120.4485909,
+          accuracy: 18.0049991607666,
+          altitude: 17.26812744140625,
+          altitudeAccuracy: 19.55817222595215,
+          speed: 1.3094755411148071,
+          heading: 87.02710723876953,
+        },
+        timestamp: 1687532067536,
+      },
+      {
+        coords: {
+          latitude: 31.1262473,
+          longitude: 120.4486682,
+          accuracy: 15.40999984741211,
+          altitude: 20.22357177734375,
+          altitudeAccuracy: 15.856236457824707,
+          speed: 1.3357502222061157,
+          heading: 85.37618255615234,
+        },
+        timestamp: 1687532072520,
+      },
+      {
+        coords: {
+          latitude: 31.1262514,
+          longitude: 120.4487423,
+          accuracy: 18.018999099731445,
+          altitude: 20.22357177734375,
+          altitudeAccuracy: 15.856236457824707,
+          speed: 1.3493794202804565,
+          heading: 88.18750762939453,
+        },
+        timestamp: 1687532077156,
+      },
+      {
+        coords: {
+          latitude: 31.1262552,
+          longitude: 120.4488067,
+          accuracy: 13.79800033569336,
+          altitude: 24.76922607421875,
+          altitudeAccuracy: 8.238835334777832,
+          speed: 1.3451457023620605,
+          heading: 88.24646759033203,
+        },
+        timestamp: 1687532081676,
+      },
+      {
+        coords: {
+          latitude: 31.1262583,
+          longitude: 120.4489033,
+          accuracy: 13.625,
+          altitude: 24.76922607421875,
+          altitudeAccuracy: 8.238835334777832,
+          speed: 1.3522353172302246,
+          heading: 87.04612731933594,
+        },
+        timestamp: 1687532087239,
+      },
+      {
+        coords: {
+          latitude: 31.1262538,
+          longitude: 120.4489539,
+          accuracy: 12.024999618530273,
+          altitude: 19.67730712890625,
+          altitudeAccuracy: 5.672508239746094,
+          speed: 1.2910549640655518,
+          heading: 92.6560287475586,
+        },
+        timestamp: 1687532091875,
+      },
+      {
+        coords: {
+          latitude: 31.1262424,
+          longitude: 120.4490301,
+          accuracy: 13.446000099182129,
+          altitude: 19.67730712890625,
+          altitudeAccuracy: 5.672508239746094,
+          speed: 1.3053648471832275,
+          heading: 94.6934585571289,
+        },
+        timestamp: 1687532096511,
+      },
+      {
+        coords: {
+          latitude: 31.1262759,
+          longitude: 120.4490451,
+          accuracy: 14.715999603271484,
+          altitude: 24.3831787109375,
+          altitudeAccuracy: 12.0009126663208,
+          speed: 0.41696080565452576,
+          heading: 72.29947662353516,
+        },
+        timestamp: 1687532101495,
+      },
+      {
+        coords: {
+          latitude: 31.1262897,
+          longitude: 120.4489854,
+          accuracy: 12.753999710083008,
+          altitude: 24.3831787109375,
+          altitudeAccuracy: 12.0009126663208,
+          speed: 0.08929099887609482,
+          heading: 0,
+        },
+        timestamp: 1687532106105,
+      },
+      {
+        coords: {
+          latitude: 31.1262722,
+          longitude: 120.4488758,
+          accuracy: 12.470000267028809,
+          altitude: 34.1373291015625,
+          altitudeAccuracy: 9.753472328186035,
+          speed: 0.3951999843120575,
+          heading: 248.19252014160156,
+        },
+        timestamp: 1687532110767,
+      },
+      {
+        coords: {
+          latitude: 31.1262743,
+          longitude: 120.4487781,
+          accuracy: 14.446000099182129,
+          altitude: 34.1373291015625,
+          altitudeAccuracy: 9.753472328186035,
+          speed: 0.7563164830207825,
+          heading: 274.61285400390625,
+        },
+        timestamp: 1687532116330,
+      },
+      {
+        coords: {
+          latitude: 31.1262762,
+          longitude: 120.4486777,
+          accuracy: 15.963000297546387,
+          altitude: 31.56048583984375,
+          altitudeAccuracy: 11.818158149719238,
+          speed: 1.0699423551559448,
+          heading: 276.3619079589844,
+        },
+        timestamp: 1687532120845,
+      },
+      {
+        coords: {
+          latitude: 31.1262856,
+          longitude: 120.4485907,
+          accuracy: 17.78700065612793,
+          altitude: 31.56048583984375,
+          altitudeAccuracy: 11.818158149719238,
+          speed: 1.2695256471633911,
+          heading: 277.9208679199219,
+        },
+        timestamp: 1687532125415,
+      },
+      {
+        coords: {
+          latitude: 31.1262585,
+          longitude: 120.4484863,
+          accuracy: 15.982999801635742,
+          altitude: 29.4058837890625,
+          altitudeAccuracy: 8.683859825134277,
+          speed: 1.4041341543197632,
+          heading: 276.1004333496094,
+        },
+        timestamp: 1687532130415,
+      },
+      {
+        coords: {
+          latitude: 31.1262522,
+          longitude: 120.4484116,
+          accuracy: 14.906000137329102,
+          altitude: 29.4058837890625,
+          altitudeAccuracy: 8.683859825134277,
+          speed: 1.4003323316574097,
+          heading: 271.9714050292969,
+        },
+        timestamp: 1687532134990,
+      },
+    ];
+    let mockLength = mock.length;
+    let index = 0;
+    setInterval(async () => {
+      if (index < mockLength) {
+        const data = mock[index];
+        index++;
+        await computedRideData(data);
+      }
+    }, 2000);
+  }
 };
+let isFirstPoint = true;
 const watchPosition = () => {
   watchCurrentPosition(async (geolocationPosition) => {
     if (geolocationPosition === null) return;
-    const { longitude, latitude, altitude, speed, accuracy } =
-      geolocationPosition!.coords;
-    currentSpeed.value = speed || 0;
-    currentAltitude.value = altitude || 0;
-    currentLongitude.value = longitude;
-    currentLatitude.value = latitude;
-    currentAccuracy.value = accuracy;
-    geoLocationData.push(geolocationPosition); // 存储原始数据
-
-    const positions = await mapRef.value.convertGpsToAMap([
-      longitude,
-      latitude,
-    ]); // 转化成高德坐标
-    path.push(positions);
-    smoothedPath = pathSmoothTool.pathOptimize(path); // 优化轨迹
-    mapRef.value.setPolylineByPath(smoothedPath); // 绘制轨迹
-    getMaxData(); // 从GPS数据中计算最大速度、最高海拔
-    calculateAverageSpeed(); // 计算平均速度
+    await computedRideData(geolocationPosition);
   });
 };
+
+const computedRideData = async (geolocationPosition: Position) => {
+  if (isFirstPoint) {
+    isFirstPoint = false;
+    return;
+  }
+  const { longitude, latitude, altitude, speed, accuracy } =
+    geolocationPosition!.coords;
+  currentSpeed.value = speed || 0;
+  currentAltitude.value = altitude || 0;
+  currentLongitude.value = longitude;
+  currentLatitude.value = latitude;
+  currentAccuracy.value = accuracy;
+  geoLocationData.push(geolocationPosition); // 存储原始数据
+  console.log(geoLocationData);
+  window.localStorage.geoLocationData = JSON.stringify(geoLocationData);
+  const positions = await mapRef.value.convertGpsToAMap([longitude, latitude]); // 转化成高德坐标
+  path.push(positions);
+  smoothedPath = pathSmoothTool.pathOptimize(path); // 优化轨迹
+  startPosition = smoothedPath[0];
+  if (smoothedPath.length >= 2) {
+    mapRef.value.addStartPositionMarker(startPosition.lng, startPosition.lat);
+    mapRef.value.setPolylineByPath(smoothedPath); // 绘制轨迹
+    getMaxData(); // 从GPS数据中计算最大速度、最高海拔
+    computedCurrentDistance(); // 计算行驶里程
+    computedAverageSpeed(); // 计算平均速度
+  }
+};
+
 /*
  * {"timestamp":1686647786114,"coords":{"altitude":32.022853851318359,"heading":-1,"latitude":31.298159747161719,"altitudeAccuracy":10.407867431640625,"longitude":120.54356498135141,"accuracy":46,"speed":-1}}
  * */
 
 const stopRide = () => {
   isStopRiding.value = true;
-  toggleTimer();
+  stop();
   clearWatch();
 };
 const restoreRide = () => {
   isStopRiding.value = false;
-  toggleTimer();
+  start();
   watchPosition();
 };
 const { addHistoryTrack } = usePositionStore();
 const finishRide = () => {
   isRiding.value = false;
   isStopRiding.value = false;
-  toggleTimer();
+  stop();
+  reset();
   clearWatch();
   if (smoothedPath.length < 10) {
     presentNotSaveAlert();
@@ -333,13 +727,13 @@ const getMaxData = () => {
   const { _maxSpeed, _maxAltitude } = geoLocationData.reduce(
     (acc: any, curr: any) => {
       if (curr.coords.speed) {
-        if (curr.coords.speed > acc.maxSpeed) {
-          acc.maxSpeed = curr.coords.speed;
+        if (curr.coords.speed > acc._maxSpeed) {
+          acc._maxSpeed = curr.coords.speed;
         }
       }
       if (curr.coords.altitude) {
-        if (curr.coords.altitude > acc.maxAltitude) {
-          acc.maxAltitude = curr.coords.altitude;
+        if (curr.coords.altitude > acc._maxAltitude) {
+          acc._maxAltitude = curr.coords.altitude;
         }
       }
       return acc;
@@ -350,32 +744,53 @@ const getMaxData = () => {
   maxAltitude.value = Number(_maxAltitude);
 };
 
-const calculateAverageSpeed = () => {
+const computedCurrentDistance = () => {
   // 计算总行驶距离和总行驶时间
   let totalDistance = 0;
   let totalTime = 0;
   for (let i = 1; i < geoLocationData.length; i++) {
     const prevPoint = geoLocationData[i - 1];
     const currPoint = geoLocationData[i];
-    const prevLnglat = new AMap.LngLat(
-      prevPoint.coords.longitude,
-      prevPoint.coords.latitude
-    );
-    const currLnglat = new AMap.LngLat(
-      currPoint.coords.longitude,
-      currPoint.coords.latitude
-    );
-    const distance = mapRef.value.getDistance(prevLnglat, currLnglat);
+    const distance = calculateDistance(prevPoint, currPoint); // mapRef.value.getDistance(prevLnglat, currLnglat);
     const timeDiff = currPoint.timestamp - prevPoint.timestamp;
     totalDistance += distance;
     totalTime += timeDiff;
   }
-
-  // 计算平均速度（单位：米/秒）
-  const averageSpeed = totalDistance / totalTime;
-  currentAverageSpeed.value = averageSpeed;
   currentDistance.value = totalDistance;
 };
+const computedAverageSpeed = () => {
+  let totalSpeed = 0;
+  let count = 0;
+
+  for (const data of geoLocationData) {
+    if (data.coords.speed !== null) {
+      totalSpeed += data.coords.speed;
+      count++;
+    }
+  }
+
+  currentAverageSpeed.value = count > 0 ? totalSpeed / count : 0;
+};
+const calculateDistance = (prevPoint: Position, currPoint: Position) => {
+  const R = 6371e3; // earth radius in meters
+  const φ1 = (prevPoint.coords.latitude * Math.PI) / 180; // convert to radians
+  const φ2 = (currPoint.coords.latitude * Math.PI) / 180;
+  const Δφ =
+    ((currPoint.coords.latitude - prevPoint.coords.latitude) * Math.PI) / 180;
+  const Δλ =
+    ((currPoint.coords.longitude - prevPoint.coords.longitude) * Math.PI) / 180;
+
+  const a =
+    Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
+    Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+  return R * c; // distance in meters
+};
+
+function toRadians(degrees: number): number {
+  return degrees * (Math.PI / 180);
+}
 const saveHistory = () => {
   const history = {
     id: new Date().valueOf(),
@@ -397,65 +812,31 @@ const modal = ref(null) as any;
 const closeModal = () => {
   modal.value.$el.dismiss(null, "cancel");
 };
-// onIonViewDidEnter(() => {
-//   requestLocationPermission();
-//   watchCurrentPosition((location) => {
-//     presentToast(JSON.stringify(location));
-//   });
-// });
-
-const initCycle = () => {
-  const svg = document.getElementById("dashboard__action-outer");
-  const path = createSVGPath(75, 0, 74, 260, 0.5, "white");
-  svg!.appendChild(path);
-};
-
-const createSVGPath = (
-  startX: number,
-  startY: number,
-  R: number,
-  theta: number,
-  width: number,
-  color: string
-) => {
-  const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
-  const realR = R - width;
-  const dArr = [
-    "M" + startX,
-    startY + width,
-    "A" + realR,
-    realR,
-    0,
-    theta >= 180 ? 1 : 0,
-    0,
-  ];
-  const cx = startX,
-    cy = startY + R;
-
-  const theta2 = theta % 360;
-  // 避免360度与0度一样的情况
-  theta = theta > 0 && theta2 == 0 ? 359.9 : theta2;
-
-  const alpha = ((theta + 90) / 180) * Math.PI;
-  const dx = realR * Math.cos(alpha);
-  const dy = realR * Math.sin(alpha);
-  const x = cx + dx,
-    y = cy - dy;
-
-  dArr.push(x.toFixed(2));
-  dArr.push(y.toFixed(2));
-  const d = dArr.join(" ");
-
-  path.setAttribute("d", d);
-  path.setAttribute("stroke", color);
-  path.setAttribute("stroke-width", width.toString());
-  path.setAttribute("fill", "none");
-
-  return path;
-};
 </script>
 <style lang="scss">
+@keyframes ios-locating {
+  from {
+    color: var(--ion-toolbar-color, var(--color));
+  }
+  to {
+    color: #fff;
+  }
+}
+@keyframes android-locating {
+  from {
+    color: var(--ion-toolbar-color, var(--color));
+  }
+  to {
+    color: #ef4c28;
+  }
+}
 .track-page {
+  .locate-icon--locating--ios {
+    animation: ios-locating 0.8s infinite alternate;
+  }
+  .locate-icon--locating--android {
+    animation: android-locating 0.8s infinite alternate;
+  }
   ion-content {
     position: relative;
   }
@@ -517,8 +898,12 @@ const createSVGPath = (
       .dashboard-info__data {
         display: flex;
         flex-direction: column;
-        align-items: center;
+        //align-items: center;
         flex: 1;
+        div:last-child {
+          width: 100%;
+          //text-align: center;
+        }
       }
     }
   }
