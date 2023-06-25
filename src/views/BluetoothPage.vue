@@ -101,10 +101,11 @@ import {
 import { bluetooth, refresh } from "ionicons/icons";
 import { Device, useBleStore } from "@/store/useBleStore";
 import { useBluetoothLe } from "@/hooks/useBluetooth-le";
-import { onMounted, shallowRef } from "vue";
+import { onMounted, onUnmounted, ref, shallowRef } from "vue";
 import { storeToRefs } from "pinia";
 import { useRouter } from "vue-router";
 import { useMessage } from "@/hooks/useMessage";
+import { useToast } from "@/hooks/useToast";
 import { useDisconnectEventBus } from "@/hooks/useDisconnectEventBus";
 
 const store = useBleStore();
@@ -115,21 +116,38 @@ const { stopSendMessage } = useMessage();
 const router = useRouter();
 const { on } = useDisconnectEventBus();
 
+let scanIntervalId: any;
+
 onMounted(() => {
   if (connectedDevice.value.isPaired) return;
-  scan();
+  scanInterval();
 });
-
 on(async () => {
-  // 监听设备是否断开
-  store.setConnectedDevice({} as Device);
-  await stopSendMessage();
+  await scanInterval();
 });
+onUnmounted(() => {
+  clearInterval(scanIntervalId);
+});
+const toast = useToast();
+const scanInterval = async () => {
+  await scan();
+  scanIntervalId = setInterval(async () => {
+    await scan();
+  }, 1000 * 15);
+};
 const selectDevice = async (device: Device) => {
+  clearInterval(scanIntervalId);
   await showConnectLoading();
-  await connectBle(device);
-  connectLoading.value?.dismiss();
-  router.back();
+  try {
+    await connectBle(device);
+    await connectLoading.dismiss();
+    router.back();
+  } catch (e) {
+    console.log("connect error", e);
+    await connectLoading.dismiss();
+    await toast.presentToast("Unmatched Bluetooth device");
+    await scanInterval();
+  }
 };
 const alertButtons = [
   "Cancel",
@@ -138,16 +156,20 @@ const alertButtons = [
     handler: async () => {
       alert.value?.dismiss();
       await showDisconnectLoading();
-      await stopSendMessage();
-      await disConnectBle(connectedDevice.value);
-      disconnectLoading.value?.dismiss();
+      try {
+        await stopSendMessage();
+        await disConnectBle(connectedDevice.value);
+        disconnectLoading.value?.dismiss();
+      } catch (e) {
+        disconnectLoading.value?.dismiss();
+      }
       setTimeout(async () => {
-        await scan();
-      }, 500);
+        await scanInterval();
+      }, 1000);
     },
   },
 ];
-const alert = shallowRef<HTMLIonAlertElement>();
+const alert = ref<HTMLIonAlertElement>();
 const presentAlert = async () => {
   alert.value = await alertController.create({
     header: "Alert",
@@ -157,12 +179,12 @@ const presentAlert = async () => {
 
   await alert.value.present();
 };
-const connectLoading = shallowRef<HTMLIonLoadingElement>();
+let connectLoading = {} as HTMLIonLoadingElement;
 const showConnectLoading = async () => {
-  connectLoading.value = await loadingController.create({
-    message: "Disconnecting Bluetooth device",
+  connectLoading = await loadingController.create({
+    message: "Connecting to Bluetooth device",
   });
-  await connectLoading.value.present;
+  await connectLoading.present();
 };
 const disconnectLoading = shallowRef<HTMLIonLoadingElement>();
 const showDisconnectLoading = async () => {

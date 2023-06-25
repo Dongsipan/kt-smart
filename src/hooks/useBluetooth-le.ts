@@ -108,7 +108,6 @@ export function useBluetoothLe() {
     ⚡️  [error] - {"errorMessage":"Connection timeout","message":"Connection timeout"}
     ⚡️  [error] - connectToDevice {"errorMessage":"Connection timeout"}
   * */
-  let retryNum = 3;
   const connectBle = async (device: Device) => {
     return new Promise(async (resolve, reject) => {
       try {
@@ -123,13 +122,8 @@ export function useBluetoothLe() {
         updateConnectedDevicePairedStatus(true);
         resolve("");
       } catch (error) {
-        if (retryNum > 0) {
-          retryNum--;
-          await connectBle(device);
-        } else {
-          updateConnectedDevicePairedStatus(false);
-          reject();
-        }
+        updateConnectedDevicePairedStatus(false);
+        reject();
       }
     });
   };
@@ -144,15 +138,19 @@ export function useBluetoothLe() {
   // ⚡️  BluetoothLe - Resolve connect Connection successful.
 
   const disConnectBle = async (device: Device) => {
-    try {
-      if (isNative) {
-        await BleClient.initialize();
-        await BleClient.disconnect(device.deviceId);
+    return new Promise(async (resolve, reject) => {
+      try {
+        if (isNative) {
+          await BleClient.initialize();
+          await BleClient.disconnect(device.deviceId);
+        }
+        updateConnectedDevicePairedStatus(false); // 断开连接后清空连接状态
+        resolve("");
+      } catch (error) {
+        updateConnectedDevicePairedStatus(false);
+        reject();
       }
-      setConnectedDevice({} as Device); // 断开连接后清空连接状态
-    } catch (error) {
-      setConnectedDevice({} as Device);
-    }
+    });
   };
   const onDisconnect = async (deviceId: string) => {
     emit("onBleDisconnect");

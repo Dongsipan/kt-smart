@@ -44,14 +44,14 @@ export const useBleStore = defineStore("ble", {
     updateConnectedDevicePairingStatus(payload: boolean) {
       this.connectedDevice.isPairing = payload;
     },
-    removeConnectedDevice(payload: Device) {
+    removeConnectedDevice() {
       this.connectedDevice = {} as Device;
     },
     setAvailableDevice(payload: Device) {
       this.availableDevices.push(payload);
     },
     clearAvailableDevices() {
-      this.availableDevices.length = 0;
+      this.availableDevices = [];
     },
   },
   persist: {

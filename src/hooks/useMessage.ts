@@ -3,7 +3,7 @@ import { useBluetoothLe } from "@/hooks/useBluetooth-le";
 import { CharacteristicUUID, ServiceUUID } from "@/const/ble.const";
 import { useDashboardStore } from "@/store/useDashboardStore";
 import { useSettingStore } from "@/store/useSettingStore";
-import { Device, useBleStore } from "@/store/useBleStore";
+import { useBleStore } from "@/store/useBleStore";
 import { storeToRefs } from "pinia";
 import chalk from "chalk";
 import {
@@ -43,7 +43,6 @@ export function useMessage() {
     setBrake,
   } = useDashboardStore();
   const { connectedDevice } = storeToRefs(useBleStore());
-  const { setConnectedDevice } = useBleStore();
   const { write, startNotification, stopNotification, disConnectBle } =
     useBluetoothLe();
   const { presentToast } = useToast();
@@ -81,11 +80,6 @@ export function useMessage() {
         );
       } catch (error: any) {
         clearInterval(writeInterval);
-        if (error.errorMessage === "Not connected to device.") {
-          // 应该不会触发，已经监听了断开回调函数
-          // 如果设备意外断开，则清空连接状态
-          setConnectedDevice({} as Device);
-        }
         console.log(chalk.red(`send message error: ${JSON.stringify(error)}`));
       }
     }, 500);
@@ -98,7 +92,8 @@ export function useMessage() {
   };
   const stopSendMessage = async () => {
     clearInterval(writeInterval);
-    if (!connectedDevice.value.deviceId) return;
+    if (!connectedDevice.value.deviceId || !connectedDevice.value.isPaired)
+      return;
     await stopNotification(
       connectedDevice.value.deviceId,
       numberToUUID(ServiceUUID),

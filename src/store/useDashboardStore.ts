@@ -101,6 +101,10 @@ export const useDashboardStore = defineStore("dashboard", {
     setBrake(payload: number) {
       this.brake = payload;
     },
+    resetDashboard() {
+      this.speed = 0;
+      this.throttle = 0;
+    },
   },
   persist: {
     paths: ["gearPosition", "displayType", "totalMileage"],

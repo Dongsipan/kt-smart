@@ -3,7 +3,7 @@ import { toastController } from "@ionic/vue";
 export function useToast() {
   const presentToast = async (
     message: string,
-    position: "top" | "middle" | "bottom" = "middle",
+    position: "top" | "middle" | "bottom" = "top",
     duration = 3000
   ) => {
     const toast = await toastController.create({
