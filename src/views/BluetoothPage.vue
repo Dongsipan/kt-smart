@@ -6,7 +6,7 @@
           <ion-back-button></ion-back-button>
         </ion-buttons>
         <ion-title>Bluetooth</ion-title>
-        <ion-buttons slot="end" v-if="!connectedDevice.isPaired">
+        <ion-buttons v-if="!connectedDevice.isPaired" slot="end">
           <ion-button @click="scan">
             <ion-icon
               slot="icon-only"
@@ -45,18 +45,18 @@
             <ion-icon slot="start" :icon="bluetooth"></ion-icon>
             <ion-label>{{ item.name }}</ion-label>
           </ion-item>
-          <ion-item lines="none" v-if="scanning">
+          <ion-item v-if="scanning" lines="none">
             <ion-note v-if="isPlatform('ios')">
               Searching for available devices...
             </ion-note>
-            <ion-note slot="start" v-else>
+            <ion-note v-else slot="start">
               Searching for available devices...
             </ion-note>
             <ion-spinner slot="end"></ion-spinner>
           </ion-item>
           <ion-item
-            lines="none"
             v-if="availableDevices.length === 0 && !scanning"
+            lines="none"
           >
             <ion-note v-if="isPlatform('ios')">
               No available Bluetooth devices found
@@ -78,10 +78,10 @@ import {
   IonButton,
   IonButtons,
   IonCard,
+  IonCardContent,
   IonCardHeader,
   IonCardSubtitle,
   IonCardTitle,
-  IonCardContent,
   IonContent,
   IonHeader,
   IonIcon,
@@ -90,13 +90,13 @@ import {
   IonItemGroup,
   IonLabel,
   IonList,
+  IonNote,
   IonPage,
+  IonSpinner,
   IonTitle,
   IonToolbar,
-  loadingController,
-  IonNote,
-  IonSpinner,
   isPlatform,
+  loadingController,
 } from "@ionic/vue";
 import { bluetooth, refresh } from "ionicons/icons";
 import { Device, useBleStore } from "@/store/useBleStore";
@@ -105,18 +105,26 @@ import { onMounted, shallowRef } from "vue";
 import { storeToRefs } from "pinia";
 import { useRouter } from "vue-router";
 import { useMessage } from "@/hooks/useMessage";
+import { useDisconnectEventBus } from "@/hooks/useDisconnectEventBus";
 
 const store = useBleStore();
 const { connectedDevice, availableDevices } = storeToRefs(store);
-const { scan, scanning, connectBle, disConnectBle } = useBluetoothLe();
+const { scan, scanning, connectBle, disConnectBle, onDisconnect } =
+  useBluetoothLe();
 const { stopSendMessage } = useMessage();
 const router = useRouter();
+const { on } = useDisconnectEventBus();
 
 onMounted(() => {
   if (connectedDevice.value.isPaired) return;
   scan();
 });
 
+on(async () => {
+  // 监听设备是否断开
+  store.setConnectedDevice({} as Device);
+  await stopSendMessage();
+});
 const selectDevice = async (device: Device) => {
   await showConnectLoading();
   await connectBle(device);
@@ -131,7 +139,7 @@ const alertButtons = [
       alert.value?.dismiss();
       await showDisconnectLoading();
       await stopSendMessage();
-      await disConnectBle(connectedDevice.value, false);
+      await disConnectBle(connectedDevice.value);
       disconnectLoading.value?.dismiss();
       setTimeout(async () => {
         await scan();
@@ -164,9 +172,6 @@ const showDisconnectLoading = async () => {
 
   await disconnectLoading.value.present();
 };
-const clearLocalStorage = () => {
-  window.localStorage.clear();
-};
 </script>
 <style lang="scss">
 @keyframes refresh {
@@ -177,6 +182,7 @@ const clearLocalStorage = () => {
     transform: rotate(360deg);
   }
 }
+
 .icon-refresh--on {
   animation-name: refresh;
   animation-duration: 1s;

@@ -274,7 +274,7 @@ const alertButtons = [
     text: "Okay",
     handler: () => {
       stopSendMessage();
-      disConnectBle(connectedDevice.value, false);
+      disConnectBle(connectedDevice.value);
     },
   },
 ];
@@ -409,6 +409,7 @@ const batteryAnimate = () => {
 
   ion-row {
     margin-top: 1rem;
+
     &:first-child {
       margin-top: 0;
     }

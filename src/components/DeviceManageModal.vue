@@ -49,10 +49,10 @@
       @didDismiss="setOpenAlert(false)"
     ></ion-alert>
     <ion-alert
-      trigger="present-alert"
-      header="Please enter your device name"
       :buttons="alertEditButtons"
       :inputs="alertInputs"
+      header="Please enter your device name"
+      trigger="present-alert"
     ></ion-alert>
   </ion-modal>
 </template>
@@ -112,7 +112,7 @@ defineExpose({
 });
 
 const deletePairedDevice = () => {
-  disConnectBle(device.value, true);
+  disConnectBle(device.value);
   dismiss();
 };
 
@@ -130,7 +130,7 @@ const alertButtons = [
   {
     text: "Okay",
     handler: () => {
-      disConnectBle(device.value, false);
+      disConnectBle(device.value);
     },
   },
 ];

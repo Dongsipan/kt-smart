@@ -11,6 +11,7 @@ import { storeToRefs } from "pinia";
 import { useToast } from "@/hooks/useToast";
 import { ServiceUUID } from "@/const/ble.const";
 import { isPlatform } from "@ionic/vue";
+import { useDisconnectEventBus } from "@/hooks/useDisconnectEventBus";
 
 export function useBluetoothLe() {
   const bleStore = useBleStore();
@@ -20,10 +21,10 @@ export function useBluetoothLe() {
     setAvailableDevice,
     clearAvailableDevices,
     setConnectedDevice,
-    removeConnectedDevice,
     updateConnectedDevicePairedStatus,
     updateConnectedDevicePairingStatus,
   } = useBleStore();
+  const { emit } = useDisconnectEventBus();
   const scanning = ref(false);
   const isNative = Capacitor.isNativePlatform();
 
@@ -35,7 +36,7 @@ export function useBluetoothLe() {
     }
     try {
       scanning.value = true;
-      await BleClient.initialize({ androidNeverForLocation: true });
+      await BleClient.initialize();
       const isBtEnabled = await BleClient.isEnabled();
       if (!isBtEnabled) {
         if (isPlatform("android")) {
@@ -72,13 +73,13 @@ export function useBluetoothLe() {
         await BleClient.initialize();
         const isBtEnabled = await BleClient.isEnabled();
         if (!isBtEnabled) {
-          await presentToast("BT not enabled, or not supported!");
+          await presentToast("Please turn on Bluetooth");
           reject();
         } else {
           if (isPlatform("ios")) {
             await BleClient.getDevices([connectedDevice.value.deviceId]);
           }
-          await connectBle(connectedDevice.value, false);
+          await connectBle(connectedDevice.value);
           resolve(true);
         }
       } catch (e) {
@@ -108,7 +109,7 @@ export function useBluetoothLe() {
     ⚡️  [error] - connectToDevice {"errorMessage":"Connection timeout"}
   * */
   let retryNum = 3;
-  const connectBle = async (device: Device, isNewDevice = true) => {
+  const connectBle = async (device: Device) => {
     return new Promise(async (resolve, reject) => {
       try {
         setConnectedDevice(device);
@@ -124,13 +125,10 @@ export function useBluetoothLe() {
       } catch (error) {
         if (retryNum > 0) {
           retryNum--;
-          await connectBle(device, isNewDevice);
+          await connectBle(device);
         } else {
           updateConnectedDevicePairedStatus(false);
           reject();
-          // await presentToast(
-          //     "Bluetooth device connection failed, please try again"
-          // );
         }
       }
     });
@@ -145,22 +143,19 @@ export function useBluetoothLe() {
   // ⚡️  BluetoothLe - didDiscoverCharacteristicsFor 1 1
   // ⚡️  BluetoothLe - Resolve connect Connection successful.
 
-  const disConnectBle = async (device: Device, isDeleteDevice: boolean) => {
+  const disConnectBle = async (device: Device) => {
     try {
       if (isNative) {
         await BleClient.initialize();
         await BleClient.disconnect(device.deviceId);
       }
-      if (isDeleteDevice) {
-        removeConnectedDevice(device);
-      } else {
-        updateConnectedDevicePairedStatus(false);
-      }
+      setConnectedDevice({} as Device); // 断开连接后清空连接状态
     } catch (error) {
-      console.error("disconnectFromDevice", error);
+      setConnectedDevice({} as Device);
     }
   };
-  const onDisconnect = (deviceId: string) => {
+  const onDisconnect = async (deviceId: string) => {
+    emit("onBleDisconnect");
     console.log(`device ${deviceId} disconnected`);
   };
   const write = async (
@@ -281,6 +276,7 @@ export function useBluetoothLe() {
     write,
     startNotification,
     stopNotification,
+    onDisconnect,
   };
 }
 
