@@ -53,6 +53,7 @@ const initMap = async () => {
         });
         map.value!.on("complete", () => {
           setMapToCenter();
+          initPolyline();
         });
       }
     })
@@ -79,6 +80,7 @@ const initWebMap = () => {
         });
         map.value!.on("complete", () => {
           setMapToCenter();
+          initPolyline();
         });
       }
     })
@@ -157,9 +159,9 @@ const initPolyline = () => {
     showDir: true,
     strokeColor: "#28F", //线颜色
     strokeOpacity: 0.8, // 线条透明度
-    strokeWeight: 5, // 线条宽度
+    strokeWeight: 6, // 线条宽度
   });
-  map.value!.add(polyline.value);
+  map.value?.add(polyline.value);
 };
 
 const getPolyLineLength = () => {
@@ -184,9 +186,11 @@ const setPolylineByPath = (path: any) => {
   polyline.value!.setPath(path);
   map.value!.setCenter(path[path.length - 1]);
 };
-
+const setToCenter = (point: AMap.LngLat) => {
+  map.value!.setCenter(point);
+};
 const clearPathAndMarker = () => {
-  polyline.value?.remove();
+  polyline.value?.destroy();
   startMarker.value?.remove();
   endMarker.value?.remove();
   startMarker.value = undefined;
@@ -236,6 +240,7 @@ defineExpose({
   initMap,
   initTrack,
   clearPathAndMarker,
+  setToCenter,
 });
 </script>
 

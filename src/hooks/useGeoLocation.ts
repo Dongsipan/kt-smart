@@ -60,7 +60,7 @@ export function useGeoLocation() {
   ) => {
     setWatchingStatus(true);
     callbackId.value = await Geolocation.watchPosition(
-      { enableHighAccuracy: true, timeout: 1000 * 10 },
+      { enableHighAccuracy: true, timeout: 10000 },
       callback
     );
   };

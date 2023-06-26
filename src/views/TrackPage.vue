@@ -199,6 +199,8 @@ import { Position } from "@capacitor/geolocation";
 import { useRouter } from "vue-router";
 import { Capacitor } from "@capacitor/core";
 import { storeToRefs } from "pinia";
+import { useDebounceFn, useThrottleFn } from "@vueuse/core";
+import GPSKalmanFilter from "@/services/GPSKalmanFilter";
 
 const mapRef = ref(null) as any;
 
@@ -217,6 +219,7 @@ const geoLocationData = [] as Position[];
 const path = [] as AMap.LngLat[]; // ref<AMap.LngLat[]>([]);
 let smoothedPath = [] as AMap.LngLat[];
 const pathSmoothTool = new PathSmoothTool();
+const kalmanFilter = new GPSKalmanFilter();
 // const currentSpeed = ref<number | string | null>(null);
 const currentLongitude = ref();
 const currentLatitude = ref();
@@ -270,6 +273,9 @@ const startRide = () => {
     presentToast("Positioning in progress, please wait");
     return;
   }
+  // smoothedPath.length = 0;
+  path.length = 0;
+  geoLocationData.length = 0;
   mapRef.value.clearPathAndMarker();
   mapRef.value.initPolyline();
   isRiding.value = true;
@@ -618,23 +624,31 @@ const startRide = () => {
     ];
     let mockLength = mock.length;
     let index = 0;
-    setInterval(async () => {
+    mockInterval = setInterval(async () => {
       if (index < mockLength) {
         const data = mock[index];
         index++;
-        await computedRideData(data);
+        await throttledComputedRideData(data);
       }
     }, 2000);
   }
 };
+let mockInterval: any;
 let isFirstPoint = true;
 const watchPosition = () => {
   watchCurrentPosition(async (geolocationPosition) => {
     if (geolocationPosition === null) return;
-    await computedRideData(geolocationPosition);
+    await throttledComputedRideData(geolocationPosition);
   });
 };
-
+const throttledComputedRideData = useThrottleFn(
+  (geolocationPosition: Position) => {
+    debugger;
+    computedRideData(geolocationPosition);
+    // do something, it will be called at most 1 time per second
+  },
+  5000
+);
 const computedRideData = async (geolocationPosition: Position) => {
   if (isFirstPoint) {
     isFirstPoint = false;
@@ -650,13 +664,22 @@ const computedRideData = async (geolocationPosition: Position) => {
   geoLocationData.push(geolocationPosition); // 存储原始数据
   console.log(geoLocationData);
   window.localStorage.geoLocationData = JSON.stringify(geoLocationData);
-  const positions = await mapRef.value.convertGpsToAMap([longitude, latitude]); // 转化成高德坐标
+  const filterPosition = kalmanFilter.filter(
+    latitude,
+    longitude,
+    accuracy,
+    geolocationPosition.timestamp
+  );
+  const positions = await mapRef.value.convertGpsToAMap(filterPosition); // 转化成高德坐标
   path.push(positions);
-  smoothedPath = pathSmoothTool.pathOptimize(path); // 优化轨迹
-  startPosition = smoothedPath[0];
-  if (smoothedPath.length >= 2) {
+  // smoothedPath = pathSmoothTool.pathOptimize(path); // 优化轨迹
+  startPosition = path[0];
+  if (smoothedPath) {
+    mapRef.value.setToCenter(startPosition);
     mapRef.value.addStartPositionMarker(startPosition.lng, startPosition.lat);
-    mapRef.value.setPolylineByPath(smoothedPath); // 绘制轨迹
+  }
+  if (path.length >= 2) {
+    mapRef.value.setPolylineByPath(path); // 绘制轨迹
     getMaxData(); // 从GPS数据中计算最大速度、最高海拔
     computedCurrentDistance(); // 计算行驶里程
     computedAverageSpeed(); // 计算平均速度
@@ -668,6 +691,7 @@ const computedRideData = async (geolocationPosition: Position) => {
  * */
 
 const stopRide = () => {
+  clearInterval(mockInterval);
   isStopRiding.value = true;
   stop();
   clearWatch();
@@ -679,15 +703,16 @@ const restoreRide = () => {
 };
 const { addHistoryTrack } = usePositionStore();
 const finishRide = () => {
+  clearInterval(mockInterval);
   isRiding.value = false;
   isStopRiding.value = false;
   stop();
   reset();
   clearWatch();
-  if (smoothedPath.length < 10) {
+  if (path.length < 5) {
     presentNotSaveAlert();
   } else {
-    const lastPosition = smoothedPath[smoothedPath.length - 1];
+    const lastPosition = path[path.length - 1];
     mapRef.value.addEndPositionMarker(lastPosition.lng, lastPosition.lat);
     saveHistory();
   }
@@ -794,7 +819,7 @@ function toRadians(degrees: number): number {
 const saveHistory = () => {
   const history = {
     id: new Date().valueOf(),
-    path: smoothedPath,
+    path: path,
     maxSpeed: maxSpeedToKm.value,
     maxAltitude: altitudeToFixed.value,
     averageSpeed: averageSpeedToKm.value,

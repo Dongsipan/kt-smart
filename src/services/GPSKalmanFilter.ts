@@ -62,7 +62,7 @@ class GPSKalmanFilter {
       this.variance = (1 - _k) * this.variance;
     }
 
-    return [this.lat, this.lon];
+    return [this.lon, this.lat];
   }
 }
 
