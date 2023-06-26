@@ -50,6 +50,7 @@ export function useMessage() {
   let writeInterval: any;
   let singleTimeInterval: any;
   let singleTimeSecond = 0;
+  let isTimerActive = false;
   const exitApp = async () => {
     await stopSendMessage();
     await disConnectBle(connectedDevice.value);
@@ -61,7 +62,9 @@ export function useMessage() {
     }
     updateSetting();
     clearInterval(writeInterval);
+    isTimerActive = true;
     writeInterval = setInterval(async () => {
+      if (!isTimerActive) return;
       try {
         console.log(
           chalk.red(
@@ -70,6 +73,7 @@ export function useMessage() {
           )
         );
         if (!connectedDevice.value.isPaired) {
+          isTimerActive = false;
           clearInterval(writeInterval);
         } // 如果设备未连接，则停止发送数据
         await write(
@@ -79,6 +83,7 @@ export function useMessage() {
           numbersToDataView(writeData.value)
         );
       } catch (error: any) {
+        isTimerActive = false;
         clearInterval(writeInterval);
         console.log(chalk.red(`send message error: ${JSON.stringify(error)}`));
       }
@@ -91,6 +96,7 @@ export function useMessage() {
     );
   };
   const stopSendMessage = async () => {
+    isTimerActive = false;
     clearInterval(writeInterval);
     if (!connectedDevice.value.deviceId || !connectedDevice.value.isPaired)
       return;
