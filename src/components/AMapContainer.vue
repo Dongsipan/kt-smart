@@ -154,7 +154,8 @@ const initPolyline = () => {
   // 绘制轨迹
   polyline.value = new window.AMap.Polyline({
     // path: path, // 初始为空数组
-    strokeColor: "#3366FF", // 线条颜色
+    showDir: true,
+    strokeColor: "#28F", //线颜色
     strokeOpacity: 0.8, // 线条透明度
     strokeWeight: 5, // 线条宽度
   });
@@ -205,19 +206,7 @@ const setMapToCenter = async () => {
   ])) as any;
   map.value!.setCenter(position);
 };
-const convertFrom = (lng: number, lat: number, callback: Function) => {
-  const location = [lng, lat];
-  window.AMap.convertFrom(location, "gps", (status: any, result: any) => {
-    if (result.info === "ok") {
-      const lngLats = result.locations; // Array.<LngLat>
-      const { lng, lat }: LngLat = lngLats[0];
-      callback({
-        lng,
-        lat,
-      });
-    }
-  });
-};
+
 const convertGpsToAMap = (location: number[]) => {
   return new Promise((resolve, reject) => {
     try {

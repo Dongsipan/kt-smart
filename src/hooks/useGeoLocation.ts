@@ -1,7 +1,6 @@
 import { Geolocation, Position } from "@capacitor/geolocation";
 import { useToast } from "@/hooks/useToast";
 import { ref } from "vue";
-import { isPlatform, loadingController } from "@ionic/vue";
 import { usePositionStore } from "@/store/usePositionStore";
 import { Capacitor } from "@capacitor/core";
 
@@ -61,7 +60,7 @@ export function useGeoLocation() {
   ) => {
     setWatchingStatus(true);
     callbackId.value = await Geolocation.watchPosition(
-      { enableHighAccuracy: true },
+      { enableHighAccuracy: true, timeout: 1000 * 10 },
       callback
     );
   };

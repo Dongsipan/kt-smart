@@ -18,13 +18,13 @@
 
           <ion-item-options>
             <ion-item-option color="danger" @click="deleteHistory(item.id)"
-              >Delete</ion-item-option
-            >
+              >Delete
+            </ion-item-option>
           </ion-item-options>
         </ion-item-sliding>
       </ion-list>
       <ion-list v-else>
-        <ion-item> No Data </ion-item>
+        <ion-item> No Data</ion-item>
       </ion-list>
     </ion-content>
   </ion-page>
@@ -37,11 +37,12 @@ import {
   IonContent,
   IonHeader,
   IonIcon,
+  IonItemOption,
+  IonItemOptions,
+  IonItemSliding,
   IonPage,
   IonTitle,
   IonToolbar,
-  IonItemOption,
-  IonItemSliding,
 } from "@ionic/vue";
 import { useDateFormat } from "@vueuse/core";
 import { usePositionStore } from "@/store/usePositionStore";
