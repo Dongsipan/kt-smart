@@ -26,14 +26,16 @@ import "@ionic/vue/css/display.css";
 import "./theme/variables.css";
 import { ScreenOrientation } from "@capacitor/screen-orientation";
 import { Capacitor } from "@capacitor/core";
+import { useAMap } from "@/hooks/useAMap";
 
 const vConsole = new VConsole();
-
+const { loadAMap } = useAMap();
 if (Capacitor.isNativePlatform()) {
   ScreenOrientation.lock({ orientation: "portrait-primary" });
 }
 const app = createApp(App).use(pinia).use(IonicVue).use(router);
 
-router.isReady().then(() => {
+router.isReady().then(async () => {
   app.mount("#app");
+  await loadAMap();
 });

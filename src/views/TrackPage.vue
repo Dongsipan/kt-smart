@@ -260,11 +260,7 @@ const altitudeToFixed = computed(() => {
 const isNative = Capacitor.isNativePlatform();
 
 onIonViewWillEnter(() => {
-  if (isNative) {
-    mapRef.value.initMap();
-  } else {
-    mapRef.value.initWebMap();
-  }
+  mapRef.value.initMap();
 });
 
 const initRide = () => {

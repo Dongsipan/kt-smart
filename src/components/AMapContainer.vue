@@ -12,19 +12,21 @@ import { usePositionStore } from "@/store/usePositionStore";
 import { storeToRefs } from "pinia";
 import LocationStartIcon from "@/assets/icon/location-start.png";
 import LocationEndIcon from "@/assets/icon/location-end.png";
-
+import BicycleIcon from "@/assets/icon/bicycle.svg";
 type LngLat = {
   lng: number;
   lat: number;
 };
 const map = shallowRef<AMap.Map>();
 const polyline = shallowRef<AMap.Polyline>();
+const passedPolyline = shallowRef<AMap.Polyline>();
 const { getCurrentPosition } = useGeoLocation();
 const positionStore = usePositionStore();
 const { currentPosition } = storeToRefs(positionStore);
 const isNative = Capacitor.isNativePlatform();
 const startMarker = shallowRef<AMap.Marker>();
 const endMarker = shallowRef<AMap.Marker>();
+const rideMarker = shallowRef<AMap.Marker>();
 
 const { presentToast } = useToast();
 
@@ -35,88 +37,48 @@ const props = defineProps({
   },
 });
 const initMap = async () => {
-  AMapLoader.load({
-    key: "f4470fae2fb3b8aa6b1c753b8cac5c26", // 申请好的Web端开发者Key，首次调用 load 时必填
-    version: "2.0", // 指定要加载的 JSAPI 的版本，缺省时默认为 1.4.15
-    plugins: [""], // 需要使用的的插件列表，如比例尺'AMap.Scale'等
-  })
-    .then((AMap) => {
-      window.AMap = AMap;
-      if (map.value) {
-        setMapToCenter();
-      } else {
-        map.value = new AMap.Map(props.container.toString(), {
-          //设置地图容器id
-          pitch: 2,
-          viewMode: "3D", //是否为3D地图模式
-          zoom: 16, //初始化地图级别
-        });
-        map.value!.on("complete", () => {
-          setMapToCenter();
-          initPolyline();
-        });
-      }
-    })
-    .catch((e) => {
-      console.log(e);
+  if (map.value) {
+    await setMapToCenter();
+  } else {
+    map.value = new AMap.Map(props.container.toString(), {
+      //设置地图容器id
+      viewMode: "2D", //是否为3D地图模式
+      zoom: 16, //初始化地图级别
     });
-};
-const initWebMap = () => {
-  AMapLoader.load({
-    key: "f4470fae2fb3b8aa6b1c753b8cac5c26", // 申请好的Web端开发者Key，首次调用 load 时必填
-    version: "2.0", // 指定要加载的 JSAPI 的版本，缺省时默认为 1.4.15
-    plugins: [""], // 需要使用的的插件列表，如比例尺'AMap.Scale'等
-  })
-    .then((AMap) => {
-      window.AMap = AMap;
-      if (map.value) {
-        setMapToCenter();
-      } else {
-        map.value = new AMap.Map(props.container.toString(), {
-          //设置地图容器id
-          pitch: 2,
-          viewMode: "3D", //是否为3D地图模式
-          zoom: 16, //初始化地图级别
-        });
-        map.value!.on("complete", () => {
-          setMapToCenter();
-          initPolyline();
-        });
-      }
-    })
-    .catch((e) => {
-      console.log(e);
+    map.value!.on("complete", () => {
+      setMapToCenter();
+      initPolyline();
     });
+  }
 };
 const initTrack = async (path: [number, number][]) => {
-  AMapLoader.load({
-    key: "f4470fae2fb3b8aa6b1c753b8cac5c26", // 申请好的Web端开发者Key，首次调用 load 时必填
-    version: "2.0", // 指定要加载的 JSAPI 的版本，缺省时默认为 1.4.15
-    plugins: [""], // 需要使用的的插件列表，如比例尺'AMap.Scale'等
-  })
-    .then((AMap) => {
-      window.AMap = AMap;
-      map.value = new AMap.Map(props.container.toString(), {
-        //设置地图容器id
-        pitch: 2,
-        viewMode: "3D", //是否为3D地图模式
-        zoom: 17, //初始化地图级别
-      });
-      map.value!.on("complete", () => {
-        initPolyline();
-        addStartPositionMarker(path[0][0], path[0][1]);
-        setPolylineByPath(path);
-        addEndPositionMarker(
-          path[path.length - 1][0],
-          path[path.length - 1][1]
-        );
-        map.value?.setFitView();
-      });
-    })
-    .catch((e) => {
-      console.log(e);
-    });
+  map.value = new AMap.Map(props.container.toString(), {
+    //设置地图容器id
+    pitch: 60,
+    viewMode: "3D", //是否为3D地图模式
+    zoom: 17, //初始化地图级别
+  });
+  map.value!.on("complete", () => {
+    initPolyline();
+    addStartPositionMarker(path[0][0], path[0][1]);
+    // addRideMarker(path[0][0], path[0][1]);
+    setPolylineByPath(path);
+    // initPassedPolyline();
+    addEndPositionMarker(path[path.length - 1][0], path[path.length - 1][1]);
+    map.value?.setFitView();
+    // rideMarker.value?.on("moving" as any, (e) => {
+    //   passedPolyline.value?.setPath(e.passedPath);
+    //   map.value?.setCenter(e.target.getPosition(), true);
+    // });
+    // rideMarker.value?.moveAlong(path, {
+    //   // 每一段的时长
+    //   duration: 500, //可根据实际采集时间间隔设置
+    //   // JSAPI2.0 是否延道路自动设置角度在 moveAlong 里设置
+    //   autoRotation: true,
+    // });
+  });
 };
+
 const addStartPositionMarker = (lng: number, lat: number) => {
   const lnglat = new window.AMap.LngLat(lng, lat);
   if (!startMarker.value) {
@@ -131,6 +93,12 @@ const addEndPositionMarker = (lng: number, lat: number) => {
     setMarker(lnglat, LocationEndIcon, endMarker);
   }
   // setMarker(lnglat, LocationEndIcon, endMarker);
+};
+const addRideMarker = (lng: number, lat: number) => {
+  const lnglat = new window.AMap.LngLat(lng, lat);
+  if (!rideMarker.value) {
+    setMarker(lnglat, BicycleIcon, rideMarker);
+  }
 };
 const setMarker = (position: AMap.LngLat, image: any, marker: any) => {
   // 创建一个 Icon
@@ -156,12 +124,22 @@ const initPolyline = () => {
   // 绘制轨迹
   polyline.value = new window.AMap.Polyline({
     // path: path, // 初始为空数组
+    lineJoin: "round",
+    lineCap: "round",
     showDir: true,
     strokeColor: "#28F", //线颜色
     strokeOpacity: 0.8, // 线条透明度
     strokeWeight: 6, // 线条宽度
   });
   map.value?.add(polyline.value);
+};
+
+const initPassedPolyline = () => {
+  passedPolyline.value = new AMap.Polyline({
+    strokeColor: "#AF5", //线颜色
+    strokeWeight: 6, //线宽
+  });
+  map.value?.add(passedPolyline.value);
 };
 
 const getPolyLineLength = () => {
@@ -181,10 +159,20 @@ const addPointToPath = (longitude: number, latitude: number) => {
   }
   map.value!.setCenter(point);
 };
+let lastPolylinePoint: AMap.LngLat;
 const setPolylineByPath = (path: any) => {
   if (path.length < 2) return;
+  const currentPoint = path[path.length - 1];
+  if (
+    lastPolylinePoint &&
+    lastPolylinePoint.lat === currentPoint.lat &&
+    lastPolylinePoint.lng === currentPoint.lng
+  ) {
+    return;
+  }
+  lastPolylinePoint = currentPoint;
   polyline.value!.setPath(path);
-  map.value!.setCenter(path[path.length - 1]);
+  map.value!.setCenter(currentPoint);
 };
 const setToCenter = (point: AMap.LngLat) => {
   map.value!.setCenter(point);
@@ -236,7 +224,6 @@ defineExpose({
   addEndPositionMarker,
   getPolyLineLength,
   getDistance,
-  initWebMap,
   initMap,
   initTrack,
   clearPathAndMarker,
