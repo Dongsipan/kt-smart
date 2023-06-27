@@ -75,9 +75,10 @@ const time = ref("");
 onIonViewDidEnter(() => {
   const id = route.params.id;
   const history = getHistoryTrackById(Number(id));
-  const path = history!.path;
-  debugger;
-  mapRef.value.initTrack(path);
+  const path = history?.path;
+  if (path) {
+    mapRef.value.initTrack(path);
+  }
   maxSpeed.value = history!.maxSpeed.toString();
   maxAltitude.value = history!.maxAltitude.toString();
   averageSpeed.value = history!.averageSpeed.toString();
