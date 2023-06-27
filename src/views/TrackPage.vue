@@ -4,7 +4,7 @@
       <ion-toolbar>
         <ion-title>Track</ion-title>
         <ion-buttons slot="end">
-          <ion-button @click="setMapToCenter" :disabled="watching">
+          <ion-button :disabled="watching" @click="setMapToCenter">
             <ion-icon
               v-if="isPlatform('ios')"
               :class="{ 'locate-icon--locating--ios': locating }"
@@ -16,7 +16,7 @@
               :icon="locateOutline"
             ></ion-icon>
           </ion-button>
-          <ion-button @click="toHistoriesPage">
+          <ion-button :disabled="watching" @click="toHistoriesPage">
             <ion-icon :icon="footstepsOutline"></ion-icon>
           </ion-button>
         </ion-buttons>
@@ -28,10 +28,10 @@
       style="width: 100vw; height: 100vh"
     >
       <ion-fab
-        style="display: none"
         slot="fixed"
         :edge="true"
         horizontal="end"
+        style="display: none"
         vertical="bottom"
       >
         <ion-fab-button id="open-modal">
@@ -188,7 +188,7 @@ import {
 } from "@ionic/vue";
 import { flashOutline, footstepsOutline, locateOutline } from "ionicons/icons";
 import AMapContainer from "@/components/AMapContainer.vue";
-import { computed, onMounted, ref } from "vue";
+import { computed, ref } from "vue";
 import { vOnLongPress } from "@vueuse/components";
 import { useGeoLocation } from "@/hooks/useGeoLocation";
 import { useToast } from "@/hooks/useToast";
@@ -199,7 +199,7 @@ import { Position } from "@capacitor/geolocation";
 import { useRouter } from "vue-router";
 import { Capacitor } from "@capacitor/core";
 import { storeToRefs } from "pinia";
-import { useDebounceFn, useThrottleFn } from "@vueuse/core";
+import { useThrottleFn } from "@vueuse/core";
 import GPSKalmanFilter from "@/services/GPSKalmanFilter";
 
 const mapRef = ref(null) as any;
@@ -267,20 +267,27 @@ onIonViewWillEnter(() => {
   }
 });
 
+const initRide = () => {
+  path.length = 0;
+  geoLocationData.length = 0;
+  currentAltitude.value = 0;
+  currentAverageSpeed.value = 0;
+  currentDistance.value = 0;
+  mapRef.value.clearPathAndMarker();
+  mapRef.value.initPolyline();
+  isRiding.value = true;
+  startPosition = undefined;
+  reset();
+  start();
+};
 let startPosition;
 const startRide = () => {
   if (locating.value) {
     presentToast("Positioning in progress, please wait");
     return;
   }
+  initRide();
   // smoothedPath.length = 0;
-  path.length = 0;
-  geoLocationData.length = 0;
-  mapRef.value.clearPathAndMarker();
-  mapRef.value.initPolyline();
-  isRiding.value = true;
-  startPosition = undefined;
-  start();
   if (isNative) {
     watchPosition();
   } else {
@@ -643,9 +650,7 @@ const watchPosition = () => {
 };
 const throttledComputedRideData = useThrottleFn(
   (geolocationPosition: Position) => {
-    debugger;
     computedRideData(geolocationPosition);
-    // do something, it will be called at most 1 time per second
   },
   5000
 );
@@ -707,7 +712,6 @@ const finishRide = () => {
   isRiding.value = false;
   isStopRiding.value = false;
   stop();
-  reset();
   clearWatch();
   if (path.length < 5) {
     presentNotSaveAlert();
@@ -816,6 +820,7 @@ const calculateDistance = (prevPoint: Position, currPoint: Position) => {
 function toRadians(degrees: number): number {
   return degrees * (Math.PI / 180);
 }
+
 const saveHistory = () => {
   const history = {
     id: new Date().valueOf(),
@@ -847,6 +852,7 @@ const closeModal = () => {
     color: #fff;
   }
 }
+
 @keyframes android-locating {
   from {
     color: var(--ion-toolbar-color, var(--color));
@@ -855,13 +861,16 @@ const closeModal = () => {
     color: #ef4c28;
   }
 }
+
 .track-page {
   .locate-icon--locating--ios {
     animation: ios-locating 0.8s infinite alternate;
   }
+
   .locate-icon--locating--android {
     animation: android-locating 0.8s infinite alternate;
   }
+
   ion-content {
     position: relative;
   }
@@ -925,6 +934,7 @@ const closeModal = () => {
         flex-direction: column;
         //align-items: center;
         flex: 1;
+
         div:last-child {
           width: 100%;
           //text-align: center;
