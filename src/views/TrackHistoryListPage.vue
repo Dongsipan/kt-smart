@@ -17,7 +17,9 @@
           </ion-item>
 
           <ion-item-options>
-            <ion-item-option color="danger" @click="deleteHistory(item.id)"
+            <ion-item-option
+              color="danger"
+              @click="deleteHistoryConfirm(item.id)"
               >Delete
             </ion-item-option>
           </ion-item-options>
@@ -32,6 +34,7 @@
 
 <script lang="ts" setup>
 import {
+  alertController,
   IonBackButton,
   IonButtons,
   IonContent,
@@ -51,8 +54,10 @@ import { useDateFormat } from "@vueuse/core";
 import { usePositionStore } from "@/store/usePositionStore";
 import { mapOutline } from "ionicons/icons";
 import { useRouter } from "vue-router";
+import { storeToRefs } from "pinia";
 
-const { historyTrack, deleteHistory } = usePositionStore();
+const { deleteHistory } = usePositionStore();
+const { historyTrack } = storeToRefs(usePositionStore());
 const router = useRouter();
 const dateFormat = (date: number) => {
   return useDateFormat(date, "YYYY-MM-DD HH:mm:ss").value;
@@ -60,5 +65,24 @@ const dateFormat = (date: number) => {
 
 const toHistoryPage = (id: number) => {
   router.push({ name: "history", params: { id } });
+};
+
+const deleteHistoryConfirm = async (id: number) => {
+  const alert = await alertController.create({
+    header: "End cycling",
+    subHeader: "Whether to end cycling",
+    buttons: [
+      "Cancel",
+      {
+        text: "OK",
+        role: "confirm",
+        handler: () => {
+          deleteHistory(id);
+        },
+      },
+    ],
+  });
+
+  await alert.present();
 };
 </script>
