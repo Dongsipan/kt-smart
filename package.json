@@ -32,6 +32,7 @@
     "@ionic/vue-router": "7.1.0",
     "@vueuse/components": "10.2.0",
     "@vueuse/core": "10.2.0",
+    "eruda": "^3.0.0",
     "ionicons": "^7.0.0",
     "pinia": "2.1.4",
     "pinia-plugin-persistedstate": "^3.1.0",

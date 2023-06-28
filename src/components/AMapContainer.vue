@@ -3,7 +3,6 @@
 </template>
 
 <script lang="ts" setup>
-import AMapLoader from "@amap/amap-jsapi-loader";
 import { shallowRef } from "vue";
 import { useGeoLocation } from "@/hooks/useGeoLocation";
 import { Capacitor } from "@capacitor/core";
@@ -13,6 +12,7 @@ import { storeToRefs } from "pinia";
 import LocationStartIcon from "@/assets/icon/location-start.png";
 import LocationEndIcon from "@/assets/icon/location-end.png";
 import BicycleIcon from "@/assets/icon/bicycle.svg";
+
 type LngLat = {
   lng: number;
   lat: number;
@@ -44,6 +44,7 @@ const initMap = async () => {
       //设置地图容器id
       viewMode: "2D", //是否为3D地图模式
       zoom: 16, //初始化地图级别
+      zooms: [10, 20],
     });
     map.value!.on("complete", () => {
       setMapToCenter();
@@ -51,20 +52,32 @@ const initMap = async () => {
     });
   }
 };
-const initTrack = async (path: [number, number][]) => {
+const initTrack = async (path: [number, number][] | AMap.LngLat[]) => {
   map.value = new AMap.Map(props.container.toString(), {
     //设置地图容器id
     pitch: 60,
     viewMode: "3D", //是否为3D地图模式
     zoom: 17, //初始化地图级别
   });
-  map.value!.on("complete", () => {
+  map.value?.on("complete", () => {
     initPolyline();
-    addStartPositionMarker(path[0][0], path[0][1]);
+    const startPoint = path[0];
+    const endPoint = path[path.length - 1];
+    debugger;
+    if (startPoint instanceof AMap.LngLat) {
+      addStartPositionMarker(startPoint.lng, startPoint.lat);
+    } else {
+      addStartPositionMarker(startPoint[0], startPoint[1]);
+    }
+    if (endPoint instanceof AMap.LngLat) {
+      addEndPositionMarker(endPoint.lng, endPoint.lat);
+    } else {
+      addEndPositionMarker(endPoint[0], endPoint[1]);
+    }
     // addRideMarker(path[0][0], path[0][1]);
     setPolylineByPath(path);
     // initPassedPolyline();
-    addEndPositionMarker(path[path.length - 1][0], path[path.length - 1][1]);
+
     map.value?.setFitView();
     // rideMarker.value?.on("moving" as any, (e) => {
     //   passedPolyline.value?.setPath(e.passedPath);
