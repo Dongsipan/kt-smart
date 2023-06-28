@@ -3,7 +3,6 @@ import App from "./App.vue";
 import router from "./router";
 import pinia from "./store";
 import "@amap/amap-jsapi-types";
-import VConsole from "vconsole";
 import { IonicVue } from "@ionic/vue";
 
 /* Core CSS required for Ionic components to work properly */
@@ -27,10 +26,9 @@ import "./theme/variables.css";
 import { ScreenOrientation } from "@capacitor/screen-orientation";
 import { Capacitor } from "@capacitor/core";
 import { useAMap } from "@/hooks/useAMap";
-import eruda from "eruda";
-
-const vConsole = new VConsole();
-eruda.init();
+// import eruda from "eruda";
+//
+// eruda.init();
 const { loadAMap } = useAMap();
 if (Capacitor.isNativePlatform()) {
   ScreenOrientation.lock({ orientation: "portrait-primary" });

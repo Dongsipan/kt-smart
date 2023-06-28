@@ -150,7 +150,6 @@ onMounted(() => {
   const save = {
     text: "Save",
     handler: async (res: any) => {
-      debugger;
       const nickname = res[0];
       try {
         await setBLEName(nickname);

@@ -44,7 +44,7 @@ const initMap = async () => {
       //设置地图容器id
       viewMode: "2D", //是否为3D地图模式
       zoom: 16, //初始化地图级别
-      zooms: [10, 20],
+      zooms: [12, 20],
     });
     map.value!.on("complete", () => {
       setMapToCenter();
@@ -55,15 +55,14 @@ const initMap = async () => {
 const initTrack = async (path: [number, number][] | AMap.LngLat[]) => {
   map.value = new AMap.Map(props.container.toString(), {
     //设置地图容器id
-    pitch: 60,
-    viewMode: "3D", //是否为3D地图模式
+    viewMode: "2D", //是否为3D地图模式
     zoom: 17, //初始化地图级别
+    zooms: [12, 20],
   });
   map.value?.on("complete", () => {
     initPolyline();
     const startPoint = path[0];
     const endPoint = path[path.length - 1];
-    debugger;
     if (startPoint instanceof AMap.LngLat) {
       addStartPositionMarker(startPoint.lng, startPoint.lat);
     } else {

@@ -13,7 +13,6 @@ export function useError() {
   });
   const setError = (code: number) => {
     errorCode.value = code;
-    debugger;
     switch (code) {
       case 33:
         current.value = true;

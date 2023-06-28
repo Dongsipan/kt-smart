@@ -883,7 +883,6 @@ const closeModal = () => {
 
     .dashboard-main {
       display: flex;
-      justify-content: space-around;
 
       .dashboard-main__action {
         position: relative;
@@ -916,6 +915,12 @@ const closeModal = () => {
 
         &.dashboard-main__data--outer {
           margin-top: 2.5rem;
+          flex: 1;
+        }
+        div:last-child {
+          font-size: 2rem;
+          font-weight: bold;
+          //text-align: center;
         }
       }
     }
@@ -933,6 +938,8 @@ const closeModal = () => {
 
         div:last-child {
           width: 100%;
+          font-size: 1.3rem;
+          font-weight: bold;
           //text-align: center;
         }
       }

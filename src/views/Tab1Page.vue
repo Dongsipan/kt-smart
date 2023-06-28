@@ -66,7 +66,6 @@ const toBluetoothPage = () => {
   router.push({ name: "bluetooth" });
 };
 const addSpeed = () => {
-  debugger;
   if (gearPosition.value >= 5) return;
   const position = gearPosition.value + 1;
   changeGearPosition(position);
@@ -81,7 +80,6 @@ const reduceSpeed = () => {
 onMounted(() => {
   const data = "41 90 80 05 f0 00 5f 02 01 00 80 39"; // ['41', '70', '80', '00', 'f1', '00', 'ba', '02', '00', '00', '80', '39']
   const dv = dataViewToNumbers(hexStringToDataView(data));
-  debugger;
   // getAssistance(dv)
   // getBattery(dv)
   setInterval(() => {

@@ -14,18 +14,18 @@
     <ion-footer :translucent="true" class="ion-no-border">
       <ion-toolbar class="dashboard-toolbar">
         <div class="dashboard">
-          <div class="dashboard-info ion-margin-top">
-            <div class="dashboard-main__data">
+          <div class="dashboard-info ion-margin-top ion-margin-horizontal">
+            <div class="dashboard-info__data" style="text-align: center">
               <div>Altitude</div>
               <div>{{ maxAltitude || "--" }}</div>
             </div>
-            <div class="dashboard-main__data">
+            <div class="dashboard-info__data">
               <div>Distance</div>
               <div>{{ distance || "--" }}</div>
             </div>
           </div>
           <div class="dashboard-info ion-margin-top ion-margin-horizontal">
-            <div class="dashboard-info__data">
+            <div class="dashboard-info__data" style="text-align: center">
               <div>Time</div>
               <div>{{ time || "--" }}</div>
             </div>
@@ -103,45 +103,6 @@ onIonViewDidEnter(() => {
     backdrop-filter: blur(4px);
     color: #fff;
 
-    .dashboard-main {
-      display: flex;
-      justify-content: space-around;
-
-      .dashboard-main__action {
-        position: relative;
-        width: 150px;
-        height: 150px;
-
-        #dashboard__action-outer {
-          position: absolute;
-          transform: rotate(130deg);
-        }
-
-        .dashboard-main__action-trigger {
-          position: relative;
-          width: 80px;
-          height: 80px;
-          border-radius: 50%;
-          transform: translate(36px, 8px);
-
-          span {
-            color: #fff;
-          }
-        }
-      }
-
-      .dashboard-main__data {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        margin-top: 1rem;
-
-        &.dashboard-main__data--outer {
-          margin-top: 2.5rem;
-        }
-      }
-    }
-
     .dashboard-info {
       height: 50px;
       display: flex;
@@ -153,6 +114,8 @@ onIonViewDidEnter(() => {
         flex: 1;
         div:last-child {
           width: 100%;
+          font-size: 1.3rem;
+          font-weight: bold;
         }
       }
     }
