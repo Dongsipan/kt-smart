@@ -169,7 +169,8 @@ const addPointToPath = (longitude: number, latitude: number) => {
   } else {
     polyline.value!.setPath([point]);
   }
-  map.value!.setCenter(point);
+  // map.value!.setCenter(point);
+  map.value?.panTo(point);
 };
 let lastPolylinePoint: AMap.LngLat;
 const setPolylineByPath = (path: any) => {
@@ -184,15 +185,18 @@ const setPolylineByPath = (path: any) => {
   }
   lastPolylinePoint = currentPoint;
   polyline.value!.setPath(path);
-  map.value!.setCenter(currentPoint);
+  // map.value!.setCenter(currentPoint);
+  map.value?.panTo(lastPolylinePoint);
 };
 const setToCenter = (point: AMap.LngLat) => {
   map.value!.setCenter(point);
 };
 const clearPathAndMarker = () => {
-  polyline.value?.destroy();
-  startMarker.value?.remove();
-  endMarker.value?.remove();
+  // polyline.value?.destroy();
+  // polyline.value?.setPath([]);
+  // startMarker.value?.remove();
+  // endMarker.value?.remove();
+  map.value?.clearMap();
   startMarker.value = undefined;
   endMarker.value = undefined;
 };

@@ -1,20 +1,20 @@
 PODS:
-  - Capacitor (5.0.5):
+  - Capacitor (5.1.0):
     - CapacitorCordova
-  - CapacitorApp (5.0.3):
+  - CapacitorApp (5.0.5):
     - Capacitor
   - CapacitorCommunityBluetoothLe (3.0.0):
     - Capacitor
-  - CapacitorCordova (5.0.5)
-  - CapacitorGeolocation (5.0.4):
+  - CapacitorCordova (5.1.0)
+  - CapacitorGeolocation (5.0.5):
     - Capacitor
-  - CapacitorHaptics (5.0.4):
+  - CapacitorHaptics (5.0.5):
     - Capacitor
-  - CapacitorKeyboard (5.0.4):
+  - CapacitorKeyboard (5.0.5):
     - Capacitor
-  - CapacitorScreenOrientation (5.0.4):
+  - CapacitorScreenOrientation (5.0.5):
     - Capacitor
-  - CapacitorStatusBar (5.0.4):
+  - CapacitorStatusBar (5.0.5):
     - Capacitor
 
 DEPENDENCIES:
@@ -49,16 +49,16 @@ EXTERNAL SOURCES:
     :path: "../../node_modules/@capacitor/status-bar"
 
 SPEC CHECKSUMS:
-  Capacitor: b1248915663add1bd6567e2b67c1c1fa3abcf5e8
-  CapacitorApp: 7a5dec8b33573707164b293475d5c89ba684364a
+  Capacitor: 8dc4a61c44f6644fe4e0b61ad01ff175f9b538e5
+  CapacitorApp: 9d91a5a400e4ad8cafe66a02cc9d8073c864d7bb
   CapacitorCommunityBluetoothLe: f2cab9f83b1ac5568c6450f39ad6c8553c64ef16
-  CapacitorCordova: f8c06b897c74ee8f7701fe10e6443b40822bc83a
-  CapacitorGeolocation: 33015be1ef496585a60da9efa1c5642ff8624db3
-  CapacitorHaptics: e36653b37326d71bb35ae42b944124037dbc3d97
-  CapacitorKeyboard: d1b25fde6f19744ad09c890862aefc6e2a7ded3d
-  CapacitorScreenOrientation: 566575e032ebb9506b328525c6237452efb51fb1
-  CapacitorStatusBar: 190e0321b8734f4244d0c81baa183a00d5806ddf
+  CapacitorCordova: 5984fa700842461518ecd320905c7f19ecdd590b
+  CapacitorGeolocation: 82f2dfc2e6b9ebff53bb5af85f8cf0c06da354e9
+  CapacitorHaptics: 4b1a7e1bac1794d1515842d304f9fce46ef5084c
+  CapacitorKeyboard: ba4d618d80bf8caef4b9d8a971d714b9ca795e28
+  CapacitorScreenOrientation: 1943b31f73b5d18a2af65f6e3d374500ef88d254
+  CapacitorStatusBar: 540867ac3c63875b65bebd888f695de50a13a9a2
 
 PODFILE CHECKSUM: 6b8f8cc51c69cd49320367b4d212e9352157b755
 
-COCOAPODS: 1.12.0
+COCOAPODS: 1.12.1
