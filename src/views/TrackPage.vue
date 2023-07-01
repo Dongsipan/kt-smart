@@ -675,12 +675,14 @@ const computedRideData = async (geolocationPosition: Position) => {
   path.push(positions);
   // smoothedPath = pathSmoothTool.pathOptimize(path); // 优化轨迹
   startPosition = path[0];
-  if (smoothedPath) {
-    mapRef.value.setToCenter(startPosition);
-    mapRef.value.addStartPositionMarker(startPosition.lng, startPosition.lat);
-  }
+  // if (smoothedPath) {
+  //   mapRef.value.setToCenter(startPosition);
+  //   mapRef.value.addStartPositionMarker(startPosition.lng, startPosition.lat);
+  // }
+  mapRef.value.setToCenter(startPosition);
+  mapRef.value.addStartPositionMarker(startPosition.lng, startPosition.lat);
+  mapRef.value.setPolylineByPath(path); // 绘制轨迹
   if (path.length >= 2) {
-    mapRef.value.setPolylineByPath(path); // 绘制轨迹
     getMaxData(); // 从GPS数据中计算最大速度、最高海拔
     computedCurrentDistance(); // 计算行驶里程
     computedAverageSpeed(); // 计算平均速度
@@ -917,6 +919,7 @@ const closeModal = () => {
           margin-top: 2.5rem;
           flex: 1;
         }
+
         div:last-child {
           font-size: 2rem;
           font-weight: bold;
