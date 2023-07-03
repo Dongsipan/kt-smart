@@ -25,11 +25,12 @@
               </ion-col>
             </ion-row>
           </ion-grid>
-          <ion-grid class="info-container">
+          <ion-grid
+            class="info-container"
+            :class="{ 'is-ipad': isPlatform('ipad') }"
+          >
             <ion-row>
-              <ion-col size="12" v-if="throttleStatus === 2">
-                Throttle
-              </ion-col>
+              <ion-col size="12"> Throttle </ion-col>
               <ion-col size="12" v-if="isAssistance && throttleStatus !== 2">
                 Assist
               </ion-col>
@@ -47,7 +48,7 @@
 </template>
 
 <script lang="ts" setup>
-import { IonCol, IonGrid, IonRow } from "@ionic/vue";
+import { IonCol, IonGrid, IonRow, isPlatform } from "@ionic/vue";
 import { onMounted, onUnmounted, ref, watch } from "vue";
 
 const props = defineProps({
@@ -88,11 +89,16 @@ const initChart = () => {
       const clientHeight = document.body.clientHeight;
       const clientWidth = document.body.clientWidth;
       const size = Math.min(clientHeight, clientWidth) - padding; // 保证chart图表是一个正圆形，且不超越屏幕的高度和宽度
-      const height = Math.round(size * 0.7);
+      const height = isPlatform("ipad")
+        ? Math.round(size * 0.6)
+        : Math.round(size * 0.7);
+      const chartElHeight = isPlatform("ipad")
+        ? Math.round(size * 0.7)
+        : Math.round(size * 0.8);
       chartSize = size;
       if (chartEl) {
         chartEl.style.width = `${chartSize}px`;
-        chartEl.style.height = `${Math.round(size * 0.8)}px`;
+        chartEl.style.height = `${chartElHeight}px`;
       }
       if (canvasEl) {
         canvasEl.width = chartSize;
@@ -183,12 +189,12 @@ const renderChart = (value: number) => {
 
 const resizeEvent = () => {
   initChart();
-  renderChart(props.speed);
+  renderChart(<number>props.speed);
 };
 
 onMounted(async () => {
   await initChart();
-  renderChart(props.speed);
+  renderChart(<number>props.speed);
   window.addEventListener("resize", resizeEvent);
 });
 
@@ -199,7 +205,7 @@ onUnmounted(() => {
 watch(
   () => props.speed,
   async (value) => {
-    renderChart(value);
+    renderChart(typeof value === "number" ? value : 0);
   }
 );
 watch(
@@ -277,6 +283,10 @@ watch(
     height: 6.375rem;
     color: #fff;
     font-size: 1.5rem;
+    &.is-ipad {
+      height: auto;
+      bottom: -10px;
+    }
 
     ion-row:first-child {
       height: 2rem;
