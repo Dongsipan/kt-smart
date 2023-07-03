@@ -182,6 +182,7 @@ export function useMessage() {
     if (timeSpan === 6922) {
       setSpeed(0);
       clearInterval(singleTimeInterval);
+      singleTimeInterval = 0;
       return;
     }
     console.log(chalk.yellow("dimension", dimension.value));
