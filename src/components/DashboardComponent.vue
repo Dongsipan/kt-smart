@@ -1,5 +1,5 @@
 <template>
-  <ion-grid class="ion-padding-top bg-black">
+  <ion-grid class="bg-black">
     <ion-row>
       <ion-col class="ion-no-padding">
         <div id="chartEl" class="dashboard">
