@@ -12,6 +12,7 @@ import { storeToRefs } from "pinia";
 import LocationStartIcon from "@/assets/icon/location-start.png";
 import LocationEndIcon from "@/assets/icon/location-end.png";
 import BicycleIcon from "@/assets/icon/bicycle.svg";
+import { useAMap } from "@/hooks/useAMap";
 
 type LngLat = {
   lng: number;
@@ -29,6 +30,7 @@ const endMarker = shallowRef<AMap.Marker>();
 const rideMarker = shallowRef<AMap.Marker>();
 
 const { presentToast } = useToast();
+const { loadAMap } = useAMap();
 
 const props = defineProps({
   container: {
@@ -37,6 +39,9 @@ const props = defineProps({
   },
 });
 const initMap = async () => {
+  if (!window.AMap) {
+    await loadAMap();
+  }
   if (map.value) {
     await setMapToCenter();
   } else {
@@ -247,11 +252,11 @@ defineExpose({
 });
 </script>
 
-<style lang="scss" scoped>
+<style lang="scss">
 .amap-container {
   padding: 0;
   margin: 0;
-  width: 100vw;
-  height: 100vh;
+  width: 100%;
+  height: 100%;
 }
 </style>

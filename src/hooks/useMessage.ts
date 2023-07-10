@@ -87,7 +87,7 @@ export function useMessage() {
         clearInterval(writeInterval);
         console.log(chalk.red(`send message error: ${JSON.stringify(error)}`));
       }
-    }, 500);
+    }, 106);
     await startNotification(
       connectedDevice.value.deviceId,
       numberToUUID(ServiceUUID),
@@ -106,10 +106,14 @@ export function useMessage() {
       numberToUUID(CharacteristicUUID)
     );
   };
+  // 校验第一位0x41,不是就跳过
+  //
   const onNotification = (value: DataView) => {
     // 欠压、反冲电 message[1]
     // 倒档、转向 message[2]
     const message = dataViewToNumbers(value);
+    const isValid = checkIsValidNotification(message);
+    if (!isValid) return;
     console.log(chalk.green("onNotification", message));
     getBattery(message);
     getSpeed(message);
@@ -119,6 +123,22 @@ export function useMessage() {
     computedMessageFirst(message);
     computedMessageSecond(message);
     computedMessageSeventh(message);
+  };
+  const checkIsValidNotification = (value: number[]) => {
+    const firstValue = value[0];
+    if (firstValue !== 0x41) return false;
+    const validate =
+      value[1] ^
+      value[2] ^
+      value[3] ^
+      value[4] ^
+      value[5] ^
+      value[7] ^
+      value[8] ^
+      value[9] ^
+      value[10] ^
+      value[11];
+    return validate === value[6];
   };
   const computedMessageFirst = (message: number[]) => {
     const command = message[1];

@@ -46,109 +46,113 @@
       </ion-toolbar>
     </ion-header>
     <ion-content :force-overscroll="true" :fullscreen="true" :scrollY="false">
-      <dashboard-component
-        ref="dashboard"
-        :gear-position="getGearPosition"
-        :is-assistance="isAssistance"
-        :is-km-unit="isKmUnit"
-        :speed="speed"
-        :throttle-status="throttle"
-      />
+      <div class="home-page__content">
+        <dashboard-component
+          class="home-page__dashboard"
+          ref="dashboard"
+          :gear-position="getGearPosition"
+          :is-assistance="isAssistance"
+          :is-km-unit="isKmUnit"
+          :speed="speed"
+          :throttle-status="throttle"
+        />
 
-      <ion-grid>
-        <ion-row>
-          <ion-col>
-            <ion-label>DST</ion-label>
-            <ion-item lines="none">
-              <ion-label v-if="getDisplayType === 'kilometer'" class="value">
-                {{ getSingleKM }}
-              </ion-label>
-              <ion-label v-else class="value">
-                {{ getSingleMileage }}
-              </ion-label>
-              <ion-text slot="end">{{ getDisplayUnit }}</ion-text>
-            </ion-item>
-          </ion-col>
-          <ion-col>
-            <ion-label>TM</ion-label>
-            <ion-item lines="none">
-              <ion-label class="value">
-                {{ singleTime }}
-              </ion-label>
-              <ion-text slot="end">H:M</ion-text>
-            </ion-item>
-          </ion-col>
-        </ion-row>
+        <ion-grid class="home-page__display">
+          <ion-row>
+            <ion-col>
+              <ion-label>DST</ion-label>
+              <ion-item lines="none">
+                <ion-label v-if="getDisplayType === 'kilometer'" class="value">
+                  {{ getSingleKM }}
+                </ion-label>
+                <ion-label v-else class="value">
+                  {{ getSingleMileage }}
+                </ion-label>
+                <ion-text slot="end">{{ getDisplayUnit }}</ion-text>
+              </ion-item>
+            </ion-col>
+            <ion-col>
+              <ion-label>TM</ion-label>
+              <ion-item lines="none">
+                <ion-label class="value">
+                  {{ singleTime }}
+                </ion-label>
+                <ion-text slot="end">H:M</ion-text>
+              </ion-item>
+            </ion-col>
+          </ion-row>
 
-        <ion-row>
-          <ion-col>
-            <ion-label>ODO</ion-label>
-            <ion-item lines="none">
-              <ion-label v-if="getDisplayType === 'kilometer'" class="value">
-                {{ getTotalKM }}
-              </ion-label>
-              <ion-label v-else class="value">
-                {{ getTotalMileage }}
-              </ion-label>
-              <ion-text slot="end">{{ getDisplayUnit }}</ion-text>
-            </ion-item>
-          </ion-col>
-          <ion-col>
-            <ion-label>CADENCE</ion-label>
-            <ion-item lines="none">
-              <ion-label class="value">
-                {{ assistance }}
-              </ion-label>
-              <ion-text slot="end">RPM</ion-text>
-            </ion-item>
-          </ion-col>
-        </ion-row>
-        <ion-row>
-          <ion-col class="text-align-center">
-            <ion-button
-              class="icon-only-button"
-              shape="round"
-              @click="addSpeed"
-            >
-              <ion-icon
-                slot="icon-only"
-                src="/assets/icon/caret-up.svg"
-              ></ion-icon>
-              <ion-ripple-effect></ion-ripple-effect>
-            </ion-button>
-          </ion-col>
-          <ion-col class="text-align-center">
-            <ion-button
-              class="icon-only-button"
-              shape="round"
-              @click="reduceSpeed"
-            >
-              <ion-icon
-                slot="icon-only"
-                src="/assets/icon/caret-down.svg"
-              ></ion-icon>
-              <ion-ripple-effect></ion-ripple-effect>
-            </ion-button>
-          </ion-col>
-          <ion-col class="text-align-center">
-            <ion-button
-              :color="lightStatus ? 'primary' : 'light'"
-              class="icon-only-button"
-              shape="round"
-              @click="changeLight"
-            >
-              <ion-icon slot="icon-only" src="/assets/icon/light-white.svg">
-              </ion-icon>
-              <ion-ripple-effect></ion-ripple-effect>
-            </ion-button>
-          </ion-col>
-        </ion-row>
-        <div style="display: none">
-          {{
-            `反冲电: ${regenative},欠压:${undervoltage},倒档: ${reverse},右转: ${turnRight},左转: ${turnLeft},转把状态: ${throttle},巡航状态: ${cruise},刹车状态: ${brake}`
-          }}
-        </div>
-      </ion-grid>
+          <ion-row>
+            <ion-col>
+              <ion-label>ODO</ion-label>
+              <ion-item lines="none">
+                <ion-label v-if="getDisplayType === 'kilometer'" class="value">
+                  {{ getTotalKM }}
+                </ion-label>
+                <ion-label v-else class="value">
+                  {{ getTotalMileage }}
+                </ion-label>
+                <ion-text slot="end">{{ getDisplayUnit }}</ion-text>
+              </ion-item>
+            </ion-col>
+            <ion-col>
+              <ion-label>CADENCE</ion-label>
+              <ion-item lines="none">
+                <ion-label class="value">
+                  {{ assistance }}
+                </ion-label>
+                <ion-text slot="end">RPM</ion-text>
+              </ion-item>
+            </ion-col>
+          </ion-row>
+          <ion-row>
+            <ion-col class="text-align-center">
+              <ion-button
+                class="icon-only-button"
+                shape="round"
+                @click="addSpeed"
+              >
+                <ion-icon
+                  slot="icon-only"
+                  src="/assets/icon/caret-up.svg"
+                ></ion-icon>
+                <ion-ripple-effect></ion-ripple-effect>
+              </ion-button>
+            </ion-col>
+            <ion-col class="text-align-center">
+              <ion-button
+                class="icon-only-button"
+                shape="round"
+                @click="reduceSpeed"
+              >
+                <ion-icon
+                  slot="icon-only"
+                  src="/assets/icon/caret-down.svg"
+                ></ion-icon>
+                <ion-ripple-effect></ion-ripple-effect>
+              </ion-button>
+            </ion-col>
+            <ion-col class="text-align-center">
+              <ion-button
+                :color="lightStatus ? 'primary' : 'light'"
+                class="icon-only-button"
+                shape="round"
+                @click="changeLight"
+              >
+                <ion-icon slot="icon-only" src="/assets/icon/light-white.svg">
+                </ion-icon>
+                <ion-ripple-effect></ion-ripple-effect>
+              </ion-button>
+            </ion-col>
+          </ion-row>
+          <div style="display: none">
+            {{
+              `反冲电: ${regenative},欠压:${undervoltage},倒档: ${reverse},右转: ${turnRight},左转: ${turnLeft},转把状态: ${throttle},巡航状态: ${cruise},刹车状态: ${brake}`
+            }}
+          </div>
+        </ion-grid>
+      </div>
+
       <ion-alert
         :buttons="alertButtons"
         :is-open="isOpenAlert"
@@ -358,7 +362,11 @@ const batteryAnimate = () => {
     opacity: 0;
   }
 }
-
+//@media only screen and (min-width: 375px) {
+//  .logo {
+//    width: 62.5px;
+//  }
+//}
 .home-page {
   .home-page__battery {
     width: 2.5rem;
@@ -397,6 +405,27 @@ const batteryAnimate = () => {
     --color: white;
   }
 
+  .home-page__content {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+
+    ion-grid {
+      width: 100%;
+    }
+    .home-page__dashboard {
+      flex: 0;
+    }
+    .home-page__display {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-around;
+      flex: 1;
+      .value {
+        font-weight: bold;
+      }
+    }
+  }
   ion-content {
     --background: #000;
     --color: #fff;
@@ -407,12 +436,12 @@ const batteryAnimate = () => {
     --color: #fff;
   }
 
-  ion-row {
-    margin-top: 1rem;
-
-    &:first-child {
-      margin-top: 0;
-    }
-  }
+  //ion-row {
+  //  margin-top: 1rem;
+  //
+  //  &:first-child {
+  //    margin-top: 0;
+  //  }
+  //}
 }
 </style>

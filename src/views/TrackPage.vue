@@ -184,6 +184,7 @@ import {
   IonTitle,
   IonToolbar,
   isPlatform,
+  onIonViewDidEnter,
   onIonViewWillEnter,
 } from "@ionic/vue";
 import { flashOutline, footstepsOutline, locateOutline } from "ionicons/icons";
@@ -259,7 +260,7 @@ const altitudeToFixed = computed(() => {
 });
 const isNative = Capacitor.isNativePlatform();
 
-onIonViewWillEnter(() => {
+onIonViewDidEnter(() => {
   mapRef.value.initMap();
 });
 
