@@ -13,7 +13,18 @@ export interface Track {
 
 export const usePositionStore = defineStore("position", {
   state: () => ({
-    currentPosition: {} as Position,
+    currentPosition: {
+      coords: {
+        longitude: 120.44790411194892,
+        altitudeAccuracy: 19.185361862182617,
+        accuracy: 35,
+        heading: -1,
+        latitude: 31.125875961204201,
+        altitude: 5.2325534820556641,
+        speed: -1,
+      },
+      timestamp: 1688915717572,
+    } as Position,
     historyTrack: [] as Track[],
     locating: false,
     watching: false,

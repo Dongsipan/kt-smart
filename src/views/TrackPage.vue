@@ -23,7 +23,9 @@
       </ion-toolbar>
     </ion-header>
     <ion-content
+      :force-overscroll="true"
       :fullscreen="true"
+      :scrollY="false"
       class="ion-no-padding"
       style="width: 100vw; height: 100vh"
     >
@@ -38,7 +40,7 @@
           <ion-icon :icon="flashOutline"></ion-icon>
         </ion-fab-button>
       </ion-fab>
-      <AMapContainer ref="mapRef" />
+      <BMapContainer ref="mapRef" />
     </ion-content>
     <ion-footer :translucent="true" class="ion-no-border">
       <ion-toolbar class="dashboard-toolbar">
@@ -185,10 +187,9 @@ import {
   IonToolbar,
   isPlatform,
   onIonViewDidEnter,
-  onIonViewWillEnter,
 } from "@ionic/vue";
 import { flashOutline, footstepsOutline, locateOutline } from "ionicons/icons";
-import AMapContainer from "@/components/AMapContainer.vue";
+import BMapContainer from "@/components/BMapContainer.vue";
 import { computed, ref } from "vue";
 import { vOnLongPress } from "@vueuse/components";
 import { useGeoLocation } from "@/hooks/useGeoLocation";
@@ -672,7 +673,7 @@ const computedRideData = async (geolocationPosition: Position) => {
     accuracy,
     geolocationPosition.timestamp
   );
-  const positions = await mapRef.value.convertGpsToAMap(filterPosition); // 转化成高德坐标
+  const positions = await mapRef.value.convertGpsToBMap(filterPosition); // 转化成高德坐标
   path.push(positions);
   // smoothedPath = pathSmoothTool.pathOptimize(path); // 优化轨迹
   startPosition = path[0];
