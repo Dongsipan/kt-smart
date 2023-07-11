@@ -5,7 +5,7 @@ export interface Track {
   id: number;
   path: AMap.LngLat[];
   maxSpeed: string | number;
-  maxAltitude: string | number | undefined;
+  maxAltitude: string | number;
   averageSpeed: string | number;
   distance: string | number;
   time: string;
