@@ -194,7 +194,7 @@ import { vOnLongPress } from "@vueuse/components";
 import { useGeoLocation } from "@/hooks/useGeoLocation";
 import { useToast } from "@/hooks/useToast";
 import { PathSmoothTool } from "@/services/PathSmoothTool";
-import { usePositionStore } from "@/store/usePositionStore";
+import { Track, usePositionStore } from "@/store/usePositionStore";
 import { useTimer } from "@/hooks/useTimer";
 import { Position } from "@capacitor/geolocation";
 import { useRouter } from "vue-router";
@@ -829,7 +829,7 @@ const saveHistory = () => {
     averageSpeed: averageSpeedToKm.value,
     distance: distanceToKm.value.toString(),
     time: formatTime.value,
-  };
+  } as Track;
   positionStore.addHistoryTrack(history);
 };
 
