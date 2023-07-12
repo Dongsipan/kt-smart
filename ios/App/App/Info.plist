@@ -35,6 +35,8 @@
 	<string>Is it allowed to obtain your location information during use to display your current location?</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>Is it allowed to obtain your location information during use to display your current location?</string>
+  <key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+  <string>I need permission</string>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>bluetooth-central</string>
