@@ -16,6 +16,20 @@ android {
             ignoreAssetsPattern '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
         }
     }
+    signingConfigs {
+      release { 
+        keyAlias 'release' 
+        keyPassword '518619' 
+        storeFile file('../../android-release.keystore')
+        storePassword '518619' 
+      } 
+      debug { 
+        keyAlias 'debug' 
+        keyPassword '518619' 
+        storeFile file('../../android-debug.keystore')
+        storePassword '518619' 
+      }
+    }
     buildTypes {
         release {
             minifyEnabled false
@@ -41,7 +55,7 @@ dependencies {
     androidTestImplementation "androidx.test.espresso:espresso-core:$androidxEspressoCoreVersion"
     implementation project(':capacitor-cordova-android-plugins')
     // 位置服务
-    implementation "com.google.android.gms:play-services-location"
+//    implementation "com.google.android.gms:play-services-location"
 
 }
 
