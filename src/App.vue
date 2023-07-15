@@ -12,6 +12,8 @@ import { useToast } from "@/hooks/useToast";
 import { useMessage } from "@/hooks/useMessage";
 import { useBluetoothLe } from "@/hooks/useBluetooth-le";
 import { useDashboardStore } from "@/store/useDashboardStore";
+import { useGeoLocation } from "@/hooks/useGeoLocation";
+import { onMounted } from "vue";
 
 const { stopSendMessage } = useMessage();
 const { scan } = useBluetoothLe();
@@ -19,6 +21,7 @@ const store = useBleStore();
 const { resetDashboard } = useDashboardStore();
 const { on } = useDisconnectEventBus();
 const toast = useToast();
+const { getCurrentPosition } = useGeoLocation();
 on(async () => {
   // 监听设备是否断开
   await toast.presentToast("Bluetooth disconnected");
@@ -27,5 +30,8 @@ on(async () => {
   await stopSendMessage();
   resetDashboard();
   await scan();
+});
+onMounted(() => {
+  getCurrentPosition();
 });
 </script>

@@ -672,7 +672,9 @@ const computedRideData = async (geolocationPosition: Position) => {
     accuracy,
     geolocationPosition.timestamp
   );
-  const positions = await mapRef.value.convertGpsToAMap(filterPosition); // 转化成高德坐标
+  const positions = isPlatform("ios")
+    ? await mapRef.value.convertGpsToAMap(filterPosition)
+    : new AMap.LngLat(filterPosition[0], filterPosition[1]); // 转化成高德坐标
   path.push(positions);
   // smoothedPath = pathSmoothTool.pathOptimize(path); // 优化轨迹
   startPosition = path[0];

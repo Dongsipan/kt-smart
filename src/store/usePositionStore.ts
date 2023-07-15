@@ -1,6 +1,5 @@
 import { defineStore } from "pinia";
 import { Position } from "@capacitor/geolocation";
-import { PositionRes } from "@awesome-cordova-plugins/gao-de-location/ngx";
 
 export interface Track {
   id: number;
