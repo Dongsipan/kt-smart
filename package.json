@@ -19,6 +19,7 @@
     "@amap/amap-jsapi-loader": "^1.0.1",
     "@amap/amap-jsapi-types": "^0.0.13",
     "@capacitor-community/bluetooth-le": "^3.0.0",
+    "@capacitor-community/keep-awake": "4.0.0",
     "@capacitor/android": "5.1.0",
     "@capacitor/app": "5.0.5",
     "@capacitor/core": "5.1.0",
