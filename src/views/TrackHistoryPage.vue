@@ -56,7 +56,6 @@ import {
   IonToolbar,
   onIonViewDidEnter,
 } from "@ionic/vue";
-import { useDateFormat } from "@vueuse/core";
 import AMapContainer from "@/components/AMapContainer.vue";
 import { ref } from "vue";
 import { usePositionStore } from "@/store/usePositionStore";
@@ -79,11 +78,13 @@ onIonViewDidEnter(() => {
   if (path) {
     mapRef.value.initTrack(path);
   }
-  maxSpeed.value = history!.maxSpeed.toString();
-  maxAltitude.value = history!.maxAltitude.toString();
-  averageSpeed.value = history!.averageSpeed.toString();
-  distance.value = history!.distance.toString();
-  time.value = history!.time;
+  if (history) {
+    maxSpeed.value = history!.maxSpeed.toString();
+    maxAltitude.value = history!.maxAltitude.toString();
+    averageSpeed.value = history!.averageSpeed.toString();
+    distance.value = history!.distance.toString();
+    time.value = history!.time;
+  }
 });
 </script>
 
@@ -112,6 +113,7 @@ onIonViewDidEnter(() => {
         display: flex;
         flex-direction: column;
         flex: 1;
+
         div:last-child {
           width: 100%;
           font-size: 1.3rem;

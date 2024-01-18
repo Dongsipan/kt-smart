@@ -5,7 +5,7 @@ export interface Track {
   id: number;
   path: AMap.LngLat[];
   maxSpeed: string | number;
-  maxAltitude: string | number | undefined;
+  maxAltitude: string | number;
   averageSpeed: string | number;
   distance: string | number;
   time: string;
@@ -15,11 +15,11 @@ export const usePositionStore = defineStore("position", {
   state: () => ({
     currentPosition: {
       coords: {
-        longitude: 120.44790411194892,
+        longitude: 120.452849,
         altitudeAccuracy: 19.185361862182617,
         accuracy: 35,
         heading: -1,
-        latitude: 31.125875961204201,
+        latitude: 31.123824,
         altitude: 5.2325534820556641,
         speed: -1,
       },
