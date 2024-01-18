@@ -30,7 +30,9 @@
             :class="{ 'is-ipad': isPlatform('ipad') }"
           >
             <ion-row>
-              <ion-col size="12"> Throttle </ion-col>
+              <ion-col size="12" v-if="throttleStatus === 2">
+                Throttle
+              </ion-col>
               <ion-col size="12" v-if="isAssistance && throttleStatus !== 2">
                 Assist
               </ion-col>
