@@ -114,7 +114,7 @@ export const DimensionList = [
     dimension: 20,
   },
   {
-    name: "22 inch",
+    name: "23 inch", // 朱工要求只要帮忙把原来显示的文字“22寸”改程“23寸”就行
     value: DimensionSize.inch_22,
     dimension: 22,
   },

@@ -13,6 +13,7 @@ import LocationStartIcon from "@/assets/icon/location-start.png";
 import LocationEndIcon from "@/assets/icon/location-end.png";
 import BicycleIcon from "@/assets/icon/bicycle.svg";
 import { useAMap } from "@/hooks/useAMap";
+import { isPlatform } from "@ionic/vue";
 
 type LngLat = {
   lng: number;
@@ -213,17 +214,22 @@ const getDistance = (point1: AMap.LngLat, point2: AMap.LngLat) => {
 const setMapToCenter = async () => {
   await getCurrentPosition();
   if (!currentPosition.value.coords) return;
-  const position = (await convertGpsToAMap([
-    currentPosition.value.coords.longitude,
-    currentPosition.value.coords.latitude,
-  ])) as any;
+  const position = isPlatform("ios")
+    ? ((await convertGpsToAMap([
+        currentPosition.value.coords.longitude,
+        currentPosition.value.coords.latitude,
+      ])) as any)
+    : [
+        currentPosition.value.coords.longitude,
+        currentPosition.value.coords.latitude,
+      ];
   map.value!.setCenter(position);
 };
 
-const convertGpsToAMap = (location: number[]) => {
+const convertGpsToAMap = (location: number[], type = "gps") => {
   return new Promise((resolve, reject) => {
     try {
-      window.AMap.convertFrom(location, "gps", (status: any, result: any) => {
+      window.AMap.convertFrom(location, type, (status: any, result: any) => {
         if (result.info === "ok") {
           const lngLat = result.locations[0];
           resolve(lngLat);

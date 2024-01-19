@@ -26,9 +26,9 @@ import "./theme/variables.css";
 import { ScreenOrientation } from "@capacitor/screen-orientation";
 import { Capacitor } from "@capacitor/core";
 import { useAMap } from "@/hooks/useAMap";
-// import eruda from "eruda";
+import eruda from "eruda";
 //
-// eruda.init();
+eruda.init();
 const { loadAMap } = useAMap();
 if (Capacitor.isNativePlatform()) {
   ScreenOrientation.lock({ orientation: "portrait-primary" });

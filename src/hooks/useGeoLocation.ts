@@ -3,6 +3,8 @@ import { useToast } from "@/hooks/useToast";
 import { ref } from "vue";
 import { usePositionStore } from "@/store/usePositionStore";
 import { Capacitor } from "@capacitor/core";
+import { isPlatform } from "@ionic/vue";
+import { useGaoDeLocation } from "@/hooks/useGaoDeLocation";
 
 export function useGeoLocation() {
   const { presentToast } = useToast();
@@ -69,9 +71,13 @@ export function useGeoLocation() {
     setWatchingStatus(false);
     await Geolocation.clearWatch({ id: callbackId.value });
   };
-  return {
-    getCurrentPosition,
-    watchCurrentPosition,
-    clearWatch,
-  };
+  if (isPlatform("ios")) {
+    return {
+      getCurrentPosition,
+      watchCurrentPosition,
+      clearWatch,
+    };
+  } else {
+    return useGaoDeLocation();
+  }
 }
