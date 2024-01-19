@@ -1,22 +1,22 @@
 PODS:
   - Capacitor (5.1.0):
     - CapacitorCordova
-  - CapacitorApp (5.0.5):
+  - CapacitorApp (5.0.6):
     - Capacitor
-  - CapacitorCommunityBluetoothLe (3.0.0):
+  - CapacitorCommunityBluetoothLe (3.1.1):
     - Capacitor
   - CapacitorCommunityKeepAwake (4.0.0):
     - Capacitor
   - CapacitorCordova (5.1.0)
-  - CapacitorGeolocation (5.0.5):
+  - CapacitorGeolocation (5.0.6):
     - Capacitor
-  - CapacitorHaptics (5.0.5):
+  - CapacitorHaptics (5.0.6):
     - Capacitor
-  - CapacitorKeyboard (5.0.5):
+  - CapacitorKeyboard (5.0.7):
     - Capacitor
-  - CapacitorScreenOrientation (5.0.5):
+  - CapacitorScreenOrientation (5.0.6):
     - Capacitor
-  - CapacitorStatusBar (5.0.5):
+  - CapacitorStatusBar (5.0.6):
     - Capacitor
   - CordovaPlugins (5.1.0):
     - CapacitorCordova
@@ -60,15 +60,15 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   Capacitor: 8dc4a61c44f6644fe4e0b61ad01ff175f9b538e5
-  CapacitorApp: ca063526f23b17b5cc907311245674ac533ea075
-  CapacitorCommunityBluetoothLe: 3a96b60b90df83420df5ebf108b50c2153195609
+  CapacitorApp: 024e1b1bea5f883d79f6330d309bc441c88ad04a
+  CapacitorCommunityBluetoothLe: 86ca83c89199336039bad94f45f8363114ae1464
   CapacitorCommunityKeepAwake: 5127ac2043946ccc83a3716b3961152b94ad37f9
   CapacitorCordova: 5984fa700842461518ecd320905c7f19ecdd590b
-  CapacitorGeolocation: 19e49e27762a220972631cce2c058f4cf38df157
-  CapacitorHaptics: c73e85b86f4946d97cc5dd325b1dcde5f8ee27b2
-  CapacitorKeyboard: cffb587ba4dbed7033ecda6c81c9682194b8a5d8
-  CapacitorScreenOrientation: 33e189f765be82e76847256d058672d1dfec019c
-  CapacitorStatusBar: d2c9ef614e9964e968ff3ef923566c8beeaeb907
+  CapacitorGeolocation: 7be5f77abc205c0efe319fff8587a7183e7b0240
+  CapacitorHaptics: 1fffc1217c7e64a472d7845be50fb0c2f7d4204c
+  CapacitorKeyboard: ce5e01064cf57a2c05b32565310713b7fe6cc6f9
+  CapacitorScreenOrientation: e5ef438489815d05340f1b51a2b1794108dc0ac3
+  CapacitorStatusBar: 565c0a1ebd79bb40d797606a8992b4a105885309
   CordovaPlugins: 0daa6118eb4fd9b91cf69394bdf31a372a953aac
 
 PODFILE CHECKSUM: d5a332ba1b1b6c2936fc2582d9ec2cef7668b453
